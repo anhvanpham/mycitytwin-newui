@@ -158,3 +158,20 @@ export function StreetDetails({doc,layers,ground,sunAltitudeDeg}:{doc:StreetDeta
     <group ref={paintGroup} visible={false}><mesh geometry={paint} receiveShadow raycast={NO_RAYCAST}><meshStandardMaterial color="#ffffff" roughness={1} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-7}/></mesh></group>
   </group>;
 }
+
+/** Sparse decorative street glows for the landing city, visible only after dusk. */
+export function LandingNightLights({doc,ground,sunAltitudeDeg}:{doc:StreetDetailsDoc|null;ground:number;sunAltitudeDeg:number}) {
+  const power=streetlightPower(sunAltitudeDeg);
+  const parts=useMemo(()=>{
+    const lanterns=treeLanterns(doc?.trees.filter(t=>cbdEdgeVisibility([t.e,t.n])>0)??[],45);
+    return {
+      pools:lanterns.map(l=>({position:[l.e,l.n,ground+0.13] as [number,number,number],scale:[14,14,1] as [number,number,number]})),
+      bulbs:lanterns.map(l=>({position:[l.e,l.n,ground+0.4] as [number,number,number],scale:[0.5,0.5,0.5] as [number,number,number]})),
+    };
+  },[doc,ground]);
+  if(power===0)return null;
+  return <group>
+    <Instances instances={parts.pools} shape="treePool" colour="#ffffff" power={power*0.85}/>
+    <Instances instances={parts.bulbs} shape="lantern" colour="#ffe2af" power={power}/>
+  </group>;
+}

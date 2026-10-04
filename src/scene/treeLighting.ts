@@ -3,8 +3,8 @@ import type { StreetTree } from '../data/streetDetails';
 export interface TreeLantern { id: string; e: number; n: number; height: number; offset: number; colour: string }
 
 /** Decorative placements beside recorded trees; these are not mapped lighting assets. */
-export function treeLanterns(trees: StreetTree[]): TreeLantern[] {
-  const gap=6, cells=new Map<string,TreeLantern[]>(), lanterns:TreeLantern[]=[];
+export function treeLanterns(trees: StreetTree[], gap=6): TreeLantern[] {
+  const cells=new Map<string,TreeLantern[]>(), lanterns:TreeLantern[]=[];
   for(const tree of [...trees].sort((a,b)=>a.id.localeCompare(b.id))) {
     const x=Math.floor(tree.e/gap),y=Math.floor(tree.n/gap);
     let crowded=false;

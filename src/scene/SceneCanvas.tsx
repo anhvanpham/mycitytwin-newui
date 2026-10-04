@@ -81,6 +81,7 @@ import { CBD_RING } from './cbdBoundary';
 import { LandmarkLabels } from './LandmarkLabels';
 import type { Landmark } from '../data/landmarks';
 import type { StreetDetailsDoc, StreetLayers } from '../data/streetDetails';
+import { LandingNightLights } from './StreetDetails';
 import { CityMassing } from './CityMassing';
 import { StreetLabels } from './StreetLabels';
 import { SiteMarker, type SiteMarkerSubject } from './SiteMarker';
@@ -655,6 +656,8 @@ export function SceneCanvas({
             highlightedBuildingId={highlightedBuildingId}
             showHighlighted={showHighlighted}
           />
+
+          {insetOn && !streetMap && <LandingNightLights doc={streetDetails} ground={ground} sunAltitudeDeg={sun.altitudeDeg}/>}
 
           {/*
             The sun arrow. In the world frame, so it points at the city rather
