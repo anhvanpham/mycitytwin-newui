@@ -1776,6 +1776,7 @@ export default function App() {
         <button type="button" aria-pressed={mapDimension === '2d'} onClick={() => setMapDimension('2d')}>2D view</button>
         <button type="button" aria-pressed={mapDimension === '3d'} onClick={() => setMapDimension('3d')}>3D view</button>
         {layers.streetlights !== false && <span className="map-lights-status">Streetlights {streetlightPower(sun.altitudeDeg) > 0 ? 'on · dusk to dawn' : 'off · daytime'}</span>}
+        {layers.lightLevels === true && <span className="map-lights-status">Historical light levels · 2014 · purple: low, gold: high</span>}
       </div>}
       {!chromeHidden && view === 'explore' && (
         foundLandmark ? (

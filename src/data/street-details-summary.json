@@ -1,6 +1,6 @@
 {
   "source": {
-    "retrievedAt": "2026-10-04T06:39:44.023Z",
+    "retrievedAt": "2026-10-04T07:30:28.617Z",
     "bounds": {
       "south": -37.823,
       "west": 144.948,
@@ -13,16 +13,31 @@
       "minN": -989.46,
       "maxN": 1030.52
     },
-    "coverage": "CBD and nearby streets within the building extract, with a 100 m margin",
+    "coverage": "CBD and nearby streets; visual fixtures limited to the building extract and a 100 m margin",
     "trees": "https://data.melbourne.vic.gov.au/explore/dataset/trees-with-species-and-dimensions-urban-forest/",
     "lights": "https://data.melbourne.vic.gov.au/explore/dataset/feature-lighting-including-light-type-wattage-and-location/",
+    "lightLevels": "https://data.melbourne.vic.gov.au/explore/dataset/street-lights-with-emitted-lux-level-council-owned-lights-only/",
+    "surveyDates": [
+      "2014-09-16"
+    ],
     "osm": "https://www.openstreetmap.org/copyright",
     "licences": "City of Melbourne CC BY; OpenStreetMap contributors ODbL 1.0",
-    "notes": "Tree/pole positions are recorded; tree heights are estimated from trunk diameter and pole sizes are illustrative, not surveyed physical dimensions. Automatic lighting follows solar altitude at the selected date and time, not a measured switching schedule. Road widths/lane divider paint are inferred from OSM tags; crossing style is included only where explicitly mapped. Features conflicting with building footprints omitted. Does not model canopy shade, lighting lux, or every city asset."
+    "notes": "Tree/fixture positions are recorded; tree heights are estimated from trunk diameter and fixture dimensions are illustrative, not surveyed physical dimensions. Pole, suspended, wall, bridge and low fixtures are distinguished; unknown mountings use ground markers rather than invented poles. All source lighting assets, mounting descriptions, lamp types and available wattages are retained. Same-source fixtures within 0.5 m and matching cross-source fixtures within 3 m are combined visually; distinct nearby positions are retained; positions conflicting with building footprints remain in the asset data but are not drawn. Automatic lighting follows solar altitude at the selected date and time, not a measured switching schedule. The separate light-level layer shows historical council lux records at their recorded locations/dates, not lamp positions or current illumination; no interpolation into unsampled streets. Road widths/lane divider paint are inferred from OSM tags; crossing style is included only where explicitly mapped. Does not model canopy shade or every city asset."
   },
   "trees": 7036,
-  "lights": 1019,
-  "councilLights": 920,
+  "lights": 2297,
+  "councilLights": 2199,
+  "lightingAssets": 2342,
+  "councilAssets": 2242,
+  "lightLevels": 35495,
+  "lightMounts": {
+    "pole": 2104,
+    "suspended": 68,
+    "wall": 5,
+    "bridge": 10,
+    "low": 45,
+    "unknown": 65
+  },
   "crossings": 222,
   "paintPatches": 5537
 }

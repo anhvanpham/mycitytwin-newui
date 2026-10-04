@@ -4,6 +4,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import proj4 from 'proj4';
 import { obstacleIndex, clearRect, rectPoint } from '../src/data/streetGeometry.ts';
+import { lightMount, lightLevel, surveyDate, lightingLocations } from '../src/data/lightingImport.ts';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const cacheArg = process.argv.indexOf('--from-cache');
 const cache = cacheArg >= 0 ? process.argv[cacheArg + 1] : null;
@@ -18,14 +19,16 @@ async function request(url, options) {
   return r.json();
 }
 const portal = 'https://data.melbourne.vic.gov.au/api/explore/v2.1/catalog/datasets/';
+const lightingWhere = `in_bbox(geo_point_2d,${bounds.south},${bounds.west},${bounds.north},${bounds.east})`;
 const where = `latitude>=${bounds.south} AND latitude<=${bounds.north} AND longitude>=${bounds.west} AND longitude<=${bounds.east}`;
 const query = `[out:json][timeout:60];(node["highway"="street_lamp"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});node["highway"="crossing"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});way["highway"](${bounds.south},${bounds.west},${bounds.north},${bounds.east}););out body geom;`;
-const inputs = cache ? await Promise.all(['cbd-trees-raw.json', 'cbd-lights-raw.json', 'cbd-osm-raw.json'].map(f => readFile(resolve(cache, f), 'utf8').then(JSON.parse))) : await Promise.all([
+const inputs = cache ? await Promise.all(['cbd-trees-raw.json', 'cbd-lights-full-raw.json', 'cbd-osm-raw.json', 'cbd-lux-raw.json'].map(f => readFile(resolve(cache, f), 'utf8').then(JSON.parse))) : await Promise.all([
   request(portal + 'trees-with-species-and-dimensions-urban-forest/exports/json?where=' + encodeURIComponent(where)),
-  request(portal + 'feature-lighting-including-light-type-wattage-and-location/exports/json'),
+  request(portal + 'feature-lighting-including-light-type-wattage-and-location/exports/json?where=' + encodeURIComponent(lightingWhere)),
   request('https://overpass-api.de/api/interpreter', { method: 'POST', body: new URLSearchParams({ data: query }) }),
+  request(portal + 'street-lights-with-emitted-lux-level-council-owned-lights-only/exports/json?where=' + encodeURIComponent(lightingWhere)),
 ]);
-const [treeRows, lightRows, osm] = inputs;
+const [treeRows, lightRows, osm, luxRows] = inputs;
 const buildings = JSON.parse(await readFile(resolve(root, 'public/data/building-footprints.json'), 'utf8'));
 const polygons = buildings.features.flatMap(f => f.geometry.coordinates.map(p => p.map(r => r.map(([lon, lat]) => en(lon, lat)))));
 const free = obstacleIndex(polygons);
@@ -41,21 +44,35 @@ const trees = treeRows.flatMap(r => {
   if (!visible([e,n]) || treeIds.has(id)) return []; treeIds.add(id);
   return [{ id, e, n, species: r.common_name ?? 'Tree', diameterCm: Number(r.diameter_breast_height) || null }];
 });
-const lights = []; const lampCells = new Map();
-function addLamp(id, point, source) {
-  if (!visible(point)) return;
-  const x = Math.floor(point[0]/3), y = Math.floor(point[1]/3);
-  for (let i=x-1;i<=x+1;i++) for (let j=y-1;j<=y+1;j++) {
-    if ((lampCells.get(`${i},${j}`)??[]).some(p => Math.hypot(p[0]-point[0],p[1]-point[1]) < 3)) return;
-  }
-  const key = `${x},${y}`; const list = lampCells.get(key)??[];list.push(point);lampCells.set(key,list);
-  lights.push({ id, e: point[0], n: point[1], source });
-}
+// Preserve every source asset, even where a simplified building hides its location.
+// Only the visual groups are combined or omitted; no source fixture is discarded.
+const lightingAssets = [], assetIds = new Set();
 for (const r of lightRows) {
-  const p = r.geo_point_2d;
-  if (p && inBounds(p.lon,p.lat) && r.lightmounting?.startsWith('Pole:')) addLamp(`council-${r.assetid}`,en(p.lon,p.lat),'council');
+  const p = r.geo_point_2d, id = `council-${r.assetid}`;
+  if (!p || !inBounds(p.lon, p.lat) || assetIds.has(id)) continue;
+  const [e,n] = en(p.lon,p.lat); assetIds.add(id);
+  lightingAssets.push({ id,e,n,source:'council',mount:lightMount(r.lightmounting),mounting:r.lightmounting??null,
+    lampType:r.lamptype??null,watts:lightLevel(r.lamprating),description:r.description??null,location:r.locationdescription??null });
 }
-for (const r of osm.elements) if (r.type==='node' && r.tags?.highway==='street_lamp' && inBounds(r.lon,r.lat)) addLamp(`osm-${r.id}`,en(r.lon,r.lat),'osm');
+for (const r of osm.elements) {
+  if (r.type!=='node' || r.tags?.highway!=='street_lamp' || !inBounds(r.lon,r.lat)) continue;
+  const id=`osm-${r.id}`; if(assetIds.has(id))continue;
+  const [e,n]=en(r.lon,r.lat);assetIds.add(id);
+  const mounting=r.tags['lamp_mount']??null;
+  const mount=mounting==='wall'?'wall':mounting==='suspended'?'suspended':'pole';
+  lightingAssets.push({id,e,n,source:'osm',mount,mounting,lampType:r.tags['light:source']??null,watts:null,description:null,location:null});
+}
+const lights = lightingLocations(lightingAssets, visible);
+const lightLevels=[],readingIds=new Set();
+for(const r of luxRows) {
+  const p=r.geo_point_2d,lux=lightLevel(r.label);
+  if(!p||!inBounds(p.lon,p.lat)||lux===null)continue;
+  const [e,n]=en(p.lon,p.lat),date=surveyDate(r.xdate);
+  // The source identifier repeats between surveys/locations; keep distinct samples.
+  const id=`lux-${r.ext_id}-${date??'undated'}-${e}-${n}`;
+  if(readingIds.has(id))continue;readingIds.add(id);
+  lightLevels.push({id,e,n,lux,surveyDate:date});
+}
 const classes = new Set(['primary','secondary','tertiary','unclassified','residential','living_street','busway','primary_link','secondary_link','tertiary_link']);
 const roads = osm.elements.filter(r => r.type==='way' && classes.has(r.tags?.highway) && r.geometry?.length>1 && !['yes','building_passage'].includes(r.tags.tunnel) && (!r.tags.layer || r.tags.layer==='0') && r.tags.bridge!=='yes');
 const paint = [], crossings = []; const roadNodes = new Map();
@@ -109,9 +126,10 @@ for (const r of osm.elements) {
   if(valid.length) { paint.push(...valid);crossings.push({id:`osm-${r.id}`,e,n,style}); }
 }
 const roundRects = rows => rows.map(r => Object.fromEntries(Object.entries(r).map(([k,v])=>[k,Math.round(v*1000)/1000])));
-const source={ retrievedAt:new Date().toISOString(), bounds, extent, coverage:'CBD and nearby streets within the building extract, with a 100 m margin', trees:'https://data.melbourne.vic.gov.au/explore/dataset/trees-with-species-and-dimensions-urban-forest/', lights:'https://data.melbourne.vic.gov.au/explore/dataset/feature-lighting-including-light-type-wattage-and-location/', osm:'https://www.openstreetmap.org/copyright', licences:'City of Melbourne CC BY; OpenStreetMap contributors ODbL 1.0', notes:'Tree/pole positions are recorded; tree heights are estimated from trunk diameter and pole sizes are illustrative, not surveyed physical dimensions. Automatic lighting follows solar altitude at the selected date and time, not a measured switching schedule. Road widths/lane divider paint are inferred from OSM tags; crossing style is included only where explicitly mapped. Features conflicting with building footprints omitted. Does not model canopy shade, lighting lux, or every city asset.' };
-const doc={version:1,source,trees,lights,paint:roundRects(paint),crossings};
+const surveyDates=[...new Set(lightLevels.map(p=>p.surveyDate).filter(Boolean))].sort();
+const source={ retrievedAt:new Date().toISOString(), bounds, extent, coverage:'CBD and nearby streets; visual fixtures limited to the building extract and a 100 m margin', trees:'https://data.melbourne.vic.gov.au/explore/dataset/trees-with-species-and-dimensions-urban-forest/', lights:'https://data.melbourne.vic.gov.au/explore/dataset/feature-lighting-including-light-type-wattage-and-location/', lightLevels:'https://data.melbourne.vic.gov.au/explore/dataset/street-lights-with-emitted-lux-level-council-owned-lights-only/', surveyDates, osm:'https://www.openstreetmap.org/copyright', licences:'City of Melbourne CC BY; OpenStreetMap contributors ODbL 1.0', notes:'Tree/fixture positions are recorded; tree heights are estimated from trunk diameter and fixture dimensions are illustrative, not surveyed physical dimensions. Pole, suspended, wall, bridge and low fixtures are distinguished; unknown mountings use ground markers rather than invented poles. All source lighting assets, mounting descriptions, lamp types and available wattages are retained. Same-source fixtures within 0.5 m and matching cross-source fixtures within 3 m are combined visually; distinct nearby positions are retained; positions conflicting with building footprints remain in the asset data but are not drawn. Automatic lighting follows solar altitude at the selected date and time, not a measured switching schedule. The separate light-level layer shows historical council lux records at their recorded locations/dates, not lamp positions or current illumination; no interpolation into unsampled streets. Road widths/lane divider paint are inferred from OSM tags; crossing style is included only where explicitly mapped. Does not model canopy shade or every city asset.' };
+const doc={version:2,source,trees,lights,lightingAssets,lightLevels,paint:roundRects(paint),crossings};
 await mkdir(resolve(root,'public/data'),{recursive:true});
 await writeFile(resolve(root,'public/data/street-details.json'),JSON.stringify(doc));
-await writeFile(resolve(root,'src/data/street-details-summary.json'),JSON.stringify({source,trees:trees.length,lights:lights.length,councilLights:lights.filter(l=>l.source==='council').length,crossings:crossings.length,paintPatches:paint.length},null,2)+'\n');
-console.log(`${trees.length} trees, ${lights.length} lamps, ${crossings.length} explicitly marked crossings, ${paint.length} paint patches.`);
+await writeFile(resolve(root,'src/data/street-details-summary.json'),JSON.stringify({source,trees:trees.length,lights:lights.length,councilLights:lights.filter(l=>l.source==='council').length,lightingAssets:lightingAssets.length,councilAssets:lightingAssets.filter(l=>l.source==='council').length,lightLevels:lightLevels.length,lightMounts:Object.fromEntries(['pole','suspended','wall','bridge','low','unknown'].map(m=>[m,lights.filter(l=>l.mount===m).length])),crossings:crossings.length,paintPatches:paint.length},null,2)+'\n');
+console.log(`${trees.length} trees, ${lights.length} light locations from ${lightingAssets.length} assets, ${lightLevels.length} historical lux readings, ${crossings.length} crossings, ${paint.length} paint patches.`);

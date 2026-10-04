@@ -8,13 +8,19 @@ import {
 import type { StreetDetailsDoc, StreetLayers, StreetLamp } from '../data/streetDetails';
 import { rectPoint } from '../data/streetGeometry';
 import { cbdEdgeVisibility } from './cbdBoundary';
-import { treeDimensions, streetlightPower, STREETLAMP_HEIGHT_M } from './streetAppearance';
+import { treeDimensions, streetlightPower, fixtureHeight } from './streetAppearance';
+import { HistoricalLightLevels } from './HistoricalLightLevels';
 
 type Instance = { position: [number, number, number]; scale: [number, number, number]; colour?: string; angle?: number };
 type Shape = 'cylinder' | 'crown' | 'box' | 'bulb' | 'pool';
 const NO_RAYCAST = () => null;
 const ARM = 1.35;
 const LAMP_ANGLE = Math.PI / 10;
+const lampPoint=(l:StreetLamp,ground:number):[number,number,number]=>[
+  l.e+(l.mount==='pole'?ARM*Math.cos(LAMP_ANGLE):0),
+  l.n+(l.mount==='pole'?ARM*Math.sin(LAMP_ANGLE):0),
+  ground+fixtureHeight(l.mount)-(l.mount==='pole'?0.31:0),
+];
 
 function lightPoolTexture() {
   const size=64, pixels=new Uint8Array(size*size*4);
@@ -69,7 +75,7 @@ function NearbyLights({lights,ground,power}:{lights:StreetLamp[];ground:number;p
     previous.current={e,n,elapsed:0};
     setNear(lights.map(l=>({l,d:Math.hypot(l.e-e,l.n-n)})).filter(p=>p.d<150).sort((a,b)=>a.d-b.d).slice(0,6).map(p=>p.l));
   });
-  return <group>{near.map(l=><pointLight key={l.id} position={[l.e+ARM*Math.cos(LAMP_ANGLE),l.n+ARM*Math.sin(LAMP_ANGLE),ground+STREETLAMP_HEIGHT_M-0.25]} color="#ffd7a0" intensity={power*220} distance={32} decay={2}/>)}</group>;
+  return <group>{near.map(l=><pointLight key={l.id} position={lampPoint(l,ground)} color="#ffd7a0" intensity={power*(l.mount==='pole'||l.mount==='suspended'?220:70)} distance={32} decay={2}/>)}</group>;
 }
 
 /** Trees and lamps add visual context; building-only sunlight calculations stay unchanged. */
@@ -89,14 +95,21 @@ export function StreetDetails({doc,layers,ground,sunAltitudeDeg}:{doc:StreetDeta
   },[trees,ground]);
   const lampParts=useMemo(()=>{
     const poles:Instance[]=[],arms:Instance[]=[],heads:Instance[]=[],bulbs:Instance[]=[],pools:Instance[]=[];
-    const height=STREETLAMP_HEIGHT_M;
+    const cells=new Map<string,StreetLamp[]>();
+    for(const l of lights){const key=`${Math.floor(l.e/8)},${Math.floor(l.n/8)}`,bucket=cells.get(key)??[];bucket.push(l);cells.set(key,bucket);}
     for(const l of lights){
-      const e=l.e+ARM*Math.cos(LAMP_ANGLE),n=l.n+ARM*Math.sin(LAMP_ANGLE);
-      poles.push({position:[l.e,l.n,ground+height/2],scale:[0.11,0.11,height]});
-      arms.push({position:[(l.e+e)/2,(l.n+n)/2,ground+height-0.15],scale:[ARM+0.15,0.14,0.14],angle:LAMP_ANGLE});
-      heads.push({position:[e,n,ground+height-0.15],scale:[0.9,0.45,0.24],angle:LAMP_ANGLE});
-      bulbs.push({position:[e,n,ground+height-0.31],scale:[0.35,0.2,0.13]});
-      pools.push({position:[e,n,ground+0.12],scale:[10,10,1]});
+      const height=fixtureHeight(l.mount),position=lampPoint(l,ground),[e,n]=position;
+      if(l.mount==='pole') {
+        poles.push({position:[l.e,l.n,ground+height/2],scale:[0.11,0.11,height]});
+        arms.push({position:[(l.e+e)/2,(l.n+n)/2,ground+height-0.15],scale:[ARM+0.15,0.14,0.14],angle:LAMP_ANGLE});
+      }
+      if(l.mount!=='unknown')heads.push({position:[e,n,position[2]+0.16],scale:[0.9,0.45,0.24],angle:LAMP_ANGLE});
+      bulbs.push({position,scale:[0.35,0.2,0.13]});
+      const radius=l.mount==='pole'||l.mount==='suspended'?10:4;
+      const x=Math.floor(l.e/8),y=Math.floor(l.n/8);let neighbours=0;
+      for(let i=x-1;i<=x+1;i++)for(let j=y-1;j<=y+1;j++)for(const other of cells.get(`${i},${j}`)??[])if(Math.hypot(other.e-l.e,other.n-l.n)<8)neighbours++;
+      const weight=1/Math.sqrt(Math.max(1,neighbours));
+      pools.push({position:[e,n,ground+0.12],scale:[radius,radius,1],colour:'#'+new Color().setRGB(weight,weight,weight).getHexString()});
     }return {poles,arms,heads,bulbs,pools};
   },[lights,ground]);
   const paint=useMemo(()=>{
@@ -114,6 +127,7 @@ export function StreetDetails({doc,layers,ground,sunAltitudeDeg}:{doc:StreetDeta
     if(paintGroup.current)paintGroup.current.visible=layers.roadMarkings!==false&&camera.position.distanceTo(target)<1800;
   });
   return <group>
+    {layers.lightLevels===true&&doc&&<HistoricalLightLevels readings={doc.lightLevels} ground={ground}/>}
     {layers.trees!==false&&<group><Instances instances={treeParts.trunks} shape="cylinder" colour="#8b7863"/><Instances instances={treeParts.crowns} shape="crown" colour="#ffffff"/></group>}
     {layers.streetlights!==false&&<group>
       <Instances instances={lampParts.poles} shape="cylinder" colour="#969bb0"/>

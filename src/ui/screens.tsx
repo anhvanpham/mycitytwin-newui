@@ -475,7 +475,8 @@ export function MapLayers({
               note: 'Preview shadows at the selected time',
             },
             { key: 'trees', name: 'Trees', note: `${streetSummary.trees.toLocaleString()} recorded locations · 3D trees with estimated heights` },
-            { key: 'streetlights', name: 'Streetlights', note: `${streetSummary.lights.toLocaleString()} mapped poles · lights turn on automatically at dusk` },
+            { key: 'streetlights', name: 'Streetlights', note: `${streetSummary.lights.toLocaleString()} light locations · pole, hanging and low fixtures turn on at dusk` },
+            { key: 'lightLevels', name: 'Historical light levels', note: `${streetSummary.lightLevels.toLocaleString()} council readings · 16 September 2014 · purple: low, gold: high` },
             { key: 'roadMarkings', name: 'Road markings', note: 'Mapped crossings and illustrative lane lines' },
             { key: 'landmarks', name: 'Landmarks', note: 'Search or tap a landmark to find a place' },
           ] as const
@@ -493,7 +494,7 @@ export function MapLayers({
             <input
               type="checkbox"
               className="switch__input"
-              checked={layers[layer.key] !== false}
+              checked={layer.key === 'lightLevels' ? layers.lightLevels === true : layers[layer.key] !== false}
               onChange={(event) => onChange({ ...layers, [layer.key]: event.target.checked })}
             />
             <span className="switch__track" aria-hidden="true" />

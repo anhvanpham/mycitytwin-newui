@@ -17,3 +17,9 @@ export function streetlightPower(altitudeDeg: number) {
   return dusk * dusk * (3 - 2 * dusk);
 }
 export const STREETLAMP_HEIGHT_M = 8; // Illustration: the pole records contain no height.
+
+/** Mounting is recorded; these heights only illustrate the fixture type. */
+export function fixtureHeight(mount: LightMount) {
+  return {pole:STREETLAMP_HEIGHT_M,suspended:8,wall:3,bridge:4,low:0.3,unknown:0.15}[mount];
+}
+import type { LightMount } from '../data/lightingImport';

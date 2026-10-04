@@ -4,8 +4,9 @@ import { MapLayers } from './screens';
 const html=(status:'loading'|'ready'|'error'='ready', mode:'street'|'model'|'integrated'='integrated')=>renderToStaticMarkup(<MapLayers layers={{developments:true,shadows:true}} onChange={()=>undefined} onClose={()=>undefined} streetDataStatus={status} mode={mode}/>);
 describe('map layer controls',()=>{
   it('offers the appropriate switches for each map view and explains what the new visuals mean',()=>{
-    const s=html();expect(s.match(/type="checkbox"/g)).toHaveLength(6);
-    for(const label of ['Trees','Streetlights','Road markings','Landmarks'])expect(s).toContain(label);
+    const s=html();expect(s.match(/type="checkbox"/g)).toHaveLength(7);
+    for(const label of ['Trees','Streetlights','Historical light levels','Road markings','Landmarks'])expect(s).toContain(label);
+    expect(s).toContain('16 September 2014');
     expect(s).toContain('same sunlight map');
     expect(html('ready','model').match(/type="checkbox"/g)).toHaveLength(2);
     expect(html('ready','model')).toContain('Sunlight &amp; shadows');
