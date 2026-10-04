@@ -36,11 +36,19 @@ describe('the bundled CBD street extract', () => {
     expect(doc.lights.every(p=>p.assetIds.length>0&&p.assetIds.every(id=>assets.has(id)))).toBe(true);
     for(const mount of ['pole','suspended','wall','bridge','low','unknown'] as const) {
       expect(doc.lights.filter(p=>p.mount===mount)).toHaveLength(summary.lightMounts[mount]);
-      expect(summary.lightMounts[mount]).toBeGreaterThan(0);
+      expect(doc.lightingAssets.some(p=>p.mount===mount)).toBe(true);
     }
     expect(fixtureHeight('unknown')).toBeLessThan(1);
     expect(fixtureHeight('low')).toBeLessThan(fixtureHeight('wall'));
     expect(fixtureHeight('wall')).toBeLessThan(fixtureHeight('pole'));
+  });
+  it('ships no packed visual light groups while retaining source assets',()=>{
+    let minimum=Infinity;
+    for(let i=0;i<doc.lights.length;i++)for(let j=i+1;j<doc.lights.length;j++) {
+      minimum=Math.min(minimum,Math.hypot(doc.lights[i].e-doc.lights[j].e,doc.lights[i].n-doc.lights[j].n));
+    }
+    expect(minimum).toBeGreaterThanOrEqual(12);
+    expect(doc.lightingAssets.length).toBe(2342);
   });
   it('keeps historical lux values, dates and sample identifiers without inventing poles', () => {
     expect(new Set(doc.lightLevels.map(p=>p.id)).size).toBe(doc.lightLevels.length);

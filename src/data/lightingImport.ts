@@ -54,5 +54,37 @@ export function lightingLocations(assets: LightingAsset[], visible: (point: [num
     const entry={id:asset.id,e,n,source:asset.source,mount,assetIds:[asset.id]};lights.push(entry);
     const key=`${mount}:${x},${y}`,bucket=cells.get(key)??[];bucket.push(entry);cells.set(key,bucket);
   }
-  return lights;
+  return removeLightClusters(lights);
+}
+
+/** Hide packed fixture groups and keep the remaining visual lights at least 12 m apart. */
+export function removeLightClusters(lights: StreetLamp[]): StreetLamp[] {
+  const radius=8, cells=new Map<string,number[]>();
+  lights.forEach((l,i)=>{
+    const key=`${Math.floor(l.e/radius)},${Math.floor(l.n/radius)}`,bucket=cells.get(key)??[];
+    bucket.push(i);cells.set(key,bucket);
+  });
+  const seen=new Set<number>(),hidden=new Set<number>();
+  for(let start=0;start<lights.length;start++) {
+    if(seen.has(start))continue;
+    const pending=[start],group:number[]=[];seen.add(start);
+    while(pending.length) {
+      const i=pending.pop()!,l=lights[i],x=Math.floor(l.e/radius),y=Math.floor(l.n/radius);group.push(i);
+      for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++)for(const j of cells.get(`${x+dx},${y+dy}`)??[]) {
+        if(!seen.has(j)&&Math.hypot(lights[j].e-l.e,lights[j].n-l.n)<radius){seen.add(j);pending.push(j);}
+      }
+    }
+    if(group.length>=3)group.forEach(i=>hidden.add(i));
+  }
+  const gap=12,placed=new Map<string,StreetLamp[]>(),result:StreetLamp[]=[];
+  const candidates=lights.filter((_,i)=>!hidden.has(i)).sort((a,b)=>a.id.localeCompare(b.id));
+  for(const l of candidates) {
+    const x=Math.floor(l.e/gap),y=Math.floor(l.n/gap);let crowded=false;
+    for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++) {
+      if((placed.get(`${x+dx},${y+dy}`)??[]).some(p=>Math.hypot(p.e-l.e,p.n-l.n)<gap))crowded=true;
+    }
+    if(crowded)continue;
+    result.push(l);const key=`${x},${y}`,bucket=placed.get(key)??[];bucket.push(l);placed.set(key,bucket);
+  }
+  return result;
 }

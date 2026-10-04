@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { lightLevel, lightMount, surveyDate, lightingLocations, showLightingAsset } from './lightingImport';
+import { lightLevel, lightMount, surveyDate, lightingLocations, showLightingAsset, removeLightClusters } from './lightingImport';
 
 describe('council lighting records', () => {
   it('preserves mounting distinctions and never calls a missing mount a pole', () => {
@@ -22,9 +22,9 @@ describe('council lighting records', () => {
   });
 });
 
-it('retains distinct nearby fixtures while grouping duplicate positions and cross-source matches',()=>{
+it('groups duplicate positions and cross-source matches before spacing the visual lights',()=>{
   const asset=(id:string,e:number,source:'council'|'osm'='council',mount:'pole'|'low'='pole')=>({id,e,n:0,source,mount,mounting:null,lampType:null,watts:null,description:null,location:null});
-  const grouped=lightingLocations([asset('a',0),asset('duplicate',0.2),asset('b',1.2),asset('c',2.4),asset('osm',2,'osm'),asset('ground',0,'council','low'),asset('occupied',20)],([e])=>e<10);
+  const grouped=lightingLocations([asset('a',0),asset('duplicate',0.2),asset('b',15),asset('c',30),asset('osm',2,'osm'),asset('ground',45,'council','low'),asset('occupied',60)],([e])=>e<50);
   expect(grouped.map(l=>l.id)).toEqual(['a','b','c','ground']);
   expect(grouped[0].assetIds).toEqual(['a','duplicate','osm']);
 });
@@ -47,4 +47,19 @@ it('omits the two compact Russell/Little Bourke gateway arrays while preserving 
   expect(showLightingAsset({...asset,e:650})).toBe(true);
   expect(showLightingAsset({...asset,mounting:'Pole: Single Fixed'})).toBe(true);
   expect(showLightingAsset({...asset,source:'osm'})).toBe(true);
+});
+
+const fixture=(id:string,e:number,n=0,mount:'pole'|'low'|'suspended'='pole')=>({id,e,n,source:'council' as const,mount,assetIds:[id]});
+it('removes complete dense grids and connected rows across mounting types and negative coordinates',()=>{
+  const cluster=[fixture('a',-4,-2),fixture('b',0,-2),fixture('c',4,-2,'low'),fixture('d',10,-2,'suspended')];
+  const isolated=[fixture('street-a',40),fixture('street-b',60)];
+  expect(removeLightClusters([...cluster,...isolated])).toEqual(isolated);
+  expect(removeLightClusters([...isolated,...cluster].reverse())).toEqual(isolated);
+});
+it('spaces the remaining lights while preserving isolated ordinary fixtures',()=>{
+  const input=[fixture('a',0),fixture('b',10),fixture('c',25),fixture('d',25,20,'low')];
+  const spaced=removeLightClusters(input);
+  expect(spaced.map(l=>l.id)).toEqual(['a','c','d']);
+  for(let i=0;i<spaced.length;i++)for(let j=i+1;j<spaced.length;j++)expect(Math.hypot(spaced[i].e-spaced[j].e,spaced[i].n-spaced[j].n)).toBeGreaterThanOrEqual(12);
+  expect(removeLightClusters([])).toEqual([]);
 });

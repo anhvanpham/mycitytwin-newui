@@ -93,11 +93,11 @@ export function StreetDetails({doc,layers,ground,sunAltitudeDeg}:{doc:StreetDeta
   const trees=useMemo(()=>doc?.trees.filter(p=>cbdEdgeVisibility([p.e,p.n])>0)??[],[doc]);
   const lights=useMemo(()=>doc?.lights.filter(p=>cbdEdgeVisibility([p.e,p.n])>0)??[],[doc]);
   const power=streetlightPower(sunAltitudeDeg);
-  const lanterns=useMemo(()=>layers.trees!==false?treeLanterns(trees):[],[trees,layers.trees]);
+  const lanterns=useMemo(()=>layers.trees!==false?treeLanterns(trees,12):[],[trees,layers.trees]);
   const lanternParts=useMemo(()=>({
     bulbs:lanterns.map(l=>({position:[l.e+l.offset,l.n,ground+l.height] as [number,number,number],scale:[0.16,0.16,0.22] as [number,number,number]})),
     halos:lanterns.map(l=>({position:[l.e+l.offset,l.n,ground+l.height] as [number,number,number],scale:[0.55,0.55,0.6] as [number,number,number]})),
-    pools:lanterns.map(l=>({position:[l.e+l.offset,l.n,ground+0.13] as [number,number,number],scale:[6,6,1] as [number,number,number]})),
+    pools:lanterns.map(l=>({position:[l.e+l.offset,l.n,ground+0.13] as [number,number,number],scale:[4.5,4.5,1] as [number,number,number]})),
   }),[lanterns,ground]);
   const treeParts=useMemo(()=>{
     const trunks:Instance[]=[],crowns:Instance[]=[];
@@ -119,7 +119,7 @@ export function StreetDetails({doc,layers,ground,sunAltitudeDeg}:{doc:StreetDeta
       }
       if(l.mount!=='unknown')heads.push({position:[e,n,position[2]+0.16],scale:[0.9,0.45,0.24],angle:LAMP_ANGLE});
       bulbs.push({position,scale:[0.35,0.2,0.13]});
-      const radius=l.mount==='pole'||l.mount==='suspended'?10:4;
+      const radius=l.mount==='pole'||l.mount==='suspended'?6:3;
       const x=Math.floor(l.e/8),y=Math.floor(l.n/8);let neighbours=0;
       for(let i=x-1;i<=x+1;i++)for(let j=y-1;j<=y+1;j++)for(const other of cells.get(`${i},${j}`)??[])if(Math.hypot(other.e-l.e,other.n-l.n)<8)neighbours++;
       const weight=1/Math.sqrt(Math.max(1,neighbours));
@@ -148,10 +148,10 @@ export function StreetDetails({doc,layers,ground,sunAltitudeDeg}:{doc:StreetDeta
       <Instances instances={lampParts.arms} shape="box" colour="#969bb0"/>
       <Instances instances={lampParts.heads} shape="box" colour="#858ca3"/>
       <Instances instances={lampParts.bulbs} shape="bulb" colour={power>0?'#ffe4af':'#cad2d4'} power={power}/>
-      {power>0&&<><Instances instances={lampParts.pools} shape="pool" colour="#fff" power={power}/><NearbyLights lights={lights} lanterns={lanterns} ground={ground} power={power}/></>}
+      {power>0&&<><Instances instances={lampParts.pools} shape="pool" colour="#fff" power={power*0.65}/><NearbyLights lights={lights} lanterns={lanterns} ground={ground} power={power}/></>}
     </group>}
     {layers.streetlights!==false&&layers.trees!==false&&power>0&&<group>
-      <Instances instances={lanternParts.pools} shape="treePool" colour="#ffffff" power={power}/>
+      <Instances instances={lanternParts.pools} shape="treePool" colour="#ffffff" power={power*0.65}/>
       <Instances instances={lanternParts.bulbs} shape="lantern" colour="#ffe2af" power={power}/>
       <Instances instances={lanternParts.halos} shape="halo" colour="#ffe2af" power={power}/>
     </group>}
