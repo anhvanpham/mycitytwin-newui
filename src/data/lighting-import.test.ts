@@ -29,10 +29,22 @@ it('retains distinct nearby fixtures while grouping duplicate positions and cros
   expect(grouped[0].assetIds).toEqual(['a','duplicate','osm']);
 });
 
-it('omits the Lonsdale/Russell decorative array without hiding neighbouring street lamps',()=>{
-  const asset={id:'council-array',e:583,n:423,source:'council' as const,mount:'pole' as const,mounting:'Pole: Multiple Fixed',lampType:null,watts:null,description:'Feature Lighting - Intersection of Lonsdale Street and Russell Street',location:null};
+it.each([
+  'Feature Lighting - Intersection of Lonsdale Street and Russell Street',
+  'Feature Lighting - Intersection of Russell Street and Little Bourke Street',
+])('omits decorative array %s without hiding neighbouring street lamps',description=>{
+  const asset={id:'council-array',e:583,n:423,source:'council' as const,mount:'pole' as const,mounting:'Pole: Multiple Fixed',lampType:null,watts:null,description,location:null};
   expect(showLightingAsset(asset)).toBe(false);
   const neighbour={...asset,id:'neighbour',description:'Feature Lighting - Lonsdale Street'};
   expect(showLightingAsset(neighbour)).toBe(true);
   expect(lightingLocations([asset,neighbour],()=>true).map(l=>l.id)).toEqual(['neighbour']);
+});
+
+it('omits the two compact Russell/Little Bourke gateway arrays while preserving adjacent street fixtures',()=>{
+  const asset={id:'gateway',e:640,n:318,source:'council' as const,mount:'pole' as const,mounting:'Pole: Multiple Fixed',lampType:null,watts:null,description:'Feature Lighting - Little Bourke Street between Exhibition Street and Russell Street',location:null};
+  expect(showLightingAsset(asset)).toBe(false);
+  expect(showLightingAsset({...asset,e:607,n:303})).toBe(false);
+  expect(showLightingAsset({...asset,e:650})).toBe(true);
+  expect(showLightingAsset({...asset,mounting:'Pole: Single Fixed'})).toBe(true);
+  expect(showLightingAsset({...asset,source:'osm'})).toBe(true);
 });

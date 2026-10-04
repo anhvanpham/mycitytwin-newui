@@ -28,9 +28,16 @@ export function surveyDate(value: unknown): string | null {
   return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date ? date : null;
 }
 
-/** This decorative intersection array does not make useful individual street-pole geometry. */
+/** Dense decorative intersection arrays do not make useful individual street-pole geometry. */
 export function showLightingAsset(asset: LightingAsset): boolean {
-  return !(asset.source === 'council' && asset.description === 'Feature Lighting - Intersection of Lonsdale Street and Russell Street');
+  if (asset.source !== 'council') return true;
+  const gatewayArray = asset.mounting === 'Pole: Multiple Fixed'
+    && (asset.description ?? '').startsWith('Feature Lighting - Little Bourke Street between')
+    && [[640,318],[607,303]].some(([e,n])=>Math.hypot(asset.e-e,asset.n-n)<6);
+  return !gatewayArray && ![
+    'Feature Lighting - Intersection of Lonsdale Street and Russell Street',
+    'Feature Lighting - Intersection of Russell Street and Little Bourke Street',
+  ].includes(asset.description ?? '');
 }
 
 /** Retain distinct close fixtures. Merge near-identical council records and cross-source matches. */
