@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { bundled } from './bundled';
+import summary from './street-details-summary.json';
 import type { PaintRect } from './streetGeometry';
 import type { LightMount } from './lightingImport';
 
@@ -35,7 +36,8 @@ export function useStreetDetails() {
   const [state, setState] = useState<{ doc: StreetDetailsDoc | null; status: StreetDataStatus }>({ doc: null, status: 'loading' });
   useEffect(() => {
     const controller = new AbortController();
-    fetch(bundled('data/street-details.json'), { signal: controller.signal })
+    // Each refreshed extract gets its own cache key so old fixtures cannot survive a deploy.
+    fetch(`${bundled('data/street-details.json')}?v=${encodeURIComponent(summary.source.retrievedAt)}`, { signal: controller.signal })
       .then(r => { if (!r.ok) throw new Error('Street data unavailable'); return r.json(); })
       .then((doc: StreetDetailsDoc) => {
         if (doc.version !== 2 || !['trees', 'lights', 'lightingAssets', 'lightLevels', 'paint', 'crossings'].every(k => Array.isArray(doc[k as keyof StreetDetailsDoc]))) throw new Error('Invalid street data');
