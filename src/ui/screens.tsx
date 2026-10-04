@@ -475,7 +475,7 @@ export function MapLayers({
               note: 'Preview shadows at the selected time',
             },
             { key: 'trees', name: 'Trees', note: `${streetSummary.trees.toLocaleString()} recorded locations · 3D trees with estimated heights` },
-            { key: 'streetlights', name: 'Streetlights', note: `${streetSummary.lights.toLocaleString()} light locations · pole, hanging and low fixtures turn on at dusk` },
+            { key: 'streetlights', name: 'Streetlights', note: `${streetSummary.lights.toLocaleString()} mapped locations + decorative tree lanterns · on at dusk` },
             { key: 'lightLevels', name: 'Historical light levels', note: `${streetSummary.lightLevels.toLocaleString()} council readings · 16 September 2014 · purple: low, gold: high` },
             { key: 'roadMarkings', name: 'Road markings', note: 'Mapped crossings and illustrative lane lines' },
             { key: 'landmarks', name: 'Landmarks', note: 'Search or tap a landmark to find a place' },
@@ -504,7 +504,7 @@ export function MapLayers({
 
       {mode !== 'model' && streetDataStatus === 'loading' && <p className="note" role="status">Loading trees, lamps and road details…</p>}
       {mode !== 'model' && streetDataStatus === 'error' && <p className="note" role="alert">Street details could not load. The building map and landmark search are still available. Reload to try again.</p>}
-      {mode !== 'model' && <p className="note">Trees and streetlights add detail to the same sunlight map. Tree heights and pole sizes are estimated; lighting follows the selected date and time. Sunlight figures still measure building shadows. Lane paint is illustrative.</p>}
+      {mode !== 'model' && <p className="note">Trees and streetlights add detail to the same sunlight map. Tree lanterns are decorative placements. Tree heights and pole sizes are estimated; lighting follows the selected date and time. Sunlight figures still measure building shadows. Lane paint is illustrative.</p>}
       <div className="soonlist">
         <p className="panel__eyebrow soonlist__head">Coming soon</p>
         {(

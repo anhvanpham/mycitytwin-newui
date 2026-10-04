@@ -146,6 +146,9 @@ export function SourcesLink() {
 
           <h3>CBD street details</h3>
           <p className="sources-note">
+            Decorative tree lanterns add warm light to the night view. These are illustrative placements beside recorded trees, spaced to avoid dense clusters, with soft ground glows and gently lit foliage. They are not recorded streetlight assets or measured illumination. They follow dusk and dawn and turn off with the Trees or Streetlights layer.
+          </p>
+          <p className="sources-note">
             {streetSummary.trees.toLocaleString()} tree locations and {streetSummary.lights.toLocaleString()} visual light locations cover the CBD and nearby streets in this extract. The data retains {streetSummary.lightingAssets.toLocaleString()} lighting assets, including poles, hanging lights, wall and bridge fixtures, and low-mounted lights. Council feature lighting is supplemented by OpenStreetMap street lamps; coverage is incomplete. Nearby fixtures of the same mounting type are combined visually. Locations conflicting with building footprints remain in the source data but are not drawn.
           </p>
           <p className="sources-note">

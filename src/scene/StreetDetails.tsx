@@ -10,9 +10,11 @@ import { rectPoint } from '../data/streetGeometry';
 import { cbdEdgeVisibility } from './cbdBoundary';
 import { treeDimensions, streetlightPower, fixtureHeight } from './streetAppearance';
 import { HistoricalLightLevels } from './HistoricalLightLevels';
+import { treeLanterns } from './treeLighting';
+import type { TreeLantern } from './treeLighting';
 
 type Instance = { position: [number, number, number]; scale: [number, number, number]; colour?: string; angle?: number };
-type Shape = 'cylinder' | 'crown' | 'box' | 'bulb' | 'pool';
+type Shape = 'cylinder' | 'crown' | 'box' | 'bulb' | 'pool' | 'lantern' | 'halo' | 'treePool';
 const NO_RAYCAST = () => null;
 const ARM = 1.35;
 const LAMP_ANGLE = Math.PI / 10;
@@ -41,10 +43,10 @@ function Instances({instances,shape,colour,power=0}:{instances:Instance[];shape:
     if(shape==='cylinder')return new CylinderGeometry(1,1,1,6).rotateX(Math.PI/2);
     if(shape==='crown')return new IcosahedronGeometry(1,1);
     if(shape==='box')return new BoxGeometry(1,1,1);
-    if(shape==='bulb')return new SphereGeometry(1,8,6);
+    if(['bulb','lantern','halo'].includes(shape))return new SphereGeometry(1,8,6);
     return new CircleGeometry(1,24);
   },[shape]);
-  const pool=useMemo(()=>shape==='pool'?lightPoolTexture():null,[shape]);
+  const pool=useMemo(()=>shape==='pool'||shape==='treePool'?lightPoolTexture():null,[shape]);
   useEffect(()=>{
     const matrix=new Matrix4(),position=new Vector3(),scale=new Vector3(),rotation=new Quaternion(),axis=new Vector3(0,0,1),tint=new Color();
     instances.forEach((p,i)=>{
@@ -55,27 +57,33 @@ function Instances({instances,shape,colour,power=0}:{instances:Instance[];shape:
     if(mesh.current){mesh.current.instanceMatrix.needsUpdate=true;if(mesh.current.instanceColor)mesh.current.instanceColor.needsUpdate=true;}
   },[instances]);
   useEffect(()=>()=>{geometry.dispose();pool?.dispose();},[geometry,pool]);
-  return <instancedMesh ref={mesh} args={[geometry,undefined,instances.length]} raycast={NO_RAYCAST} frustumCulled={false} receiveShadow={shape!=='pool'&&shape!=='bulb'}>
-    {shape==='pool' ? <meshBasicMaterial map={pool} transparent opacity={power*0.72} blending={AdditiveBlending} depthWrite={false} toneMapped={false} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-8}/> :
+  return <instancedMesh ref={mesh} args={[geometry,undefined,instances.length]} raycast={NO_RAYCAST} frustumCulled={false} receiveShadow={!['pool','treePool','bulb','lantern','halo'].includes(shape)}>
+    {shape==='treePool' ? <meshBasicMaterial map={pool} transparent opacity={power*0.48} blending={AdditiveBlending} depthWrite={false} toneMapped={false} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-8}/> :
+      shape==='halo' ? <meshBasicMaterial color={colour} transparent opacity={power*0.16} depthWrite={false} toneMapped={false}/> :
+      shape==='lantern' ? <meshStandardMaterial color={colour} emissive="#ffe2af" emissiveIntensity={power*5} toneMapped={false} roughness={0.3}/> :
+      shape==='pool' ? <meshBasicMaterial map={pool} transparent opacity={power*0.72} blending={AdditiveBlending} depthWrite={false} toneMapped={false} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-8}/> :
       shape==='bulb' ? <meshStandardMaterial color={colour} emissive="#ffd899" emissiveIntensity={power*4} toneMapped={false} roughness={0.4}/> :
-      <meshStandardMaterial color={colour} roughness={0.95}/>}
+      <meshStandardMaterial color={colour} roughness={0.95} emissive={shape==='crown'?'#a0bea9':'#000000'} emissiveIntensity={shape==='crown'?power*0.24:0}/>}
   </instancedMesh>;
 }
 
-/** Only nearby poles get actual lights; distant poles keep emissive bulbs and ground halos. */
-function NearbyLights({lights,ground,power}:{lights:StreetLamp[];ground:number;power:number}) {
+/** Four mapped fixtures and two tree lanterns share the nearby-light budget. */
+function NearbyLights({lights,lanterns,ground,power}:{lights:StreetLamp[];lanterns:TreeLantern[];ground:number;power:number}) {
   const camera=useThree(s=>s.camera),controls=useThree(s=>s.controls) as {target?:Vector3}|null;
   const [near,setNear]=useState<StreetLamp[]>([]);
+  const [treeNear,setTreeNear]=useState<TreeLantern[]>([]);
   const previous=useRef({e:Infinity,n:Infinity,elapsed:0});
+  useEffect(()=>{ previous.current.e=Infinity;previous.current.n=Infinity; },[lights,lanterns]);
   useFrame((_,delta)=>{
     previous.current.elapsed+=delta;
     if(power===0||previous.current.elapsed<0.5)return;
     const target=controls?.target??camera.position,e=target.x,n=-target.z;
     if(Math.hypot(e-previous.current.e,n-previous.current.n)<20)return;
     previous.current={e,n,elapsed:0};
-    setNear(lights.map(l=>({l,d:Math.hypot(l.e-e,l.n-n)})).filter(p=>p.d<150).sort((a,b)=>a.d-b.d).slice(0,6).map(p=>p.l));
+    setNear(lights.map(l=>({l,d:Math.hypot(l.e-e,l.n-n)})).filter(p=>p.d<150).sort((a,b)=>a.d-b.d).slice(0,4).map(p=>p.l));
+    setTreeNear(lanterns.map(l=>({l,d:Math.hypot(l.e-e,l.n-n)})).filter(p=>p.d<100).sort((a,b)=>a.d-b.d).slice(0,2).map(p=>p.l));
   });
-  return <group>{near.map(l=><pointLight key={l.id} position={lampPoint(l,ground)} color="#ffd7a0" intensity={power*(l.mount==='pole'||l.mount==='suspended'?220:70)} distance={32} decay={2}/>)}</group>;
+  return <group>{near.map(l=><pointLight key={l.id} position={lampPoint(l,ground)} color="#ffd7a0" intensity={power*(l.mount==='pole'||l.mount==='suspended'?220:70)} distance={32} decay={2}/>)}{lanterns.length>0&&treeNear.map(l=><pointLight key={l.id} position={[l.e+l.offset,l.n,ground+l.height]} color={l.colour} intensity={power*65} distance={18} decay={2}/>)}</group>;
 }
 
 /** Trees and lamps add visual context; building-only sunlight calculations stay unchanged. */
@@ -85,6 +93,12 @@ export function StreetDetails({doc,layers,ground,sunAltitudeDeg}:{doc:StreetDeta
   const trees=useMemo(()=>doc?.trees.filter(p=>cbdEdgeVisibility([p.e,p.n])>0)??[],[doc]);
   const lights=useMemo(()=>doc?.lights.filter(p=>cbdEdgeVisibility([p.e,p.n])>0)??[],[doc]);
   const power=streetlightPower(sunAltitudeDeg);
+  const lanterns=useMemo(()=>layers.trees!==false?treeLanterns(trees):[],[trees,layers.trees]);
+  const lanternParts=useMemo(()=>({
+    bulbs:lanterns.map(l=>({position:[l.e+l.offset,l.n,ground+l.height] as [number,number,number],scale:[0.16,0.16,0.22] as [number,number,number]})),
+    halos:lanterns.map(l=>({position:[l.e+l.offset,l.n,ground+l.height] as [number,number,number],scale:[0.55,0.55,0.6] as [number,number,number]})),
+    pools:lanterns.map(l=>({position:[l.e+l.offset,l.n,ground+0.13] as [number,number,number],scale:[6,6,1] as [number,number,number]})),
+  }),[lanterns,ground]);
   const treeParts=useMemo(()=>{
     const trunks:Instance[]=[],crowns:Instance[]=[];
     trees.forEach((p,i)=>{
@@ -128,13 +142,18 @@ export function StreetDetails({doc,layers,ground,sunAltitudeDeg}:{doc:StreetDeta
   });
   return <group>
     {layers.lightLevels===true&&doc&&<HistoricalLightLevels readings={doc.lightLevels} ground={ground}/>}
-    {layers.trees!==false&&<group><Instances instances={treeParts.trunks} shape="cylinder" colour="#8b7863"/><Instances instances={treeParts.crowns} shape="crown" colour="#ffffff"/></group>}
+    {layers.trees!==false&&<group><Instances instances={treeParts.trunks} shape="cylinder" colour="#8b7863"/><Instances instances={treeParts.crowns} shape="crown" colour="#ffffff" power={layers.streetlights!==false?power:0}/></group>}
     {layers.streetlights!==false&&<group>
       <Instances instances={lampParts.poles} shape="cylinder" colour="#969bb0"/>
       <Instances instances={lampParts.arms} shape="box" colour="#969bb0"/>
       <Instances instances={lampParts.heads} shape="box" colour="#858ca3"/>
       <Instances instances={lampParts.bulbs} shape="bulb" colour={power>0?'#ffe4af':'#cad2d4'} power={power}/>
-      {power>0&&<><Instances instances={lampParts.pools} shape="pool" colour="#fff" power={power}/><NearbyLights lights={lights} ground={ground} power={power}/></>}
+      {power>0&&<><Instances instances={lampParts.pools} shape="pool" colour="#fff" power={power}/><NearbyLights lights={lights} lanterns={lanterns} ground={ground} power={power}/></>}
+    </group>}
+    {layers.streetlights!==false&&layers.trees!==false&&power>0&&<group>
+      <Instances instances={lanternParts.pools} shape="treePool" colour="#ffffff" power={power}/>
+      <Instances instances={lanternParts.bulbs} shape="lantern" colour="#ffe2af" power={power}/>
+      <Instances instances={lanternParts.halos} shape="halo" colour="#ffe2af" power={power}/>
     </group>}
     <group ref={paintGroup} visible={false}><mesh geometry={paint} receiveShadow raycast={NO_RAYCAST}><meshStandardMaterial color="#ffffff" roughness={1} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-7}/></mesh></group>
   </group>;
