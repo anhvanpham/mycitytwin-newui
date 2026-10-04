@@ -1,0 +1,49 @@
+{
+  "name": "my-city-twin",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "npm run config && vite",
+    "build": "npm run config && tsc -b && vite build",
+    "build:release": "node scripts/build-release.mjs",
+    "deploy": "npm run build:release && wrangler deploy",
+    "deploy:dev": "npm run build && wrangler deploy -c wrangler.dev.jsonc",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:vr": "node scripts/vr-check.mjs",
+    "test:page": "node scripts/page-check.mjs",
+    "how-images": "node scripts/how-images.mjs",
+    "config": "node scripts/mapbox-config.mjs public"
+  },
+  "dependencies": {
+    "@fontsource-variable/manrope": "^5.3.0",
+    "@fontsource-variable/nunito": "^5.3.0",
+    "@pmndrs/xr": "6.6.30",
+    "@react-three/drei": "^10.7.8",
+    "@react-three/fiber": "^9.7.0",
+    "@react-three/uikit": "^1.0.76",
+    "@react-three/xr": "^6.6.30",
+    "astronomy-engine": "^2.1.19",
+    "proj4": "^2.22.0",
+    "react": "~19.2.8",
+    "react-dom": "~19.2.8",
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "@iwer/devui": "1.1.2",
+    "@types/node": "^24.13.3",
+    "@types/proj4": "^2.5.6",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@types/three": "^0.185.4",
+    "@vitejs/plugin-react": "^6.1.0",
+    "iwer": "2.4.0",
+    "oxlint": "^1.79.0",
+    "playwright-core": "1.63.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
+  }
+}

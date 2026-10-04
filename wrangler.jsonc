@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mycitytwin-newui",
+  "compatibility_date": "2026-09-01",
+  "workers_dev": true,
+  "assets": {
+    "directory": "./releases",
+    "binding": "ASSETS"
+  },
+  "main": "./worker/index.ts",
+  "observability": {
+    "enabled": true
+  }
+}

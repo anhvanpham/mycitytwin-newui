@@ -1,0 +1,17 @@
+.future-work__intro { max-width: 42rem; margin: 1.5rem 0 2.5rem; }
+.future-work__intro h1 { font-size: clamp(2rem, 5vw, 3.7rem); }
+.future-work__cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; padding: 0; margin: 0; list-style: none; }
+.future-work__cards li { padding: 1.75rem; background: #e0eee7; border: 1px solid #c7dfd2; border-radius: 1.25rem; }
+.future-work__cards li:nth-child(2) { background: #f6e9dc; border-color: #ead7c4; }
+.future-work__cards li:nth-child(3) { background: #e9e8f3; border-color: #d6d4e9; }
+.future-work__cards h2 { margin: 1.1rem 0 .85rem; font-size: 1.4rem; line-height: 1.25; }
+.future-work__cards h2 + p { margin: 0; font-size: .9rem; line-height: 1.75; color: #526d6a; }
+.future-work__footer { margin-top: 2.5rem; border-top: 1px solid #d9e6df; padding-top: 1.25rem; font-size: 1rem; font-weight: 600; color: #49635a; }
+@media (prefers-reduced-motion: no-preference) {
+  .future-work__intro, .future-work__cards li { animation: future-work-in 650ms ease both; }
+  .future-work__cards li:nth-child(2) { animation-delay: 100ms; }
+  .future-work__cards li:nth-child(3) { animation-delay: 200ms; }
+  @keyframes future-work-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+}
+@media (max-width: 760px) { .future-work__cards { grid-template-columns: minmax(0, 1fr); } }
+.future-plans__header nav { flex-wrap: wrap; justify-content: flex-end; }

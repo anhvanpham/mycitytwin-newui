@@ -1,0 +1,3227 @@
+/*
+ * ─────────────────────────────────────────────────────────────────────────
+ * THE INTERFACE OVER THE MODEL
+ * ─────────────────────────────────────────────────────────────────────────
+ *
+ * Everything is a panel on top of the 3D view, as in the design — the city
+ * is never covered by a full-width page, because the thing being explained
+ * is behind the glass.
+ *
+ * WHAT IS ELSEWHERE
+ *   The front page and the sections under it: landing.css and
+ *   landing-more.css. The sunlight screen's column, its buttons and its
+ *   fine print: sunlight.css. Sources & limitations and the map key:
+ *   sources.css. The values everything here is built from: tokens.css.
+ *
+ * WHAT IS IN HERE, TOP TO BOTTOM
+ *   - The app and the header bar.
+ *   - Panels, and the shared controls: the segmented switch with its
+ *     travelling face.
+ *   - Motion: how panels, lists and the figure arrive.
+ *   - The subject panels: their head, the layer switches, one project,
+ *     the window controls and their figures.
+ *   - Choosing a day, the calendar, and the sunlight half: the figure,
+ *     arming the ground, the folded steps.
+ *   - Notes, the time bar, and the minimum target size.
+ *   - The map controls, the search results, the pin's label.
+ *   - Narrow viewports: the panel becomes a sheet.
+ *   - Standing in the street, the map credit, the explore screen's hint,
+ *     the view controls on short screens, focus mode, reduced motion.
+ */
+
+.app {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+/*
+ * The explicit z-index matters: it makes this element a stacking context, so
+ * the labels drei renders over the canvas stay inside it however high their
+ * own z-index climbs. Without it a street name at z-index 10 competes with
+ * the panels in the root stacking context and wins, and the names sit on top
+ * of the interface instead of sliding under it.
+ */
+.app__scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/*
+ * ─────────────────────────────────────────────────────────────────────────
+ * THE HEADER BAR
+ * ─────────────────────────────────────────────────────────────────────────
+ *
+ * Solid, full width, and the city begins underneath it. That is a different
+ * decision from everything else in this file — every panel floats over the
+ * model because the model is the argument — and it is worth being clear that
+ * it is deliberate.
+ *
+ * A bar that is part of the page rather than on top of it can hold plain dark
+ * text at a fixed contrast. The version before this was bare marks laid
+ * straight onto the scene, which meant a wash across the top to keep them
+ * readable, which then had to flip colour at dusk so it did not look like a
+ * smear of light across a night city. Three mechanisms to solve a problem
+ * that an opaque bar does not have.
+ *
+ * It costs 72 px of city. The panels below it start under it and scroll
+ * inside what is left — see --y-top.
+ */
+.header {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  height: var(--h-header);
+  padding-inline: var(--space-4);
+  background: var(--paper);
+  border-bottom: 1px solid var(--hairline);
+}
+
+/*
+ * Present, not announced.
+ *
+ * It was 17px, weight 800, uppercase and tracked — four kinds of emphasis on
+ * the one thing in the bar nobody needs to read twice. The search is what
+ * people came to use, so the mark steps back to a normal label and lets it
+ * have the middle.
+ */
+.header__brand {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding-inline: var(--space-1);
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--green-700);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-label);
+  letter-spacing: 0.01em;
+}
+
+/* The words are the brand; the mark beside them is not a second voice. */
+.header__brand span {
+  color: var(--ink);
+}
+
+/*
+ * ── THE MIDDLE OF THE BAR ────────────────────────────────────────────────
+ *
+ * Centred rather than left-aligned after the brand, and given the room to be
+ * the obvious thing: it is the one control on this bar that somebody uses
+ * repeatedly, and it used to sit between a shouting wordmark and three
+ * outlined buttons, all competing at the same weight.
+ *
+ * `position: relative` so the results can be taken out of the flow — left in
+ * it, the bar would grow taller as somebody typed and push the city down.
+ */
+.header__search {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 30rem;
+  margin-inline: auto;
+}
+
+/*
+ * The list is the field continued downwards, so it takes the field's width,
+ * its radius and its gutter. A dropdown a few pixels wider than the control
+ * it belongs to reads as a separate object that happens to be underneath.
+ */
+.header__search .results,
+.header__search .results__none {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  left: 0;
+  right: 0;
+  z-index: 1;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: var(--space-2);
+  border-radius: var(--radius-control);
+  background: var(--paper);
+  box-shadow: var(--shadow-panel);
+}
+
+.header__search .results__none {
+  padding: 14px 16px;
+}
+
+.header__actions {
+  flex: none;
+  margin-left: auto;
+  display: flex;
+  gap: 10px;
+}
+
+/*
+ * ── THE THREE SECONDARY CONTROLS ─────────────────────────────────────────
+ *
+ * Borderless until they are wanted. Three outlined boxes in a row read as
+ * three buttons of the same standing as the one filled action on the screen,
+ * which is not what they are: these change what is shown, and "Explore the
+ * CBD" is the thing to do.
+ *
+ * Pressed is a tinted surface and a darker label, not a colour — the same
+ * rule the rest of the interface follows, and the same signal a reader who
+ * cannot separate the green still gets.
+ */
+.chip {
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: none;
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-label);
+  color: var(--ink-2);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--dur-quick) var(--ease),
+    color var(--dur-quick) var(--ease);
+}
+
+.chip:hover {
+  background: #f1f2f3;
+  color: var(--ink);
+}
+
+/* An icon and a word, so the mark is not asked to carry the meaning alone. */
+.chip--icon {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/*
+ * How many layers are switched off.
+ *
+ * On the button that turns them off, because that is where somebody goes to
+ * find out — and in amber rather than green, since it is the one thing in
+ * this bar reporting a state that differs from the default.
+ */
+.chip__count {
+  display: grid;
+  place-items: center;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding-inline: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--amber-050);
+  color: var(--amber-ink);
+  font-size: var(--text-xs);
+  font-variant-numeric: var(--numeric);
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--green-050);
+  color: var(--green-700);
+}
+
+.chip:hover {
+  border-color: var(--ink-3);
+  background: var(--green-050);
+}
+
+.chip[aria-disabled='true'] {
+  color: var(--ink-3);
+  cursor: not-allowed;
+}
+
+.chip[aria-disabled='true']:hover {
+  background: none;
+  color: var(--ink-3);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--green-700);
+  outline-offset: 2px;
+}
+
+@media (max-width: 1180px) {
+}
+
+@media (max-width: 900px) {
+  .header__brand span {
+    display: none;
+  }
+}
+
+/* ── panels ─────────────────────────────────────────────── */
+
+.panel {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: var(--pad-panel);
+  border-radius: var(--radius-panel);
+  background: var(--paper);
+  box-shadow: var(--shadow-panel);
+}
+
+/*
+ * ── NO PANEL HAS A HEIGHT; EVERY PANEL HAS A LIMIT ───────────────────────
+ *
+ * Both start below the nav and both can be taller than the window. Below
+ * them sits the time bar, and a panel that grows past it does not push it
+ * out of the way — everything here is absolutely positioned, so it covers
+ * it, and its own last rows go off the bottom of the screen where there is
+ * no way to reach them.
+ *
+ * The right panel has been bounded since it was written. The LEFT one was
+ * not, and it is the taller of the two: date field, four seasons, the clock
+ * note, the city/plan switch, the measure instruction and the modelling
+ * caveat come to well over 500 px.
+ *
+ * WHY IT WAS NOT NOTICED, WHICH IS THE INTERESTING PART
+ *   The breakpoints only ever asked about WIDTH — 1180 and 900. A laptop at
+ *   1440×900 is wide, so it took neither, and 900 px of height swallowed the
+ *   panel with room to spare.
+ *
+ *   Short-and-wide was the case nothing covered: a MacBook at 1512×982 with
+ *   a dock and a browser chrome, and the headset browser, whose window is
+ *   shorter than any laptop. There, the caveat — the one panel on the page
+ *   that says these figures do not determine planning compliance — was the
+ *   part that fell off the bottom.
+ *
+ * Measuring against the window rather than guessing a breakpoint means the
+ * case does not have to be anticipated to be handled.
+ */
+.panel--left {
+  /*
+   * The max() is a floor, for the case the subtraction cannot survive: a
+   * window shorter than the 228 px this reserves would compute a negative
+   * height, which CSS resolves to zero — a panel with no content visible at
+   * all, and no way to tell it apart from one that failed to render.
+   * Overflowing a very short window is bad; disappearing is worse.
+   */
+  max-height: max(160px, calc(100% - var(--y-top) - var(--y-bottom)));
+  overflow-y: auto;
+}
+
+.panel--left {
+  top: var(--y-top);
+  left: var(--gutter);
+  /* Floors at 292 so four season names still sit side by side at the bold
+     weight with a date field on one line; at 306 the row was already
+     touching its own edges, and below that it wraps. */
+  width: var(--w-panel-left);
+}
+
+.panel__eyebrow {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-label);
+  color: var(--green-500);
+}
+
+/* ── controls ───────────────────────────────────────────── */
+
+.button {
+  padding: 11px 20px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: var(--green-700);
+  color: var(--paper);
+  font: inherit;
+  font-weight: var(--weight-label);
+  cursor: pointer;
+  /*
+   * Everything that changes on hover or press is listed, not just the
+   * background. A control that recolours instantly but moves abruptly reads
+   * as two different components reacting at different speeds.
+   */
+  transition:
+    background var(--dur-quick) var(--ease),
+    border-color var(--dur-quick) var(--ease),
+    color var(--dur-quick) var(--ease),
+    box-shadow var(--dur-quick) var(--ease),
+    transform var(--dur-quick) var(--ease);
+}
+
+.button:hover {
+  background: var(--green-600);
+}
+
+/*
+ * One pixel, not four. The press has to be felt rather than watched — this
+ * is a planning tool, and a button that bounces undercuts the numbers next
+ * to it. The shorter transform duration above makes the press feel like a
+ * response to the finger rather than an animation that follows it.
+ */
+.button:active {
+  transform: translateY(1px);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--green-700);
+  outline-offset: 2px;
+}
+
+.button--ghost {
+  background: var(--paper);
+  border-color: var(--hairline);
+  color: var(--ink);
+}
+
+.button--ghost:hover {
+  background: var(--green-050);
+  border-color: var(--green-600);
+}
+
+.button--block {
+  width: 100%;
+}
+
+/*
+ * A button with a mark in it.
+ *
+ * Centred as a pair rather than the icon being pinned to one side: these are
+ * one label, and an icon pushed to the edge of a full-width button reads as
+ * an unrelated adornment sitting at the end of a bar.
+ */
+.button svg {
+  flex: none;
+  margin-right: var(--space-2);
+  vertical-align: -0.2em;
+}
+
+.button--block:has(svg) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/*
+ * ── THE BEFORE / AFTER SWITCH ────────────────────────────────────────────
+ *
+ * A recessed track with one raised face in it. The selected half is a white
+ * card sitting ON the tint; the other is the tint itself.
+ *
+ * That is the part a reader who cannot separate the two greens still gets:
+ * one side has an edge and a shadow and the other does not, so the answer to
+ * "which is showing" is a shape, not a colour.
+ */
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  padding: 3px;
+  border-radius: var(--radius-control);
+  background: var(--surface-sunken);
+}
+
+/*
+ * ── THE FACE THAT TRAVELS ────────────────────────────────────────────────
+ *
+ * One raised surface belonging to the STRIP, not a background on whichever
+ * button is selected. That is the whole trick: a background cannot move
+ * between two elements, it can only appear on one and vanish from the other,
+ * which is why the control used to change without any sense of being
+ * operated. As one element it slides, and the movement is the thing that
+ * says the switch was thrown.
+ *
+ * WHERE IT GOES
+ *   --at is the index of the chosen segment and --count how many there are,
+ *   both set in the markup, because CSS cannot count its own selected child.
+ *   The strip has 3px of padding and 3px between segments, so a segment is
+ *   (100% - 6px - (count - 1) * 3px) / count wide, and the step from one to
+ *   the next is its own width plus the gap -- which is what translateX of
+ *   100% plus 3px means here, percentages on a transform being of the moving
+ *   element rather than of its parent.
+ *
+ * WHEN IT IS NOWHERE
+ *   --at of -1 means nothing is chosen. It was written for the four
+ *   seasons, for a date that is not one of them; the seasons are four
+ *   separate buttons now (sunlight.css), and the rule stays for any strip
+ *   that can have nothing chosen. The face is hidden rather than parked on a
+ *   neighbour, because parking it would say "Spring" about a day in October.
+ *
+ * It is drawn UNDER the labels: z-index 0 against their 1. Painted over
+ * them it would hide the word it is meant to be selecting.
+ */
+.segmented,
+.sheet__tabs {
+  position: relative;
+  isolation: isolate;
+}
+
+.segmented::after,
+.sheet__tabs::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc((100% - 6px - (var(--count, 2) - 1) * 3px) / var(--count, 2));
+  border-radius: calc(var(--radius-control) - 4px);
+  background: var(--paper);
+  box-shadow: 0 1px 4px rgba(32, 48, 32, 0.11);
+  transform: translateX(calc(var(--at, 0) * (100% + 3px)));
+  transition: transform var(--dur-quick) var(--ease-spring);
+}
+
+/*
+ * Nothing is chosen, so there is nothing to raise.
+ *
+ * An attribute rather than a match on the inline style. Reading --at back out
+ * of the style string works, and works by luck: how a custom property is
+ * serialised into the attribute is up to the engine, so a browser that wrote
+ * "--at:-1" without the space would quietly park a raised face on Summer and
+ * call an October date a season.
+ */
+.segmented[data-chosen='no']::after {
+  opacity: 0;
+}
+
+.segmented button,
+.sheet__tabs button {
+  position: relative;
+  z-index: 1;
+}
+
+
+.segmented button {
+  position: relative;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-1);
+  border: 0;
+  border-radius: calc(var(--radius-control) - 4px);
+  background: transparent;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-label);
+  cursor: pointer;
+  transition:
+    background var(--dur-quick) var(--ease),
+    color var(--dur-quick) var(--ease);
+}
+
+.segmented button:hover {
+  color: var(--ink);
+}
+
+/*
+ * Every segment reserves the width its own label needs AT THE HEAVIEST
+ * weight the control can put it in, whether or not it is the selected one.
+ *
+ * The four season names are all six letters, so equal columns looked like
+ * enough — but a selected segment set heavier is wider than the same word
+ * set lighter. Only the selected one overflowed, and only for some words,
+ * which is why it read as a font-size problem.
+ *
+ * The hidden copy is laid out at that weight and collapsed to zero height,
+ * so it contributes width and nothing else.
+ *
+ * IT IS KEPT EVEN THOUGH THE RESTYLE REMOVED THE WEIGHT CHANGE. The selected
+ * segment is now marked by a raised surface rather than by heavier text, so
+ * today nothing shifts without this — and the next person to reach for bold
+ * as the selected state will not have to rediscover why "Spring" jumps.
+ * segmented.test.ts holds both halves of it: this rule, and the attribute in
+ * the markup that supplies the word.
+ */
+.segmented button::before {
+  content: attr(data-label);
+  display: block;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font-weight: var(--weight-title);
+  white-space: nowrap;
+}
+
+/*
+ * The surface is drawn by the strip now -- see the travelling face above --
+ * so the selected button contributes only its ink. Left with a background of
+ * its own it would appear instantly under the one that is still sliding
+ * towards it, and two raised faces would be lit at once.
+ */
+.segmented button[aria-pressed='true'] {
+  color: var(--green-700);
+  font-weight: var(--weight-title);
+}
+
+.segmented button:focus-visible {
+  outline: 2px solid var(--green-700);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/*
+ * A tinted surface rather than an outline.
+ *
+ * An empty field drawn as a 1px box is a rectangle competing with every
+ * other rectangle on the bar. Filled and borderless it reads as somewhere to
+ * put something, which is what it is — and the border comes back on focus,
+ * where it means the field has the keyboard.
+ */
+.field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: #f1f2f3;
+  transition:
+    background var(--dur-quick) var(--ease),
+    border-color var(--dur-quick) var(--ease);
+}
+
+.field:hover {
+  background: #eaebed;
+}
+
+/*
+ * The whole field lights up, not just the input inside it.
+ *
+ * `:focus-within` because the thing that takes focus is the input and the
+ * thing a reader sees is the field around it. Focusing the child and
+ * outlining nothing is how a search box ends up looking inert while it is
+ * actually collecting keystrokes.
+ */
+.field:focus-within {
+  background: var(--paper);
+  border-color: var(--green-700);
+  box-shadow: 0 0 0 3px rgba(20, 98, 74, 0.14);
+}
+
+.field input {
+  flex: 1;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--ink);
+  min-width: 0;
+}
+
+/*
+ * Not --ink-3: the field's ground is tinted, and the same grey that clears
+ * 4.5:1 on white only reaches 4.1 on it. A placeholder is the text that
+ * tells somebody what the field is for when they have not used it yet.
+ */
+/*
+ * The key that focuses this field.
+ *
+ * Drawn as a key rather than written in the placeholder, so it survives the
+ * placeholder being replaced by what somebody typed — and so it reads as a
+ * thing to press rather than as part of the prompt.
+ */
+.field__key {
+  flex: none;
+  display: grid;
+  place-items: center;
+  min-width: 1.3rem;
+  height: 1.3rem;
+  border: 1px solid var(--hairline);
+  border-radius: 5px;
+  background: var(--paper);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+}
+
+.field input::placeholder {
+  color: #676e76; /* 4.54:1 on the field's ground */
+  opacity: 1;
+}
+
+.field input:focus {
+  outline: none;
+}
+
+/* ── motion ─────────────────────────────────────────────── */
+
+/*
+ * ─────────────────────────────────────────────────────────────────────────
+ * WHAT THE MOVEMENT IS FOR
+ * ─────────────────────────────────────────────────────────────────────────
+ *
+ * Two jobs, and nothing else gets to move.
+ *
+ *   ANSWERING     Something was pressed, and it says so before anything
+ *                 slower happens. This is the whole of "the interface feels
+ *                 responsive": not how much moves, but how soon.
+ *
+ *   EXPLAINING    Something appeared, and the way it appeared says where it
+ *                 came from. A panel that rises a few pixels from the edge
+ *                 it is docked to has told the reader it belongs there; the
+ *                 same panel switched on has told them nothing.
+ *
+ * Every keyframe below animates only `opacity` and `transform`. Those two
+ * are the ones a browser can move without recalculating the page, so a list
+ * of eight rows arriving costs nothing measurable. Animating height, or
+ * top, or width, would make the same effect stutter on the slowest device
+ * anybody opens this on.
+ *
+ * Distances are small — 4 to 10px. Far enough to have direction, near
+ * enough that nothing has to be waited for.
+ *
+ * The reduced-motion block above holds all of it at 0.01ms, and every
+ * keyframe ends on the element's resting state, so the end of each is
+ * exactly what a reader who asked for no movement sees immediately.
+ */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes emerge {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.99);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+/*
+ * A panel arriving, and a tab's contents changing — one short settle for
+ * both.
+ *
+ * Docked panels, the view controls and the time bar rise a little from
+ * where they sit rather than fading in place, which is what connects them
+ * to the edge they are attached to. (The view controls take the longer
+ * `rise` of their own further down.)
+ *
+ * The tab body is keyed on which tab it is — see screens.tsx. Without the
+ * key React keeps the same element and swaps its children, and nothing
+ * moves at all; with it the panel is genuinely new and can arrive. Its
+ * frame did not go anywhere, so this is a change of contents rather than
+ * an arrival.
+ */
+.panel,
+.viewctl,
+.timebar,
+.sheet__tabpanel {
+  animation: settle var(--dur-quick) var(--ease) both;
+}
+
+/*
+ * The search results, from under the field they belong to.
+ *
+ * Downward-from-above, because that is the direction they came from: the
+ * list is the field continued, so it emerges from its underside rather than
+ * rising from the page.
+ */
+.header__search .results,
+.header__search .results__none {
+  animation: emerge var(--dur-quick) var(--ease) both;
+  transform-origin: top center;
+}
+
+/*
+ * ── LISTS ARRIVE IN ORDER ────────────────────────────────────────────────
+ *
+ * Each item a little behind the last. The index comes from the markup as
+ * `--i` — see the components — and an item without one simply starts at
+ * zero, so nothing breaks if a list forgets to set it.
+ *
+ * Capped at eight. Past that the delay is longer than anybody will wait to
+ * read the ninth row, and a stagger that outlives its usefulness is just a
+ * slow interface.
+ */
+.results button {
+  animation: settle var(--dur-quick) var(--ease) both;
+  animation-delay: calc(min(var(--i, 0), 8) * var(--stagger));
+}
+
+/* Nothing moves when it cannot be pressed. */
+.chip[aria-disabled='true']:active {
+  transform: none;
+}
+
+/*
+ * ── THE FIGURE LANDING ───────────────────────────────────────────────────
+ *
+ * The measured result is the one number the reader asked a question to get,
+ * and it used to replace whatever was there between two frames. Arriving,
+ * it is noticed — which matters, because the panel around it does not
+ * change when a new point is picked and there is otherwise nothing to say
+ * the answer is a new one.
+ */
+.result {
+  animation: settle var(--dur-panel) var(--ease) both;
+}
+
+/*
+ * ── AND ON A PHONE ───────────────────────────────────────────────────────
+ *
+ * The sheet comes up from the edge it is docked to, the full distance,
+ * because on a phone it IS the arrival rather than an accent on it.
+ */
+@media (max-width: 900px) {
+  .panel {
+    animation: slideUp var(--dur-panel) var(--ease) both;
+  }
+}
+
+/*
+ * ── THE MARK IN THE CORNER ───────────────────────────────────────────────
+ *
+ * It was a text "×" with no surface: dark grey on white, invisible until
+ * hovered, at whatever weight the font felt like drawing a multiplication
+ * sign at. Next to a full-width bordered back button it read as punctuation
+ * rather than as a control, and people did not find it.
+ *
+ * Three things changed and each does its own job:
+ *
+ *   A SURFACE AT REST. It looks pressable before the pointer arrives, which
+ *   is the whole of the difference between a control and a decoration. The
+ *   fill is light enough not to compete with the back button beside it —
+ *   this is the smaller of the two exits, and should look it.
+ *
+ *   A DRAWN CROSS. Two strokes at a weight this file chose, rather than a
+ *   character whose thickness and size come from whichever font the reader's
+ *   system supplies.
+ *
+ *   A NAME THAT IS TRUE. See the markup: on two of the three panels it does
+ *   not close anything, it goes back to the start, and it now says so.
+ *
+ * The visible circle is 36px and the target is 44px, set by the rule that
+ * gives every control its minimum. A small mark is allowed a large target.
+ */
+.sheet__close {
+  flex: none;
+  /*
+   * The circle below is absolute, and this is what it is absolute TO. Put on
+   * the head instead it would have been laid out against the whole row and
+   * drawn at its top-left corner, nowhere near the mark it is behind.
+   */
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: -4px -6px -4px 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition:
+    background var(--dur-quick) var(--ease),
+    color var(--dur-quick) var(--ease);
+}
+
+/*
+ * The surface is drawn by the pseudo-element, so it can be 36px inside a
+ * 44px target without shrinking what a finger has to hit.
+ */
+.sheet__close::before {
+  content: '';
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f1f2f3;
+  transition: background var(--dur-quick) var(--ease);
+}
+
+.sheet__close svg {
+  position: relative;
+}
+
+.sheet__close:hover {
+  color: var(--ink);
+}
+
+.sheet__close:hover::before {
+  background: #e4e6e8;
+}
+
+.sheet__close:active {
+  transform: translateY(1px);
+  transition-duration: var(--dur-press);
+}
+
+.sheet__close:focus-visible {
+  outline: 2px solid var(--green-700);
+  outline-offset: -2px;
+}
+
+/* ── the working panels ─────────────────────────────────── */
+
+/*
+ * The shape every screen's left panel shares: a head with a way out, a
+ * title, a line of context, then whatever the screen is for.
+ *
+ * Named `sheet` rather than after any one screen, because five screens use
+ * it and naming it after the first would make the other four look like they
+ * had borrowed something.
+ */
+.sheet {
+  gap: var(--space-4);
+}
+
+.sheet__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/*
+ * ── THE SUBJECT, IN THREE SIZES ──────────────────────────────────────────
+ *
+ * Street line, then suburb, then what the building is. Each a step quieter
+ * than the last, so the order they are read in is set by the drawing rather
+ * than by which one the eye happens to land on.
+ *
+ * Its own stack with its own spacing, because the gap between an address and
+ * its postcode is not the gap between two sections.
+ */
+.subject {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.sheet__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: var(--weight-title);
+  letter-spacing: -0.027em;
+  line-height: 1.2;
+  /*
+   * Melbourne addresses run to "148-156 Queen Street", and a panel column is
+   * narrow. Without this a single unbreakable run pushes the panel wider
+   * than its own track instead of wrapping.
+   */
+  overflow-wrap: anywhere;
+}
+
+/* The rest of the address. Absent entirely when there was none to split. */
+.sheet__locality {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+.sheet__meta {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+}
+
+/*
+ * The count, over a rule.
+ *
+ * The line matters: without it this reads as a fourth project rather than as
+ * a statement about the three above.
+ */
+.sheet__fine {
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--hairline);
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+}
+
+/*
+ * A quiet instruction, on its own ground.
+ *
+ * Tinted rather than plain so it separates from the panel's own sentences —
+ * it is telling the reader what to DO, and the rest of the panel is telling
+ * them what is true.
+ */
+.note {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: var(--radius-card);
+  background: var(--green-050);
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+/* ── the layer switches ─────────────────────────────────── */
+
+.switches {
+  display: flex;
+  flex-direction: column;
+  padding-top: 14px;
+  border-top: 1px solid var(--hairline);
+}
+
+.switch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  cursor: pointer;
+}
+
+.switch + .switch {
+  border-top: 1px solid var(--hairline);
+}
+
+.switch__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.switch__name {
+  font-weight: var(--weight-label);
+}
+
+.switch__note {
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+/*
+ * The real checkbox, taken out of the picture but not out of the page.
+ *
+ * Not `display: none` and not `visibility: hidden`: either removes it from
+ * the accessibility tree and from the tab order, and then the switch cannot
+ * be reached or read at all. It stays where it is, transparent, with the
+ * drawn track painted over it.
+ */
+.switch__input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/*
+ * ── THE SWITCH ───────────────────────────────────────────────────────────
+ *
+ * The one control here that is meant to feel like an object rather than a
+ * region of the page, so it is the one that gets weight.
+ *
+ * Three things happen, and they are deliberately not simultaneous:
+ *
+ *   on press    the knob squashes toward the way it is about to go. This is
+ *               the part that was missing — the switch slid, but only after
+ *               the click had been let go, so there was no moment at which
+ *               it acknowledged being held.
+ *   on release  the knob travels, overshooting its stop by a few percent.
+ *   behind it   the track changes colour, a little slower, so the movement
+ *               leads and the colour confirms.
+ *
+ * Reversed — colour first, knob after — the same three would read as the
+ * switch reporting a result rather than being thrown.
+ */
+.switch__track {
+  flex: none;
+  position: relative;
+  width: 44px;
+  height: 26px;
+  border-radius: var(--radius-pill);
+  background: #c9ccd0;
+  /* Slower than the knob on purpose: it follows rather than leads. */
+  transition: background var(--dur-panel) var(--ease);
+}
+
+.switch:hover .switch__track {
+  background: #bcc0c5;
+}
+
+.switch:hover .switch__input:checked + .switch__track {
+  background: var(--green-600);
+}
+
+/*
+ * The knob. Its position and its squash are composed into one transform
+ * through two custom properties, so the two can be set by different rules
+ * without either overwriting the other — written as separate `transform`
+ * declarations, the last one to match would simply win.
+ */
+.switch__track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  --x: 0px;
+  --squash: 1;
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: 0 1px 3px rgba(16, 24, 20, 0.28);
+  transform: translateX(var(--x)) scaleX(var(--squash));
+  /* Anchored at the edge it is about to leave, so it stretches forwards. */
+  transform-origin: left center;
+  transition:
+    transform var(--dur-panel) var(--ease-spring),
+    box-shadow var(--dur-quick) var(--ease);
+}
+
+/*
+ * On is a colour AND a position. The knob moving is what a reader who cannot
+ * tell the green from the grey has to go on, and it is also what anybody
+ * sees first — the colour is the confirmation, not the message.
+ */
+.switch__input:checked + .switch__track {
+  background: var(--green-700);
+}
+
+.switch__input:checked + .switch__track::after {
+  --x: 18px;
+  /* About to travel the other way, so it stretches the other way. */
+  transform-origin: right center;
+}
+
+/*
+ * Held down. The knob leans before it goes anywhere.
+ *
+ * It springs back at the same instant the state flips — a click releases
+ * :active and applies :checked together — so the squash is gone by the time
+ * the travel starts, and the two never fight over the transform.
+ */
+.switch__input:active + .switch__track::after {
+  --squash: 1.18;
+  transition-duration: var(--dur-press);
+}
+
+.switch:hover .switch__track::after {
+  box-shadow: 0 2px 5px rgba(16, 24, 20, 0.32);
+}
+
+.switch__input:focus-visible + .switch__track {
+  outline: 2px solid var(--green-700);
+  outline-offset: 3px;
+}
+
+/* ── named, and not here yet ────────────────────────────── */
+
+.soonlist {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--hairline);
+}
+
+.soonlist__head {
+  margin: 0;
+  color: var(--ink-3);
+}
+
+.soonlist__item {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/*
+ * Full-strength text, not greyed.
+ *
+ * These are a roadmap, and a roadmap written in the colour of disabled
+ * controls reads as three things that are broken. The heading above says
+ * they are not here yet; the words themselves do not need to apologise.
+ */
+.soonlist__name {
+  font-weight: var(--weight-label);
+}
+
+.soonlist__note {
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+/* ── one project ────────────────────────────────────────── */
+
+/* The head carries a way back as well as a way out, so it needs the room. */
+/*
+ * The row above the subject: the way back, and the way to start again.
+ *
+ * Pulled tight to the panel's top edge and inset by the padding the panel
+ * already has, so the two controls sit in the corners rather than in a band
+ * of their own.
+ */
+.sheet__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: -6px -8px 0;
+}
+
+/*
+ * The way back to the list, as a link rather than a control.
+ *
+ * It was a bordered full-width button. Two framed boxes stacked above the
+ * subject's name made the heaviest thing on the panel the way off it, and
+ * the name — the thing the panel is about — the third thing seen.
+ *
+ * The 44px target is kept, in padding rather than in a border. Nothing about
+ * the hit area changed; only the drawing did.
+ */
+.backlink {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: none;
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-label);
+  color: var(--green-700);
+  cursor: pointer;
+  transition: background var(--dur-quick) var(--ease);
+}
+
+.backlink:hover {
+  background: var(--green-050);
+}
+
+.backlink:focus-visible {
+  outline: 2px solid var(--green-700);
+  outline-offset: 2px;
+}
+
+/*
+ * Tabs as a two-way switch, not as an underline.
+ *
+ * The underline said "selected" with a 2px rule and a colour, and nothing
+ * else — at a glance the two halves were the same object with one tinted.
+ * The raised face says it with a shape: one half has an edge and a shadow
+ * and the other is the recess it sits in.
+ *
+ * That difference survives not being able to separate the two greens, which
+ * the colour and the rule together did not.
+ *
+ * It also matches the season and comparison switches directly below, so the
+ * panel has one idea of what "choose one of these" looks like.
+ */
+.sheet__tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  padding: 3px;
+  border-radius: var(--radius-control);
+  background: var(--surface-sunken);
+}
+
+.sheet__tabs button {
+  min-height: 44px;
+  border: 0;
+  padding: var(--space-2);
+  border-radius: calc(var(--radius-control) - 4px);
+  background: none;
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-label);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition:
+    background var(--dur-quick) var(--ease),
+    color var(--dur-quick) var(--ease);
+}
+
+.sheet__tabs button:hover {
+  color: var(--ink);
+}
+
+.sheet__tabs button[aria-selected='true'] {
+  color: var(--ink);
+  font-weight: var(--weight-title);
+}
+
+.sheet__tabs button:focus-visible {
+  outline: 2px solid var(--green-700);
+  outline-offset: 2px;
+}
+
+.sheet__tabpanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/*
+ * The variant whose children space themselves.
+ *
+ * Its sections are separated by a hairline, and a rule only reads as a
+ * division when there is equal room on both sides of it. That is a property
+ * of the padding INSIDE each section, so the gap between them has to be
+ * nothing — otherwise every line sits nearer the section below it than the
+ * one above, by exactly the size of the gap.
+ */
+.sheet__tabpanel--flow {
+  gap: 0;
+}
+
+.sheet__lede + .sheet__sub {
+  margin-top: 6px;
+}
+
+/*
+ * ── ONE SECTION ──────────────────────────────────────────────────────────
+ *
+ * Separated by a rule and by room, not by being put in a box. Cards stacked
+ * inside a card give every group a second edge, and by the third one the
+ * panel is a list of containers rather than a list of things to do.
+ *
+ * The rule appears BETWEEN sections only — a line above the first one would
+ * cut it off from the heading it belongs to.
+ */
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-top: 22px;
+}
+
+.block + .block {
+  border-top: 1px solid var(--hairline);
+}
+
+.block__head {
+  margin: 0 0 10px;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-title);
+  color: var(--ink);
+}
+
+.block__note {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-xs);
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
+/*
+ * ── WHICH FLOOR ──────────────────────────────────────────────────────────
+ *
+ * A stepper on the same recessed ground as the date row, because it answers
+ * the same kind of question: a number the reader nudges rather than composes.
+ * The middle is a real number input, so forty is one keystroke rather than
+ * thirty-nine presses, and the two ends are 44px targets.
+ */
+.stepper {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: stretch;
+  min-height: 48px;
+  border-radius: var(--radius-control);
+  background: var(--surface-sunken);
+}
+
+.stepper__step {
+  display: grid;
+  place-items: center;
+  min-height: 48px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: none;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition:
+    background var(--dur-quick) var(--ease),
+    color var(--dur-quick) var(--ease);
+}
+
+.stepper__step:hover:not(:disabled) {
+  background: var(--green-050);
+  color: var(--ink);
+}
+
+/*
+ * Disabled at the ends of the building. Dimming alone would be a state told
+ * by contrast only, so the cursor changes too and the button stops answering
+ * — the pointer and the keyboard both say it, not just the ink.
+ */
+.stepper__step:disabled {
+  color: var(--ink-3);
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.stepper__step:focus-visible {
+  outline: 2px solid var(--green-700);
+  outline-offset: -2px;
+  border-radius: var(--radius-control);
+}
+
+.stepper__value {
+  display: grid;
+  place-items: center;
+}
+
+.stepper__value input {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-title);
+  font-variant-numeric: var(--numeric);
+  color: var(--ink);
+  text-align: center;
+}
+
+.stepper__value input:focus-visible {
+  outline: 2px solid var(--green-700);
+  outline-offset: -2px;
+  border-radius: var(--radius-control);
+}
+
+/*
+ * ── WHICH SIDE ───────────────────────────────────────────────────────────
+ *
+ * Wrapping rather than a fixed grid: a building has between two and eight
+ * sides and the names are different lengths, so a column count chosen here
+ * would either strand "North-west" on two lines or leave a four-sided tower
+ * with half a row of nothing.
+ *
+ * The chosen one is a raised white face, the same as every other choice in
+ * this panel — an edge and a shadow, not a hue.
+ */
+.sides {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.sides__side {
+  flex: 1 1 auto;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-control);
+  background: var(--paper);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-label);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition:
+    background var(--dur-quick) var(--ease),
+    border-color var(--dur-quick) var(--ease),
+    color var(--dur-quick) var(--ease);
+}
+
+.sides__side:hover {
+  border-color: var(--ink-3);
+  color: var(--ink);
+}
+
+.sides__side[aria-pressed='true'] {
+  border-color: var(--green-700);
+  color: var(--green-700);
+  font-weight: var(--weight-title);
+  box-shadow: inset 0 0 0 1px var(--green-700);
+}
+
+.sides__side:focus-visible {
+  outline: 2px solid var(--green-700);
+  outline-offset: 2px;
+}
+
+/*
+ * The part that acts, over its own rule.
+ *
+ * Everything above it describes the day being looked at; everything in it
+ * either starts a measurement or reports one. The rule is the join between
+ * the two, and it is why the primary button does not read as a fourth
+ * setting.
+ */
+.action {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px solid var(--hairline);
+}
+
+/*
+ * What this half of the panel is for. Deliberately smaller than the address
+ * above it and than the figure below it: it is read once, on arrival.
+ */
+.sheet__lede {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  font-weight: var(--weight-title);
+  letter-spacing: -0.013em;
+  line-height: 1.3;
+}
+
+/* A sentence in support of the line above it, or of the control below it. */
+.sheet__sub {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  line-height: 1.65;
+}
+
+.sheet__body {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
+/*
+ * ── THE TWO FIGURES ──────────────────────────────────────────────────────
+ *
+ * Equal columns, so neither reads as the more important of the two, and one
+ * of them is allowed not to exist — a project with no counted use gets a
+ * single tile at half width rather than a gap where a number should be.
+ *
+ * Grey rather than green: these are measurements taken from the record, not
+ * something the product is saying. The green in this panel belongs to the
+ * one button that does something.
+ */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tile {
+  padding: 16px 18px 18px;
+  border-radius: var(--radius-card);
+  background: #f2f2f0;
+}
+
+.tile__figure {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: var(--weight-title);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.tile__label {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+/*
+ * Anything whose digits change while you watch.
+ *
+ * Proportional numerals are different widths, so a clock going from 09:59 to
+ * 10:00 shifts everything after it sideways, and a duration counting down
+ * jitters. These do not move.
+ */
+.result__figure,
+.result__against,
+.tile__figure,
+.stat-row dd {
+  font-variant-numeric: var(--numeric);
+}
+
+/* ── the calendar ───────────────────────────────────────── */
+
+.daypick {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.daypick__trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-control);
+  background: var(--paper);
+  font: inherit;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-quick) var(--ease),
+    box-shadow var(--dur-quick) var(--ease);
+}
+
+.daypick__trigger:hover {
+  border-color: var(--ink-3);
+}
+
+.daypick__trigger[aria-expanded='true'],
+.daypick__trigger:focus-visible {
+  border-color: var(--green-700);
+  box-shadow: 0 0 0 3px rgba(20, 98, 74, 0.14);
+  outline: none;
+}
+
+/*
+ * One line, whatever month it is.
+ *
+ * "21 September 2026" is four characters longer than "21 June 2026". Allowed
+ * to wrap it added a second line, which grew the row, which moved everything
+ * under it — so the panel changed height as the reader paged through the
+ * year. The guarantee used to live on the native field this replaced.
+ */
+.daypick__value {
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  font-weight: var(--weight-label);
+  font-variant-numeric: var(--numeric);
+  color: var(--ink);
+}
+
+/*
+ * Over the panel, not inside it.
+ *
+ * Laid out in the flow it would push everything below it down by the height
+ * of six weeks and then pull it back up — the panel would jump every time
+ * the calendar opened. Absolute, it covers what is underneath, which is what
+ * a calendar is for as long as it is open.
+ */
+.daypick__panel {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  /*
+   * Anchored to the right edge and allowed to reach back across the row.
+   *
+   * It used to start at the date field's own left edge with a 17rem floor,
+   * which ignored the 44px arrow and the gap sitting to its left — so the
+   * calendar ran about 11px past the panel on a laptop and 39px on a phone,
+   * and because the panel scrolls, it was clipped rather than overflowing
+   * visibly. Hung from the right it grows the other way, into the room the
+   * arrow was already taking.
+   */
+  right: 0;
+  left: auto;
+  width: max-content;
+  max-width: calc(100% + 44px + var(--space-2));
+  z-index: 4;
+  padding: var(--space-3);
+  border-radius: var(--radius-card);
+  background: var(--paper);
+  box-shadow: var(--shadow-panel);
+  animation: emerge var(--dur-quick) var(--ease) both;
+}
+
+.daypick__head {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.daypick__head p {
+  margin: 0;
+  text-align: center;
+  font-weight: var(--weight-label);
+  font-variant-numeric: var(--numeric);
+}
+
+.daypick__head button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: none;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background var(--dur-quick) var(--ease);
+}
+
+.daypick__head button:hover {
+  background: #f1f2f3;
+  color: var(--ink);
+}
+
+.daypick__head button:focus-visible {
+  outline: 2px solid var(--green-700);
+  outline-offset: -2px;
+}
+
+.daypick__grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.daypick__grid th {
+  padding-bottom: var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-label);
+  color: var(--ink-3);
+}
+
+/*
+ * ── A DAY ────────────────────────────────────────────────────────────────
+ *
+ * Square, so the month reads as a grid rather than as rows of numbers, and
+ * 36px so a finger can hit one. The cells are the target; the table has no
+ * padding of its own between them.
+ *
+ * Three states that must not be confused with one another:
+ *
+ *   chosen     the day the figures on this panel describe — filled
+ *   today      the actual date — a ring, and nothing else
+ *   outside    a day of the month either side — faint
+ *
+ * Chosen and today are told apart by shape, not colour: one is solid and the
+ * other is an outline. They are frequently the same day, and when they are
+ * not, mistaking one for the other means reading a figure for the wrong
+ * date.
+ */
+.daypick__day {
+  width: 100%;
+  aspect-ratio: 1;
+  min-height: 36px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: none;
+  font: inherit;
+  font-variant-numeric: var(--numeric);
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    background var(--dur-quick) var(--ease),
+    color var(--dur-quick) var(--ease);
+}
+
+.daypick__day:hover {
+  background: var(--green-050);
+}
+
+.daypick__day.is-outside {
+  color: var(--ink-3);
+}
+
+.daypick__day[aria-current='date'] {
+  box-shadow: inset 0 0 0 1.5px var(--ink-3);
+}
+
+.daypick__day[aria-selected='true'] {
+  background: var(--green-700);
+  color: var(--paper);
+  font-weight: var(--weight-label);
+}
+
+.daypick__day[aria-selected='true']:hover {
+  background: var(--green-600);
+}
+
+.daypick__day:focus-visible {
+  outline: 2px solid var(--green-700);
+  outline-offset: -2px;
+}
+
+/* ── the sunlight half ──────────────────────────────────── */
+
+
+/*
+ * The alternatives to the primary action, side by side and equal — they are
+ * alternatives to IT, not to each other, so neither should look like the
+ * senior of the two.
+ */
+.sheet__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.sheet__actions .button {
+  padding-inline: var(--space-2);
+}
+
+/*
+ * ── THE FIGURE ───────────────────────────────────────────────────────────
+ *
+ * This is the answer. Everything above it is the question being set up and
+ * everything below it is what to do next, and it used to be the same size as
+ * both — a tinted box among tinted boxes, in a column where the date picker
+ * took more room than the number it produced.
+ *
+ * So it gets the space. More padding than anything else on the panel, a
+ * figure set larger than the panel's own title, and air above and below that
+ * nothing else gets. Emphasis is not weight or colour here; it is ROOM. A
+ * number with space around it is read first without anyone deciding to.
+ *
+ * Amber, which in this interface means "read this carefully" rather than
+ * "warning" — the same ground the modelling caveat uses. It should not look
+ * like the two grey measurement tiles on the other tab: those are figures
+ * from a record, and this is a claim about somebody's street.
+ *
+ * --amber-ink on --amber-050 measures 4.98:1.
+ */
+.result {
+  margin: var(--space-2) 0;
+  padding: var(--space-5) var(--space-5) var(--space-5);
+  border-radius: var(--radius-card);
+  background: var(--amber-050);
+}
+
+.result__eyebrow {
+  margin: 0 0 10px;
+  color: var(--amber-ink);
+}
+
+.result__figure {
+  margin: 0;
+  font-family: var(--font-display);
+  /*
+   * Larger than the panel title, which is the only thing here allowed to be.
+   * It is one short string — "3 h 50 min" — so it can take a size that a
+   * sentence could not.
+   */
+  font-size: clamp(2.4rem, 7vw, 3rem);
+  font-weight: var(--weight-title);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--amber-ink);
+}
+
+/*
+ * When nothing is lost there is no figure, only the sentence — so the
+ * sentence takes the figure's place rather than shrinking into the body.
+ * "This takes no direct sun from here" is as much an answer as a duration
+ * is, and a reader who gets it should not feel they got less.
+ */
+.result__figure--none {
+  font-size: clamp(1.3rem, 3.6vw, 1.6rem);
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+}
+
+/*
+ * What the figure is OF. Bigger than body text, because a number without its
+ * qualifier is not a fact — "3 h 50 min" alone says nothing at all.
+ */
+.result__caption {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-lg);
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+
+/*
+ * ── WHILE THE GROUND IS LIVE ─────────────────────────────────────────────
+ *
+ * The panel says so, on its own tinted ground, with the way out attached.
+ *
+ * The tint matters more than the words: the reader is about to look away
+ * from this panel and at the city, and what should be in the corner of their
+ * eye when they do is a block that is plainly in a different state from the
+ * rest of the screen — not a paragraph that reads the same as the one before
+ * it.
+ */
+/*
+ * The figure this one is measured against.
+ *
+ * Quieter than the loss above it and louder than the caveats below. It used
+ * to be called "total daylight", which it is not: it is the sun this spot
+ * would get with the subject taken away, and on a street of towers that is
+ * nowhere near the whole day.
+ */
+.result__against {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  font-variant-numeric: var(--numeric);
+}
+
+/*
+ * ── THE STEPS, FOLDED AWAY ───────────────────────────────────────────────
+ *
+ * They were an amber box captioned "Start here", open on every visit and
+ * placed between the reader and the controls it described. Useful once.
+ *
+ * A disclosure keeps it for whoever wants it and gives the room back to
+ * everybody else. The summary carries a 44px target and its own marker,
+ * because the default triangle is drawn differently by every engine and one
+ * of them does not draw it at all.
+ */
+.howto {
+  margin-top: 22px;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  border-top: 1px solid var(--hairline);
+}
+
+.howto summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  list-style: none;
+  color: var(--ink);
+  font-weight: var(--weight-label);
+  cursor: pointer;
+}
+
+.howto summary::-webkit-details-marker {
+  display: none;
+}
+
+.howto summary::after {
+  content: '+';
+  font-size: 1.05rem;
+  line-height: 1;
+  color: var(--ink-3);
+}
+
+.howto[open] summary::after {
+  content: '\2212';
+}
+
+.howto summary:focus-visible {
+  outline: 2px solid var(--green-700);
+  outline-offset: 2px;
+  border-radius: var(--radius-control);
+}
+
+.howto__steps {
+  margin: 0 0 var(--space-3);
+  padding-left: 1.15rem;
+  line-height: 1.7;
+}
+
+.howto__steps li + li {
+  margin-top: 5px;
+}
+
+.arming {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+  background: var(--amber-050);
+  animation: settle var(--dur-quick) var(--ease) both;
+}
+
+.arming__lede {
+  margin: 0;
+  font-weight: var(--weight-label);
+  color: var(--amber-ink);
+}
+
+/* The panel's own body colour reads too faint on the caution ground. */
+.arming .sheet__body {
+  color: var(--ink);
+}
+
+/* ── where to begin ─────────────────────────────────────── */
+
+
+
+
+.badge {
+  display: inline-block;
+  padding: 5px 13px;
+  border-radius: var(--radius-pill);
+  background: var(--green-700);
+  color: var(--paper);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.badge--construction {
+  background: var(--amber-ink);
+}
+
+/*
+ * The same word on a pale ground, for a subject's own header.
+ *
+ * A filled pill is right in a list, where each row has to be findable while
+ * scanning. Above the address of the one project being looked at it simply
+ * outshouted the address.
+ *
+ * The dot is not decoration: it is the second signal. The status is spelt
+ * out in words either way, so nothing here is carried by the colour alone —
+ * the tint only says "this is a status" to somebody who already knows the
+ * shape.
+ */
+.badge--soft {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--amber-050);
+  color: var(--amber-ink);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+}
+
+.badge--soft::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/*
+ * A searched existing building. The same pink as the highlighted massing and
+ * the map pin, so the badge, the marker and the building itself agree about
+ * which thing on screen is being described.
+ */
+.badge--existing {
+  background: #c9457f;
+}
+
+/*
+ * The facts list on the existing-building panel.
+ *
+ * Two columns rather than a paragraph: these are short, unrelated values —
+ * storeys, height, year built — and reading them as prose means reading
+ * every one to find the single one you wanted. Rows are built only for
+ * fields the property record actually holds, so an unknown never appears
+ * as a label with nothing beside it.
+ */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 18px;
+  margin: 0;
+}
+
+.facts > div {
+  min-width: 0;
+}
+
+.facts dt {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-label);
+  color: var(--ink-3);
+}
+
+.facts dd {
+  margin: 3px 0 0;
+  font-size: var(--text-body);
+  font-weight: var(--weight-label);
+  color: var(--ink);
+}
+
+.tabs button:focus-visible,
+.segmented button:focus-visible,
+.results button:focus-visible {
+  outline: 2px solid var(--green-700);
+  outline-offset: -2px;
+}
+
+/* ── notes ──────────────────────────────────────────────── */
+
+.note {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: var(--radius-card);
+  background: var(--green-050);
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+.note ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.note li + li {
+  margin-top: 5px;
+}
+
+.disclaimer {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  z-index: 3;
+  padding: 7px 15px;
+  border-radius: var(--radius-pill);
+  background: var(--amber-050);
+  color: var(--amber-ink);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-label);
+  letter-spacing: 0.05em;
+}
+
+/* ── the time bar ───────────────────────────────────────── */
+
+/*
+ * A dock along the bottom of the map: play, the rail, the key. Only the
+ * sunlight screen has one (TimeBar in screens.tsx).
+ *
+ * IN THIS SECTION
+ *   Where the dock sits; the play button; the words above the rail; the
+ *   rail and its handle; the hours under it; the key; and what goes when
+ *   the dock is narrow.
+ *
+ * WHERE IT SITS
+ *   From the edge of the sunlight column to the right-hand gutter, just
+ *   above the fine print — the width of the map, which is what the rail is
+ *   a timeline FOR. It stops short of the view controls on the right, which
+ *   sit above it rather than beside it.
+ */
+.timebar {
+  position: absolute;
+  left: calc(var(--w-sun-column) + var(--gutter));
+  right: var(--gutter);
+  bottom: calc(var(--h-mapfoot) + var(--space-2));
+  z-index: 3;
+  /*
+   * The dock's own width, declared so the layout inside can be judged
+   * against it rather than against the window: a wide window with the
+   * column open still leaves a narrow bar. This element draws nothing.
+   */
+  container: timebar / inline-size;
+  pointer-events: none;
+}
+
+/* The card itself, in three columns: play, the timeline, the key. */
+.timebar__dock {
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-card);
+  background: var(--paper);
+  box-shadow: var(--shadow-panel);
+}
+
+/*
+ * Play and pause. Dark on pale when stopped, pale on dark while playing:
+ * the state is a change of lightness, not of hue, and the drawing changes
+ * too — a triangle, then two bars.
+ */
+.timebar__play {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--cream-edge);
+  border-radius: 50%;
+  background: var(--surface-sunken);
+  color: var(--ink-green-900);
+  cursor: pointer;
+  transition: background var(--dur-quick) var(--ease);
+}
+
+.timebar__play:hover {
+  background: var(--green-050);
+}
+
+.timebar__play[aria-pressed='true'] {
+  border-color: var(--green-700);
+  background: var(--green-700);
+  color: var(--paper);
+}
+
+.timebar__play:focus-visible {
+  outline: 2px solid var(--green-700);
+  outline-offset: 2px;
+}
+
+.timebar__timeline {
+  min-width: 0;
+}
+
+/*
+ * What the shadow is doing on the left; when the sun rises and sets on the
+ * right. The sunrise and sunset are NOT repeated on the scale below — two
+ * rows of times under one rail, some of them the window's limits and some
+ * astronomical events, would leave the reader to work out which was which.
+ */
+.timebar__events {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--ink-2);
+}
+
+.timebar__caption {
+  font-weight: var(--weight-label);
+  color: var(--ink);
+}
+
+.timebar__events b {
+  font-weight: var(--weight-label);
+  font-variant-numeric: var(--numeric);
+  color: var(--ink);
+}
+
+/*
+ * ── THE LINE, AND THE THING THAT GRABS IT ────────────────────────────────
+ *
+ * The container is 44px and transparent — the size a finger can hit
+ * without aiming — and the line inside it is 4px. The line is a diagram of
+ * the day behind the control, and the control is the handle.
+ */
+.timebar__track {
+  position: relative;
+  height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+/*
+ * Inset by the handle's radius at each end.
+ *
+ * A native range moves the handle's CENTRE from one radius in to one radius
+ * short of the far end. Run edge to edge, the rail and the scale would
+ * disagree with the handle by that much at each end.
+ */
+.timebar__rail {
+  position: absolute;
+  left: 9px;
+  right: 9px;
+  height: 4px;
+  border-radius: 4px;
+  /*
+   * One gradient, the daylight span between the two stops from the markup.
+   * The fallbacks keep a rail on screen if the markup ever omits them: an
+   * unresolved var() would otherwise invalidate the whole declaration.
+   */
+  background: linear-gradient(
+    to right,
+    var(--rail-night) 0 var(--day-from, 0%),
+    var(--rail-day) var(--day-from, 0%) var(--day-to, 100%),
+    var(--rail-night) var(--day-to, 100%) 100%
+  );
+}
+
+.timebar__track input[type='range'] {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  background: transparent;
+  appearance: none;
+  cursor: pointer;
+}
+
+.timebar__track input::-webkit-slider-runnable-track {
+  height: 4px;
+  background: transparent;
+}
+
+/*
+ * One major engine draws its own filled portion up to the value unless both
+ * the track and the progress are cleared.
+ */
+.timebar__track input::-moz-range-track {
+  height: 4px;
+  background: transparent;
+}
+
+.timebar__track input::-moz-range-progress {
+  height: 4px;
+  background: transparent;
+}
+
+.timebar__track input::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -7px;
+  border: 4px solid var(--green-700);
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: 0 2px 6px rgba(16, 24, 20, 0.16);
+  cursor: grab;
+}
+
+.timebar__track input::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: 4px solid var(--green-700);
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: 0 2px 6px rgba(16, 24, 20, 0.16);
+  cursor: grab;
+}
+
+.timebar__track input:active::-webkit-slider-thumb {
+  cursor: grabbing;
+}
+
+/*
+ * The ring on both engines. One major engine does not accept a box-shadow on
+ * the thumb as a focus ring reliably, so the outline goes on the input.
+ */
+.timebar__track input:focus-visible {
+  outline: 2px solid var(--green-700);
+  outline-offset: 2px;
+  border-radius: var(--radius-control);
+}
+
+/*
+ * The marks every four hours, and the hour itself under the handle — dark
+ * and heavier than the marks, so it is found by weight and lightness.
+ */
+.timebar__scale {
+  position: relative;
+  height: 1.3rem;
+  margin: 0 9px;
+  font-size: var(--text-xs);
+  font-variant-numeric: var(--numeric);
+  color: var(--ink-3);
+}
+
+.timebar__tick,
+.timebar__now {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.timebar__now {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-title);
+  color: var(--ink);
+}
+
+/* Said when a crossing falls outside the window — see the dash it explains. */
+.timebar__nocross {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-xs);
+  color: var(--ink-2);
+}
+
+/* The key sits in the dock itself, without a card of its own. */
+.timebar__key {
+  padding: 0;
+  box-shadow: none;
+  font-size: var(--text-xs);
+}
+
+/*
+ * ── WHEN THE BAR IS NARROW ───────────────────────────────────────────────
+ *
+ * Judged on the dock's own width. The key goes under the rail first; below
+ * that the caption line keeps only the caption.
+ */
+@container timebar (max-width: 640px) {
+  .timebar__dock {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-2) var(--space-4);
+    padding: var(--space-3);
+  }
+
+  .timebar__key {
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
+}
+
+/* Narrower still: the hour alone under the rail, and the caption alone above it. */
+@container timebar (max-width: 420px) {
+  .timebar__events > :last-child,
+  .timebar__tick {
+    display: none;
+  }
+}
+
+/*
+ * ── NOTHING SMALLER THAN A FINGERTIP ─────────────────────────────────────
+ *
+ * 44px is the size a finger can hit without aiming. Several controls here
+ * were drawn to the size of their contents instead — a 26px close button, a
+ * 15px chevron, an 8px slider thumb — which is fine with a cursor and a
+ * coin-toss on a phone.
+ *
+ * The rule below sets the floor on the box, not on the paint. A close button
+ * still LOOKS 26px; what grew is the area that answers a tap. Making the
+ * visible circle bigger would have been the easy version and the wrong one:
+ * the design wants a small mark, and a small mark can have a large target.
+ */
+.sheet__close,
+.viewctl__stack button,
+.chip,
+.button,
+.backlink,
+.sheet__tabs button,
+.segmented button,
+.switch {
+  min-height: 44px;
+}
+
+/* ── zoom ───────────────────────────────────────────────── */
+
+/*
+ * The bottom-right corner, which is the only one nothing else claims: the
+ * left has the panel and the bottom-left has the map credit, which is an
+ * obligation and cannot move. On the sunlight screen the time bar runs
+ * along the whole bottom, and these sit above it (sunlight.css).
+ *
+ * The stack is one control with several settings rather than six separate
+ * buttons — hairlines between, no gaps — so that turning, zooming and
+ * reframing read as the same kind of thing done to the same thing.
+ */
+.viewctl {
+  position: absolute;
+  right: var(--gutter);
+  bottom: var(--gutter);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+  animation: rise var(--dur-panel) var(--ease) both;
+}
+
+.viewctl__stack {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-control);
+  background: var(--paper);
+  box-shadow: var(--shadow-chip);
+  overflow: hidden;
+}
+
+/*
+ * The instructions, where the instructions are wanted.
+ *
+ * They used to be a line of small text floating at the bottom of the screen
+ * with pointer events off: a caption, in the place captions live, which is
+ * the place nobody looks when they are trying to make something happen. Here
+ * they sit against the buttons that do the same three things.
+ *
+ * It opens upward so the button stays under the finger that opened it.
+ */
+.viewctl__help {
+  margin: 0;
+  width: max-content;
+  max-width: 17rem;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-card);
+  background: var(--paper);
+  box-shadow: var(--shadow-panel);
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  animation: settle var(--dur-quick) var(--ease) both;
+}
+
+/*
+ * A row per gesture: the mouse, what it is called, what it does.
+ *
+ * A grid rather than three lines of prose, so the three icons share a column
+ * and can be compared down it — which is the only way the difference between
+ * them (which button is filled) is legible at this size.
+ */
+.viewctl__help > div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--space-3);
+  align-items: center;
+}
+
+.viewctl__help > div + div {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--hairline);
+}
+
+.viewctl__glyph {
+  grid-row: span 2;
+  color: var(--ink-2);
+}
+
+.viewctl__help dt {
+  font-weight: var(--weight-label);
+  color: var(--ink);
+}
+
+.viewctl__help dd {
+  margin: 0;
+  color: var(--ink-2);
+}
+
+/* A separator, so "how do I" is not read as a sixth way to move the camera. */
+/*
+ * The break between moving the camera and changing the screen.
+ *
+ * Above it: turn, zoom, reframe. Below it: hide the interface, and how any
+ * of this works. Run together they would read as five ways to move.
+ */
+.viewctl__apart {
+  border-top: 1px solid var(--hairline);
+}
+
+.viewctl__ask {
+  border-top: 1px solid var(--hairline);
+}
+
+.viewctl__ask[aria-expanded='true'] {
+  background: var(--green-050);
+  color: var(--green-700);
+}
+
+.viewctl__stack button {
+  display: grid;
+  place-items: center;
+  /* In rem so the stack's height stays inside --y-bottom, which is also rem. */
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.viewctl__stack button + button {
+  border-top: 1px solid var(--hairline);
+}
+
+.viewctl__stack button:hover {
+  background: var(--green-050);
+}
+
+.viewctl__stack button:focus-visible {
+  outline: 2px solid var(--green-700);
+  outline-offset: -2px;
+}
+
+/* ── results dropdown ───────────────────────────────────── */
+
+.results {
+  display: flex;
+  flex-direction: column;
+  max-height: 232px;
+  overflow-y: auto;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-control);
+}
+
+.results button {
+  padding: 11px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  background: var(--paper);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur-quick) var(--ease);
+}
+
+/*
+ * Held while the click is being made. A search result starts a camera flight
+ * and a panel change, so the row has to confirm which one was chosen before
+ * the screen begins to change — otherwise the first thing that moves is the
+ * whole city, and it is not obvious that it was this row that did it.
+ */
+.results button:active {
+  background: var(--green-100, var(--green-050));
+}
+
+.results button:last-child {
+  border-bottom: 0;
+}
+
+.results button:hover {
+  background: var(--green-050);
+}
+
+.results small {
+  display: block;
+  color: var(--ink-3);
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: var(--text-sm);
+}
+
+.stat-row dt {
+  color: var(--ink-3);
+}
+
+.stat-row dd {
+  margin: 0;
+  font-weight: var(--weight-label);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── the label chip over the proposal ───────────────────── */
+
+.site-pin {
+  filter: drop-shadow(0 4px 10px rgba(20, 30, 26, 0.28));
+}
+
+.site-label {
+  display: block;
+  padding: 5px 12px;
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--green-700);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: var(--weight-label);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* ── narrow viewports ───────────────────────────────────── */
+
+/*
+ * ── BELOW THIS IT IS NOT THE SAME LAYOUT SMALLER ─────────────────────────
+ *
+ * A panel plus a time bar do not fit side by side much below a laptop.
+ * Rather than let them overlap, the panels shrink first and then the bar
+ * gives up its anchoring and spans the width.
+ *
+ * Three columns cannot be narrowed until they fit on a phone; at some width
+ * they have to stop being three columns. Here the panel becomes a sheet
+ * along the bottom edge and the city takes the whole screen above it.
+ *
+ * WHY A SHEET AND NOT A FULL-SCREEN PAGE
+ *   The city is the thing being explained. A panel that covers it answers a
+ *   question about something the reader can no longer see. Held to 62% of
+ *   the height there is always map above the sheet, and the sheet scrolls
+ *   inside itself rather than growing.
+ *
+ * WHY NOTHING HAS TO BE SWIPED
+ *   Every sheet has a way out in its head — a close button, or on the
+ *   sunlight screen the back link — and the header above stays
+ *   put. A drag handle would be the only way to dismiss anything, which is a
+ *   gesture with no visible affordance and no keyboard equivalent.
+ *
+ * WHAT LEAVES
+ *   The drag hint, which describes a mouse. The time bar stays, because it
+ *   is the control the sunlight screen is FOR; it moves above the sheet.
+ */
+@media (max-width: 900px) {
+  .panel--left {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: none;
+    /* Under the header and the time bar, with the map still visible. */
+    max-height: min(62vh, calc(100% - var(--h-header) - 7rem));
+    border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+    /*
+     * The home indicator and the rounded corners of the device. Without
+     * this the last row of a sheet sits under the bar the phone draws.
+     */
+    padding-bottom: calc(var(--pad-panel) + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -1px 2px rgba(16, 24, 20, 0.05), 0 -12px 32px rgba(16, 24, 20, 0.12);
+  }
+
+  /*
+   * ── THE STRIP ABOVE THE SHEET, IN THREE LAYERS ─────────────────────────
+   *
+   * The dock, the view controls and the map credit were all given the same
+   * offset — 62vh plus a gutter — which is not a stack, it is three things
+   * in one place. The credit sat under the dock and the zoom buttons sat on
+   * top of both.
+   *
+   * They are dealt out from the sheet upwards: credit, then controls, then
+   * the dock. The credit is lowest because it must never be covered; the
+   * dock is highest because it is the tallest and the one being used.
+   */
+  .timebar {
+    left: var(--space-3);
+    /* Clear across: at this width the controls are stacked above it, not
+       beside it, so there is nothing to stop short of. */
+    right: var(--space-3);
+    bottom: calc(62vh + 2.75rem + 3.25rem);
+  }
+
+  .timebar__dock {
+    padding: 16px;
+  }
+
+  /* Out of the corner the sheet now occupies, and clear of the credit. */
+  .viewctl {
+    bottom: calc(62vh + 2.75rem);
+  }
+
+  /*
+   * The credit's lift is NOT here with the other two. It has to be declared
+   * after the base rule it overrides, which comes later in this file -- see
+   * the map credit section. Left in this block it lost the cascade by source
+   * order and the credit stayed under the sheet.
+   */
+
+  /*
+   * ── THE BAR, IN TWO ROWS ───────────────────────────────────────────────
+   *
+   * A brand, a search field and three named controls do not fit across
+   * 375px, and the first version of this simply hid the controls — which
+   * took map layers, the sunlight screen and focus mode off the phone
+   * entirely to make a row fit. That is not a layout decision, it is a
+   * feature being dropped quietly.
+   *
+   * Wrapping costs a second row and keeps all four. The search takes the
+   * full width underneath, which is where a search field wants to be on a
+   * phone anyway.
+   */
+  .header {
+    height: auto;
+    flex-wrap: wrap;
+    row-gap: var(--space-2);
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .header__search {
+    order: 3;
+    flex-basis: 100%;
+    max-width: none;
+    margin-inline: 0;
+  }
+
+  .header__actions {
+    margin-left: auto;
+  }
+
+  /* Its width is what is scarce here, not the length of its words. */
+  .chip {
+    padding-inline: var(--space-2);
+  }
+}
+
+/* ── what the proposal costs one spot ───────────────────── */
+
+.sheet__close {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--green-050);
+  color: var(--ink-2);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* ── standing in the street ─────────────────────────────── */
+
+.scale-figure__label {
+  display: block;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: rgba(29, 43, 36, 0.86);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: var(--weight-label);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/*
+ * The only thing on screen while walking. The pointer is locked, so there is
+ * nothing to click and no cursor to find — the way out has to be written
+ * down or it does not exist.
+ */
+.walking-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  z-index: 5;
+  margin: 0;
+  padding: 9px 20px;
+  border-radius: var(--radius-pill);
+  background: rgba(22, 24, 26, 0.72);
+  backdrop-filter: blur(6px);
+  color: #ffffff;
+  font-size: var(--text-sm);
+  letter-spacing: 0.01em;
+  pointer-events: none;
+}
+
+.walking-hint strong {
+  font-weight: var(--weight-label);
+}
+
+/*
+ * The explore screen's one line: how to choose a place, now that the list
+ * of nearby projects is gone. Top left under the header, where that panel
+ * was, on paper so it reads over any part of the city. A caption, so the
+ * pointer passes through it to the map.
+ */
+.explore-hint {
+  position: absolute;
+  left: var(--space-4);
+  top: calc(var(--h-header) + var(--space-3));
+  z-index: 5;
+  max-width: calc(100% - 2 * var(--space-4));
+  margin: 0;
+  padding: 9px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  box-shadow: var(--shadow-chip);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  pointer-events: none;
+}
+
+/*
+ * ── THE WAY INTO A HEADSET ────────────────────────────────────────────────
+ *
+ * The one thing on this panel that can be pressed, so it has to take pointer
+ * events back — .walking-hint gives them up, because everything else on it is
+ * a caption over a street somebody is trying to click through to.
+ *
+ * LIGHT ON DARK, WHICH IS THE WHOLE DESIGN
+ *   The panel is near-black and its text is white, so a button tinted some
+ *   colour would be asking to be found by hue on a page that never asks that
+ *   of anybody. Inverting it instead — the panel's own colour on a near-white
+ *   fill — separates it by lightness alone.
+ *
+ *   #16181a on #f0efec measures 15.5:1, which is the same button to anybody,
+ *   with any colour vision, in sunlight, on a phone.
+ */
+.walking-hint__vr {
+  pointer-events: auto;
+  display: inline-block;
+  margin-top: 8px;
+  padding: 5px 16px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: #f0efec;
+  color: #16181a;
+  font: inherit;
+  font-weight: var(--weight-label);
+  font-size: var(--text-sm);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.walking-hint__vr:hover {
+  background: #ffffff;
+}
+
+.walking-hint__vr:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/*
+ * Said beside the button, not in front of it.
+ *
+ * Stick movement makes some people unwell and they are entitled to know
+ * before they put a headset on. It cannot be a dialog: a WebXR session has to
+ * start inside the click itself, so anything that must be dismissed first
+ * spends the gesture and the session never opens. See App.
+ *
+ * 12.4:1, and the same size as the rest of the panel. A warning has no
+ * business being the faintest OR the smallest thing on it; the separation
+ * from the keys above comes from weight and lightness, not from shrinking it
+ * until it can be skipped.
+ */
+.walking-hint__note {
+  display: block;
+  margin-top: 5px;
+  max-width: 34ch;
+  margin-inline: auto;
+  color: #d5d8dc;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-body);
+  line-height: 1.45;
+}
+
+/* ── map credit ─────────────────────────────────────────── */
+
+/*
+ * Bottom left, in the corner, because that is where a reader looks for it and
+ * because it must survive focus mode — where every other control leaves. It
+ * takes the corner and the focus toggle sits above it: the credit is an
+ * obligation that is always on screen, the toggle is a control that is not.
+ */
+.attribution {
+  position: absolute;
+  left: 24px;
+  bottom: 24px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 13px 5px 11px;
+  border-radius: var(--radius-pill);
+  /* Not fully opaque: it sits over the map it is crediting, and a solid pill
+     in the corner reads as a control someone should press. */
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(6px);
+}
+
+/*
+ * ── AND ABOVE THE SHEET, ON A PHONE ──────────────────────────────────────
+ *
+ * The panel becomes a bottom sheet at this width and takes the corner the
+ * credit lives in. The credit is an attribution obligation: of everything on
+ * screen it is the one thing that may never be covered, so it moves up to sit
+ * on the strip above the sheet with the dock and the view controls.
+ *
+ * DECLARED HERE, NOT WITH THE OTHER TWO.
+ *   The rest of that stack is set in the responsive block further up. This
+ *   one cannot be, because the base rule above is declared after that block
+ *   and carries equal specificity -- the later rule simply won, and the lift
+ *   was dead the day it was written. A media query is not stronger than
+ *   source order.
+ */
+@media (max-width: 900px) {
+  .attribution {
+    left: var(--space-3);
+    bottom: calc(62vh + var(--space-2));
+  }
+}
+
+/*
+ * The explore screen on a phone has no sheet, so nothing is lifted for one:
+ * the hint along the foot, the credit above it, the view controls above
+ * that. (The header is two rows here, so the hint's top-left place under it
+ * is not free.) After the rule above, which it overrides by source order.
+ */
+@media (max-width: 900px) {
+  .explore-hint {
+    top: auto;
+    left: var(--space-3);
+    right: var(--space-3);
+    bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+    max-width: none;
+    text-align: center;
+  }
+
+  .app:has(.explore-hint) .attribution {
+    bottom: calc(var(--space-3) + 4rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .app:has(.explore-hint) .viewctl {
+    bottom: calc(var(--space-3) + 7rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/*
+ * ── THE VIEW CONTROLS WHERE THE SCREEN IS SHORT ─────────────────────────
+ *
+ * Seven buttons stacked are about 18rem tall. On a phone on its side, and
+ * on a phone with a sheet up, that is more than the map shows between the
+ * header and what is below, and the top of the stack went under the header
+ * or off the screen. Laid in a row they are one button tall.
+ */
+@media (max-height: 560px) {
+  .viewctl__stack {
+    flex-direction: row;
+  }
+
+  .viewctl__stack button + button,
+  .viewctl__apart,
+  .viewctl__ask {
+    border-top: 0;
+    border-left: 1px solid var(--hairline);
+  }
+}
+
+/*
+ * A phone with a sheet up — a project, a building, the layers. (The
+ * sunlight screen has its own rules in sunlight.css.)
+ *
+ * The credit and the controls were lifted by 62vh, but the sheet is capped
+ * lower than that whenever the screen is short, so both rode up under the
+ * two-row header (about 6.75rem) or past the top. Now the sheet's height is
+ * one figure, `--phone-sheet`, and what sits above it is stacked on it:
+ * the credit, then the controls in a row.
+ */
+@media (max-width: 900px) {
+  .app:has(.panel--left:not(.sheet--sun)) {
+    --phone-sheet: min(62vh, calc(100% - 6.75rem - 6.5rem));
+  }
+
+  .panel--left:not(.sheet--sun) {
+    max-height: var(--phone-sheet);
+  }
+
+  .app:has(.panel--left:not(.sheet--sun)) .attribution {
+    bottom: calc(var(--phone-sheet) + 0.5rem);
+  }
+
+  .app:has(.panel--left:not(.sheet--sun)) .viewctl {
+    bottom: calc(var(--phone-sheet) + 0.5rem + 26px + 0.5rem);
+  }
+
+  .app:has(.panel--left:not(.sheet--sun)) .viewctl__stack {
+    flex-direction: row;
+  }
+
+  .app:has(.panel--left:not(.sheet--sun)) .viewctl__stack button + button,
+  .app:has(.panel--left:not(.sheet--sun)) .viewctl__apart,
+  .app:has(.panel--left:not(.sheet--sun)) .viewctl__ask {
+    border-top: 0;
+    border-left: 1px solid var(--hairline);
+  }
+}
+
+/*
+ * On its side the strip above the sheet is one row: the credit on the left,
+ * the controls on the right, side by side rather than one on the other.
+ */
+@media (max-width: 900px) and (max-height: 560px) {
+  .app:has(.panel--left:not(.sheet--sun)) {
+    --phone-sheet: max(6rem, calc(100% - 6.75rem - 3.75rem));
+  }
+
+  .app:has(.panel--left:not(.sheet--sun)) .viewctl {
+    bottom: calc(var(--phone-sheet) + 0.5rem);
+  }
+
+  /* Centred on the controls' row: 2.6rem of button against a 26px credit. */
+  .app:has(.panel--left:not(.sheet--sun)) .attribution {
+    bottom: calc(var(--phone-sheet) + 0.5rem + (2.6rem - 26px) / 2);
+  }
+}
+
+.attribution__mark {
+  display: flex;
+  opacity: 0.72;
+}
+
+.attribution__mark img {
+  display: block;
+}
+
+.attribution__text {
+  margin: 0;
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  color: var(--ink-2);
+}
+
+.attribution__text a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Underline on approach rather than always: three underlined links in a row
+   read as a menu, and this is a footnote. */
+.attribution__text a:hover,
+.attribution__text a:focus-visible {
+  text-decoration: underline;
+  color: var(--ink);
+}
+
+/* ── focus mode ─────────────────────────────────────────── */
+
+.focus-toggle {
+  position: absolute;
+  left: 24px;
+  /* Above the map credit, which owns the corner. */
+  bottom: 74px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 18px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  box-shadow: var(--shadow-chip);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-label);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.focus-toggle:hover {
+  background: var(--green-050);
+}
+
+.focus-toggle--exit {
+  left: auto;
+  right: 24px;
+  top: 24px;
+  bottom: auto;
+  background: var(--ink-green-900);
+  border-color: transparent;
+  color: var(--paper);
+}
+
+.focus-toggle--exit:hover {
+  background: var(--green-700);
+}
+
+.focus-toggle kbd {
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.16);
+  font: inherit;
+  font-size: var(--text-sm);
+}
+
+/* ── search results ─────────────────────────────────────── */
+
+.results button {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+/*
+ * A dot before each result, in the colour that thing will be in the city.
+ * A person who searches, sees a pink dot, and then sees a pink building has
+ * been told how the list and the model relate without a word of explanation.
+ */
+.results__kind {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  align-self: center;
+}
+
+.results__kind--development {
+  background: #6fbfa6;
+}
+
+.results__kind--building {
+  background: #e87ba8;
+}
+
+.results button small {
+  flex-basis: 100%;
+  padding-left: 18px;
+}
+
+.results__none {
+  margin: 0;
+  padding: 13px 16px;
+  border-radius: var(--radius-control);
+  background: var(--green-050);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+/* A search result's name, matching the pink of the building it names. */
+.site-label--found {
+  color: #c9457f;
+}
+
+/* ── reduced motion ─────────────────────────────────────────────────────
+ *
+ * The counterpart to useReducedMotion, which tells the camera the same
+ * thing. Both are driven by this one preference, so the panels and the 3D
+ * view can never disagree about whether this person wanted movement.
+ *
+ * Transitions collapse to a duration nothing can perceive rather than to
+ * `none`, because a real 0s can skip transitionend handlers that some
+ * browsers still fire. Transforms are removed outright: a press that moves
+ * is exactly what the preference is asking us not to do.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    /*
+     * The delay as well as the duration.
+     *
+     * Overriding only the duration left the staggered list delays standing —
+     * up to 192ms — and with backwards fill each item sat at its invisible
+     * starting state until its turn came. A reader who asked for no movement
+     * got a list that appeared in pieces instead of one that moved.
+     */
+    animation-delay: 0ms !important;
+    transition-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
+  .switch__input:active + .switch__track::after {
+    --squash: 1 !important;
+  }
+
+  /* Colour, outline and border feedback all survive — only movement goes. */
+  .button:active {
+    transform: none;
+  }
+}
+
+/* Details use the same docked column as the sunlight page. */
+@media (min-width: 901px) {
+  .panel.sheet--details {
+    top: var(--h-header);
+    bottom: 0;
+    left: 0;
+    width: var(--w-sun-column);
+    max-height: none;
+    border-radius: 0;
+    border-right: 1px solid var(--cream-edge);
+    background: var(--cream);
+    box-shadow: none;
+    padding: var(--space-4) var(--space-5) var(--space-3);
+  }
+
+  .sheet--details .sheet__tabpanel {
+    flex: 1 0 auto;
+  }
+
+  .sheet--details .sheet__fine {
+    margin-top: auto;
+  }
+
+  .app:has(.sheet--details) .attribution {
+    left: calc(var(--w-sun-column) + var(--gutter));
+  }
+}

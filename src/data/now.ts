@@ -1,0 +1,167 @@
+/*
+ * ─────────────────────────────────────────────────────────────────────────
+ * "NOW", AS THE SIMULATION CAN STATE IT
+ * ─────────────────────────────────────────────────────────────────────────
+ *
+ * WHAT THIS FILE IS
+ *   The sunlight screen asks for a date and a time and shows where the sun
+ *   is. This turns the present moment into that pair, so a reader can start
+ *   from what is happening outside rather than from a solstice they have to
+ *   imagine.
+ *
+ * WHAT IT HOLDS
+ *   - EARLIEST_MINUTES / LATEST_MINUTES: the hours the time control covers.
+ *   - intoWindow, clampMinutes: a time held inside those hours, and snapped
+ *     to the control's ten-minute step.
+ *   - presentMoment: the Melbourne clock now, as a date and a time.
+ *   - clockLabel: "23:31", the 24-hour reading used wherever a time is a
+ *     figure to compare.
+ *   - clock12Label: "4:30 pm", the time bar's own labels.
+ *   - outsideWindowNote: the sentence shown when the clock is outside the
+ *     hours on offer.
+ *
+ * TWO THINGS IT HAS TO BE HONEST ABOUT
+ *
+ *   Whose clock. The instant comes from the reader's device and is then read
+ *   off a Melbourne clock — see civilInZone, which is where that argument is
+ *   made. A reader in Melbourne notices no difference; anyone else would
+ *   otherwise be shown a sun that is not the one over the city.
+ *
+ *   The time control stops at 06:00 and 20:00, and Melbourne spends a large
+ *   part of the year outside that. Half past eleven at night is not 20:00,
+ *   and quietly showing 20:00 would be the app stating something false about
+ *   the sun on a screen whose whole purpose is to be trusted about the sun.
+ *   So the clock reading is returned alongside the clamped one, and the
+ *   caller is expected to say so.
+ */
+
+import { SITE } from '../scene/frame';
+import { civilInZone, type SimulationDate } from '../scene/solar';
+
+/**
+ * The window the time control can express, in minutes since midnight.
+ *
+ * Lives here rather than with the URL state because "now" is the thing that
+ * keeps running into it: Melbourne spends a large part of the year outside
+ * these hours, and this file is where that is reckoned with.
+ */
+export const EARLIEST_MINUTES = 6 * 60;
+export const LATEST_MINUTES = 20 * 60;
+
+/**
+ * Into the window, without rounding.
+ *
+ * Kept apart from the snapping below because the two answer different
+ * questions, and conflating them told the reader a lie: 15:03 snaps to 15:00,
+ * which is not "outside the hours this simulation covers", but a single
+ * "did it move?" flag could not tell the two apart and said it anyway.
+ */
+export function intoWindow(minutes: number): number {
+  return Math.min(LATEST_MINUTES, Math.max(EARLIEST_MINUTES, minutes));
+}
+
+/**
+ * A time the control can show: inside the window and on its ten-minute
+ * step. `fallback` stands in for a value that is not a number at all.
+ */
+export function clampMinutes(value: number, fallback: number): number {
+  if (!Number.isFinite(value)) return fallback;
+  // Snap to the slider's own step so a hand-edited URL cannot land between
+  // two positions and make the control look broken.
+  return intoWindow(Math.round(value / 10) * 10);
+}
+
+/** The present moment, and how far the time control could follow it. */
+export interface PresentMoment {
+  date: SimulationDate;
+  /** What the time control will be set to. */
+  minutes: number;
+  /** What the Melbourne clock actually reads, before the control's limits. */
+  clockMinutes: number;
+  /** Whether those two differ — the clock is outside what can be shown. */
+  clamped: boolean;
+}
+
+/**
+ * The present moment in Melbourne, as a simulation date and time.
+ *
+ * The instant is a parameter so the awkward moments — either side of a
+ * daylight-saving change, the middle of the night — can be tested at fixed
+ * points rather than whenever the suite happens to run.
+ */
+export function presentMoment(instant: Date): PresentMoment {
+  const { date, minutes: clockMinutes } = civilInZone(SITE.timeZone, instant);
+  /*
+   * `clamped` reports the window ONLY — not the ten-minute snap the slider
+   * also applies. Reported together, every clock reading that was not a
+   * multiple of ten minutes claimed to be outside the hours on offer, which
+   * since the app started opening on the present moment meant most visits
+   * began with a sentence that was not true.
+   */
+  const held = intoWindow(clockMinutes);
+  return {
+    date,
+    minutes: clampMinutes(clockMinutes, clockMinutes),
+    clockMinutes,
+    clamped: held !== clockMinutes,
+  };
+}
+
+/**
+ * "23:31" — a time on the Melbourne clock.
+ *
+ * ROUNDED ONCE, BEFORE IT IS SPLIT.
+ *   Rounding the hour and the minutes separately lets them disagree across a
+ *   boundary: floor(419.7 / 60) is 6 while round(419.7) % 60 is 0, which
+ *   writes 06:00 for a time at seven o'clock — the right minutes against the
+ *   wrong hour. One rounding, then one division, cannot split that way.
+ *
+ *   No caller passes a fraction today. Both sources of minutes hand over
+ *   whole numbers: civilInZone builds them from the hour and minute fields,
+ *   and daylightWindow rounds at the end of its bisection. This is the
+ *   formatter being total rather than a bug being fixed, and it is written
+ *   down because a later change to either source would otherwise arrive as
+ *   a sunrise labelled an hour early.
+ *
+ * AND IT WRAPS, BECAUSE A CLOCK IS A CIRCLE.
+ *   Left open the arithmetic produces readings no clock has: 1439.6 rounds
+ *   to 1440 and reads 24:00, and a negative reads -1:-1. Neither is a time.
+ *   Taking it modulo a day gives 00:00 and 23:59, which are.
+ */
+export function clockLabel(minutes: number): string {
+  const DAY = 24 * 60;
+  const whole = ((Math.round(minutes) % DAY) + DAY) % DAY;
+  return `${String(Math.floor(whole / 60)).padStart(2, '0')}:${String(whole % 60).padStart(2, '0')}`;
+}
+
+/**
+ * "8:00 am", "12:00 pm", "4:30 pm" — the time bar's own labels: its ticks,
+ * the reading at the thumb, the sunrise and sunset above it, and the note
+ * about the hours on offer.
+ *
+ * The bar reads as a day in the way a resident says one; the 24-hour
+ * readings stay everywhere a time is a figure to compare (the shadow's
+ * first and last hour at the measured window, the URL). Rounded once and
+ * wrapped round the day, for the same reasons as clockLabel.
+ */
+export function clock12Label(minutes: number): string {
+  const DAY = 24 * 60;
+  const whole = ((Math.round(minutes) % DAY) + DAY) % DAY;
+  const hour = Math.floor(whole / 60);
+  const shown = hour % 12 === 0 ? 12 : hour % 12;
+  return `${shown}:${String(whole % 60).padStart(2, '0')} ${hour < 12 ? 'am' : 'pm'}`;
+}
+
+/**
+ * What to tell the reader, or nothing when the moment shows as it is.
+ *
+ * Worded around the control rather than around the sun: this file knows the
+ * clock is past 20:00, and does not know whether the sun had set — in June it
+ * would have been down for hours by 20:00, in January it would still be up.
+ */
+export function outsideWindowNote(moment: PresentMoment): string | null {
+  if (!moment.clamped) return null;
+  const edge = moment.clockMinutes < EARLIEST_MINUTES ? EARLIEST_MINUTES : LATEST_MINUTES;
+  return `It is ${clockLabel(moment.clockMinutes)} in Melbourne — outside the hours this
+    simulation covers. Showing ${clockLabel(edge)}.`.replace(/\s+/g, ' ');
+}

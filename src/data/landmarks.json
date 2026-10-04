@@ -1,0 +1,593 @@
+[
+  {
+    "id": "48",
+    "name": "ANZ 'Gothic' Bank",
+    "address": "380 Collins Street, Melbourne VIC 3000",
+    "longitude": 144.961673719242,
+    "latitude": -37.8161580666029,
+    "siteStatus": "current",
+    "addressSource": "https://whatson.melbourne.vic.gov.au/things-to-do/the-gothic-bank",
+    "reviewNote": "",
+    "aliases": []
+  },
+  {
+    "id": "120",
+    "name": "Athanaeum Theatre",
+    "address": "188 Collins Street, Melbourne VIC 3000",
+    "longitude": 144.96732254212,
+    "latitude": -37.814954347831,
+    "siteStatus": "current",
+    "addressSource": "https://www.athenaeumtheatre.com.au/faqs",
+    "reviewNote": "Original dataset spelling retained; venue generally spelled Athenaeum.",
+    "aliases": [
+      "Athenaeum Theatre"
+    ]
+  },
+  {
+    "id": "208",
+    "name": "Australian Centre For The Moving Image (ACMI)",
+    "address": "Federation Square, Flinders Street, Melbourne VIC 3000",
+    "longitude": 144.969070431323,
+    "latitude": -37.8176107327202,
+    "siteStatus": "current",
+    "addressSource": "https://www.acmi.net.au/plan-your-visit/",
+    "reviewNote": "Fed Square venue; not individual street number.",
+    "aliases": [
+      "ACMI"
+    ]
+  },
+  {
+    "id": "190",
+    "name": "Batman Park",
+    "address": "32 Rebecca Walk, Melbourne VIC 3004",
+    "longitude": 144.956665812218,
+    "latitude": -37.8218460949601,
+    "siteStatus": "current",
+    "addressSource": "https://whatson.melbourne.vic.gov.au/things-to-do/batman-park",
+    "reviewNote": "Park location supplied by City of Melbourne.",
+    "aliases": []
+  },
+  {
+    "id": "83",
+    "name": "Church of Christ",
+    "address": "333 Swanston Street, Melbourne VIC 3000",
+    "longitude": 144.96388920294,
+    "latitude": -37.8104524079085,
+    "siteStatus": "current",
+    "addressSource": "https://crossculture.net.au/melbourne/",
+    "reviewNote": "Church visitor address; heritage parcel may cover 327-333.",
+    "aliases": []
+  },
+  {
+    "id": "181",
+    "name": "City Baths",
+    "address": "420 Swanston Street, Melbourne VIC 3000",
+    "longitude": 144.963189789721,
+    "latitude": -37.8071585350561,
+    "siteStatus": "current",
+    "addressSource": "https://whatson.melbourne.vic.gov.au/things-to-do/melbourne-city-baths",
+    "reviewNote": "",
+    "aliases": []
+  },
+  {
+    "id": "221",
+    "name": "Collins Street Baptist Church",
+    "address": "174 Collins Street, Melbourne VIC 3000",
+    "longitude": 144.968072486031,
+    "latitude": -37.8147011904647,
+    "siteStatus": "current",
+    "addressSource": "https://www.csbc.org.au/contact-us/",
+    "reviewNote": "",
+    "aliases": []
+  },
+  {
+    "id": "236",
+    "name": "Comedy Theatre",
+    "address": "240 Exhibition Street, Melbourne VIC 3000",
+    "longitude": 144.97013311862,
+    "latitude": -37.8102053945163,
+    "siteStatus": "current",
+    "addressSource": "https://whatson.melbourne.vic.gov.au/things-to-do/comedy-theatre",
+    "reviewNote": "",
+    "aliases": []
+  },
+  {
+    "id": "180",
+    "name": "Commonwealth Law Courts",
+    "address": "305 William Street, Melbourne VIC 3000",
+    "longitude": 144.955823833257,
+    "latitude": -37.8123961677596,
+    "siteStatus": "current",
+    "addressSource": "https://www.fedcourt.gov.au/contact/registries/vic",
+    "reviewNote": "Owen Dixon Commonwealth Law Courts Building.",
+    "aliases": []
+  },
+  {
+    "id": "183",
+    "name": "Council House 2 (CH2)",
+    "address": "240 Little Collins Street, Melbourne VIC 3000",
+    "longitude": 144.966638432727,
+    "latitude": -37.8142591432011,
+    "siteStatus": "current",
+    "addressSource": "https://participate.melbourne.vic.gov.au/climate-and-environment-strategy/terms-and-conditions",
+    "reviewNote": "Official Council House 2 address.",
+    "aliases": [
+      "CH2"
+    ]
+  },
+  {
+    "id": "81",
+    "name": "County Court Melbourne",
+    "address": "250 William Street, Melbourne VIC 3000",
+    "longitude": 144.957734246387,
+    "latitude": -37.8132011619962,
+    "siteStatus": "current",
+    "addressSource": "https://courts.vic.gov.au/court-system/victorian-courts-and-tribunals",
+    "reviewNote": "",
+    "aliases": []
+  },
+  {
+    "id": "241",
+    "name": "David Jones",
+    "address": "310 Bourke Street, Melbourne VIC 3000",
+    "longitude": 144.964373486798,
+    "latitude": -37.8133127260638,
+    "siteStatus": "current",
+    "addressSource": "https://www.davidjones.com/stores/bourke-street-mall",
+    "reviewNote": "Bourke Street Mall store; do not use unrelated branches.",
+    "aliases": []
+  },
+  {
+    "id": "178",
+    "name": "Enterprize Park",
+    "address": "North bank of the Yarra River, near Queens Bridge, Melbourne VIC 3000",
+    "longitude": 144.959276859602,
+    "latitude": -37.820210269629,
+    "siteStatus": "current",
+    "addressSource": "https://whatson.melbourne.vic.gov.au/things-to-do/enterprize-park",
+    "reviewNote": "No official street number given on council listing; named riverside location.",
+    "aliases": []
+  },
+  {
+    "id": "17",
+    "name": "Federation Square",
+    "address": "2-20 Swanston Street, Melbourne VIC 3000",
+    "longitude": 144.968963600783,
+    "latitude": -37.8178516571684,
+    "siteStatus": "current",
+    "addressSource": "https://assets.heritagecouncil.vic.gov.au/assets/Determination-Federation-Square-FINAL.pdf",
+    "reviewNote": "Entire precinct has a street-address range.",
+    "aliases": [
+      "Fed Square"
+    ]
+  },
+  {
+    "id": "119",
+    "name": "Flagstaff Railway Station",
+    "address": "Corner William Street and La Trobe Street, Melbourne VIC 3000",
+    "longitude": 144.9561186805,
+    "latitude": -37.8116384403974,
+    "siteStatus": "current",
+    "addressSource": "https://www.metrotrains.com.au/stations/flagstaff/",
+    "reviewNote": "Station address is intersection, not door number.",
+    "aliases": [
+      "Flagstaff Station"
+    ]
+  },
+  {
+    "id": "122",
+    "name": "Flinders Street Railway Station",
+    "address": "Corner Flinders Street and Swanston Street, Melbourne VIC 3000",
+    "longitude": 144.967064817875,
+    "latitude": -37.8179063007545,
+    "siteStatus": "current",
+    "addressSource": "https://www.visitmelbourne.com/regions/melbourne/see-and-do/history-and-heritage/heritage-buildings/vv-flinders-street-station",
+    "reviewNote": "",
+    "aliases": [
+      "Flinders Street Station"
+    ]
+  },
+  {
+    "id": "106",
+    "name": "Former Royal Mint",
+    "address": "280 William Street, Melbourne VIC 3000",
+    "longitude": 144.957055454136,
+    "latitude": -37.8121838748712,
+    "siteStatus": "current",
+    "addressSource": "https://workingheritage.com.au/places/former-royal-mint",
+    "reviewNote": "",
+    "aliases": []
+  },
+  {
+    "id": "238",
+    "name": "Forum Theatre",
+    "address": "154 Flinders Street, Melbourne VIC 3000",
+    "longitude": 144.969386556998,
+    "latitude": -37.816485409696,
+    "siteStatus": "current",
+    "addressSource": "https://whatson.melbourne.vic.gov.au/things-to-do/forum-melbourne",
+    "reviewNote": "",
+    "aliases": []
+  },
+  {
+    "id": "121",
+    "name": "Her Majesty's Theatre",
+    "address": "219 Exhibition Street, Melbourne VIC 3000",
+    "longitude": 144.969520183129,
+    "latitude": -37.8109975612842,
+    "siteStatus": "current",
+    "addressSource": "https://whatson.melbourne.vic.gov.au/things-to-do/her-majestys-theatre",
+    "reviewNote": "",
+    "aliases": []
+  },
+  {
+    "id": "133",
+    "name": "Immigration Museum",
+    "address": "400 Flinders Street, Melbourne VIC 3000",
+    "longitude": 144.960426777129,
+    "latitude": -37.8191798798062,
+    "siteStatus": "current",
+    "addressSource": "https://www.visitmelbourne.com/regions/melbourne/see-and-do/art-and-culture/museums/immigration-museum",
+    "reviewNote": "",
+    "aliases": []
+  },
+  {
+    "id": "73",
+    "name": "Koorie Heritage Trust Inc",
+    "address": "295 King Street, Melbourne VIC 3000",
+    "longitude": 144.954027907736,
+    "latitude": -37.8133854259085,
+    "siteStatus": "historical",
+    "addressSource": "https://kht.org.au/about-us/history/2003-2015-295-king-street-melbourne/",
+    "reviewNote": "Historical 2003-2015 King St site matches ORIGINAL source coordinate; now at Federation Square (Birrarung Building).",
+    "aliases": []
+  },
+  {
+    "id": "166",
+    "name": "Melbourne Aquarium",
+    "address": "503 Flinders Street, Melbourne VIC 3000",
+    "longitude": 144.958425696055,
+    "latitude": -37.8209627824685,
+    "siteStatus": "current",
+    "addressSource": "https://support.melbourneaquarium.com.au/hc/en-us/articles/115000472031-Where-is-SEA-LIFE-Melbourne-Located",
+    "reviewNote": "Current SEA LIFE Melbourne Aquarium.",
+    "aliases": [
+      "SEA LIFE Melbourne Aquarium",
+      "SEA LIFE Aquarium"
+    ]
+  },
+  {
+    "id": "163",
+    "name": "Melbourne Central",
+    "address": "Corner La Trobe Street and Swanston Street, Melbourne VIC 3000",
+    "longitude": 144.962749729496,
+    "latitude": -37.8105371797142,
+    "siteStatus": "current",
+    "addressSource": "https://www.melbournecentral.com.au/centre-info/contact-us",
+    "reviewNote": "Shopping centre, distinct from underground railway station.",
+    "aliases": []
+  },
+  {
+    "id": "220",
+    "name": "Melbourne Central Railway Station",
+    "address": "La Trobe Street, Melbourne VIC 3000",
+    "longitude": 144.963100728702,
+    "latitude": -37.8108930047401,
+    "siteStatus": "current",
+    "addressSource": "https://www.metrotrains.com.au/stations/melbourne-central/",
+    "reviewNote": "Metro trains location, not retail centre address.",
+    "aliases": [
+      "Melbourne Central Station"
+    ]
+  },
+  {
+    "id": "79",
+    "name": "Melbourne Childrens Court",
+    "address": "477 Little Lonsdale Street, Melbourne VIC 3000",
+    "longitude": 144.958298873269,
+    "latitude": -37.8125077646598,
+    "siteStatus": "current",
+    "addressSource": "https://www.childrenscourt.vic.gov.au/court-locations-1/melbourne",
+    "reviewNote": "Original spelling retained.",
+    "aliases": [
+      "Melbourne Children's Court"
+    ]
+  },
+  {
+    "id": "101",
+    "name": "Melbourne Magistrates Court",
+    "address": "233 William Street, Melbourne VIC 3000",
+    "longitude": 144.956846193891,
+    "latitude": -37.8136147671606,
+    "siteStatus": "current",
+    "addressSource": "https://www.mcv.vic.gov.au/court/melbourne-magistrates-court",
+    "reviewNote": "",
+    "aliases": []
+  },
+  {
+    "id": "193",
+    "name": "Melbourne Town Hall",
+    "address": "90-130 Swanston Street, Melbourne VIC 3000",
+    "longitude": 144.966542722283,
+    "latitude": -37.8150754791411,
+    "siteStatus": "current",
+    "addressSource": "https://whatson.melbourne.vic.gov.au/things-to-do/melbourne-town-hall",
+    "reviewNote": "",
+    "aliases": []
+  },
+  {
+    "id": "223",
+    "name": "Melbourne Visitor Booth",
+    "address": "335 Bourke Street Mall, Melbourne VIC 3000",
+    "longitude": 144.964425882562,
+    "latitude": -37.8139525061193,
+    "siteStatus": "current",
+    "addressSource": "https://www.visitmelbourne.com/regions/melbourne/practical-information/visitor-information-centres/melbourne-visitor-booth",
+    "reviewNote": "Booth in mall, not the former Visitor Centre.",
+    "aliases": []
+  },
+  {
+    "id": "207",
+    "name": "Melbourne Visitor Centre",
+    "address": "Federation Square, Corner Flinders Street and Swanston Street, Melbourne VIC 3000",
+    "longitude": 144.967937138226,
+    "latitude": -37.8177352402006,
+    "siteStatus": "historical",
+    "addressSource": "https://www.premier.vic.gov.au/new-melbourne-visitor-hub-opens-town-hall",
+    "reviewNote": "Former Fed Square visitor centre closed in 2018; current Melbourne Visitor Hub moved to Town Hall. Source coordinate corresponds to historic site.",
+    "aliases": []
+  },
+  {
+    "id": "167",
+    "name": "Myer",
+    "address": "314-336 Bourke Street, Melbourne VIC 3000",
+    "longitude": 144.963855087868,
+    "latitude": -37.8135911985281,
+    "siteStatus": "current",
+    "addressSource": "https://whatson.melbourne.vic.gov.au/shop/myer",
+    "reviewNote": "Flagship Bourke Street Mall store.",
+    "aliases": []
+  },
+  {
+    "id": "87",
+    "name": "Old Melbourne Gaol Crime & Justice Experience",
+    "address": "377 Russell Street, Melbourne VIC 3000",
+    "longitude": 144.965463853978,
+    "latitude": -37.8077644149636,
+    "siteStatus": "current",
+    "addressSource": "https://whatson.melbourne.vic.gov.au/things-to-do/old-melbourne-gaol",
+    "reviewNote": "",
+    "aliases": [
+      "Old Melbourne Gaol"
+    ]
+  },
+  {
+    "id": "233",
+    "name": "Parliament Railway Station",
+    "address": "Spring Street, Melbourne VIC 3000",
+    "longitude": 144.973742010011,
+    "latitude": -37.8121572789173,
+    "siteStatus": "current",
+    "addressSource": "https://www.metrotrains.com.au/stations/parliament/",
+    "reviewNote": "Multiple entrances; Metro lists Spring Street without a building number.",
+    "aliases": [
+      "Parliament Station"
+    ]
+  },
+  {
+    "id": "146",
+    "name": "Princess Theatre",
+    "address": "163 Spring Street, Melbourne VIC 3000",
+    "longitude": 144.9723265962,
+    "latitude": -37.8107257091302,
+    "siteStatus": "current",
+    "addressSource": "https://whatson.melbourne.vic.gov.au/things-to-do/princess-theatre",
+    "reviewNote": "",
+    "aliases": []
+  },
+  {
+    "id": "66",
+    "name": "QV Village",
+    "address": "Corner Swanston Street and Lonsdale Street, Melbourne VIC 3000",
+    "longitude": 144.965714574014,
+    "latitude": -37.8106891897454,
+    "siteStatus": "current",
+    "addressSource": "https://www.qv.com.au/contact-us.html",
+    "reviewNote": "Precinct covers multiple entrances.",
+    "aliases": []
+  },
+  {
+    "id": "37",
+    "name": "Queen Victoria Market",
+    "address": "Queen Street, Melbourne VIC 3000",
+    "longitude": 144.957158515056,
+    "latitude": -37.8075002018073,
+    "siteStatus": "current",
+    "addressSource": "https://whatson.melbourne.vic.gov.au/things-to-do/queen-victoria-market",
+    "reviewNote": "Large market; street only as listed by City of Melbourne.",
+    "aliases": []
+  },
+  {
+    "id": "74",
+    "name": "RMIT University",
+    "address": "124 La Trobe Street, Melbourne VIC 3000",
+    "longitude": 144.964452974798,
+    "latitude": -37.8080795360545,
+    "siteStatus": "current",
+    "addressSource": "https://www.rmit.edu.au/about/our-locations-and-facilities/locations/melbourne-city-campus",
+    "reviewNote": "General city campus address; campus is multi-building.",
+    "aliases": []
+  },
+  {
+    "id": "39",
+    "name": "Regent Theatre",
+    "address": "191 Collins Street, Melbourne VIC 3000",
+    "longitude": 144.967916735261,
+    "latitude": -37.8160014744179,
+    "siteStatus": "current",
+    "addressSource": "https://whatson.melbourne.vic.gov.au/things-to-do/regent-theatre",
+    "reviewNote": "",
+    "aliases": []
+  },
+  {
+    "id": "16",
+    "name": "SBS (Special Broadcasting Service)",
+    "address": "Level 3, Alfred Deakin Building, Federation Square, Melbourne VIC 3000",
+    "longitude": 144.968740597156,
+    "latitude": -37.8176921210305,
+    "siteStatus": "current",
+    "addressSource": "https://www.sbsmedia.com.au/contact-us/",
+    "reviewNote": "SBS Melbourne office, not Sydney headquarters.",
+    "aliases": [
+      "SBS"
+    ]
+  },
+  {
+    "id": "214",
+    "name": "Scots Church",
+    "address": "Corner Collins Street and Russell Street, Melbourne VIC 3000",
+    "longitude": 144.96855105335,
+    "latitude": -37.8145687802664,
+    "siteStatus": "current",
+    "addressSource": "https://scotschurch.com/contact/",
+    "reviewNote": "Church not administration office.",
+    "aliases": []
+  },
+  {
+    "id": "49",
+    "name": "St Augustines Church",
+    "address": "631 Bourke Street, Melbourne VIC 3000",
+    "longitude": 144.954862000132,
+    "latitude": -37.8169741358546,
+    "siteStatus": "current",
+    "addressSource": "https://www.emelbourne.net.au/biogs/EM01299b.htm",
+    "reviewNote": "Historic church entry on Bourke St.",
+    "aliases": []
+  },
+  {
+    "id": "168",
+    "name": "St Francis Church",
+    "address": "326 Lonsdale Street, Melbourne VIC 3000",
+    "longitude": 144.962422614541,
+    "latitude": -37.8118847831837,
+    "siteStatus": "current",
+    "addressSource": "https://vhd-dr.heritage.vic.gov.au/places/772/download-report",
+    "reviewNote": "Historic building site; church entrance sometimes listed 324 Lonsdale.",
+    "aliases": []
+  },
+  {
+    "id": "97",
+    "name": "St Michael's Uniting Church",
+    "address": "120 Collins Street, Melbourne VIC 3000",
+    "longitude": 144.969174036096,
+    "latitude": -37.8143851324913,
+    "siteStatus": "current",
+    "addressSource": "https://whatson.melbourne.vic.gov.au/things-to-do/st-michaels-uniting-church",
+    "reviewNote": "",
+    "aliases": []
+  },
+  {
+    "id": "206",
+    "name": "St Pauls Cathedral",
+    "address": "Corner Flinders Street and Swanston Street, Melbourne VIC 3000",
+    "longitude": 144.967681647402,
+    "latitude": -37.8169549012399,
+    "siteStatus": "current",
+    "addressSource": "https://cathedral.org.au/contact/",
+    "reviewNote": "Cathedral itself, not administrative office at 209 Flinders Lane.",
+    "aliases": []
+  },
+  {
+    "id": "38",
+    "name": "State Library Victoria",
+    "address": "328 Swanston Street, Melbourne VIC 3000",
+    "longitude": 144.964330322397,
+    "latitude": -37.8099852201226,
+    "siteStatus": "current",
+    "addressSource": "https://whatson.melbourne.vic.gov.au/things-to-do/state-library-victoria",
+    "reviewNote": "",
+    "aliases": []
+  },
+  {
+    "id": "41",
+    "name": "Supreme Court",
+    "address": "210 William Street, Melbourne VIC 3000",
+    "longitude": 144.957894024264,
+    "latitude": -37.8141494182814,
+    "siteStatus": "current",
+    "addressSource": "https://www.supremecourt.vic.gov.au/contact-us/locations",
+    "reviewNote": "Supreme Court main building; judiciary uses other sites too.",
+    "aliases": []
+  },
+  {
+    "id": "195",
+    "name": "The Ian Potter Centre: NGV Australia",
+    "address": "Federation Square, Melbourne VIC 3000",
+    "longitude": 144.969899048343,
+    "latitude": -37.8174831423197,
+    "siteStatus": "current",
+    "addressSource": "https://www.ngv.vic.gov.au/plan-your-visit/",
+    "reviewNote": "Distinct from NGV International at 180 St Kilda Road.",
+    "aliases": [
+      "NGV Australia",
+      "Ian Potter Centre"
+    ]
+  },
+  {
+    "id": "32",
+    "name": "The Melbourne Athenaeum Library",
+    "address": "Level 1, 188 Collins Street, Melbourne VIC 3000",
+    "longitude": 144.967291289941,
+    "latitude": -37.8148855756416,
+    "siteStatus": "current",
+    "addressSource": "https://whatson.melbourne.vic.gov.au/things-to-do/melbourne-athenaeum-library",
+    "reviewNote": "Same building as Athanaeum Theatre.",
+    "aliases": []
+  },
+  {
+    "id": "124",
+    "name": "The Museum Of Australian Chinese History",
+    "address": "22 Cohen Place, Melbourne VIC 3000",
+    "longitude": 144.96923385414,
+    "latitude": -37.8107686127655,
+    "siteStatus": "current",
+    "addressSource": "https://www.chinesemuseum.com.au/contact",
+    "reviewNote": "",
+    "aliases": [
+      "Chinese Museum"
+    ]
+  },
+  {
+    "id": "188",
+    "name": "Victoria Police",
+    "address": "637 Flinders Street, Docklands VIC 3008",
+    "longitude": 144.954697453742,
+    "latitude": -37.8003121288849,
+    "siteStatus": "historical",
+    "addressSource": "https://collections.museumsvictoria.com.au/articles/2516",
+    "reviewNote": "Former Victoria Police Centre at World Trade Centre, matches ORIGINAL GeoJSON coordinates; not current headquarters; suburb Docklands 3008.",
+    "aliases": []
+  },
+  {
+    "id": "137",
+    "name": "Welsh Presbyterian Church",
+    "address": "320-330 La Trobe Street, Melbourne VIC 3000",
+    "longitude": 144.959873260087,
+    "latitude": -37.8104478768313,
+    "siteStatus": "current",
+    "addressSource": "https://librarysearch.melbourne.vic.gov.au/cgi-bin/spydus.exe/ENQ/OPAC/ARCENQ?RNI=746319&SETLVL=",
+    "reviewNote": "Heritage building address range.",
+    "aliases": []
+  },
+  {
+    "id": "185",
+    "name": "Wesley Church",
+    "address": "136 Lonsdale Street, Melbourne VIC 3000",
+    "longitude": 144.968168215633,
+    "latitude": -37.8101576446961,
+    "siteStatus": "current",
+    "addressSource": "https://wesleychurchmelbourne.org.au/contact/",
+    "reviewNote": "Use actual church entrance; office postal address differs.",
+    "aliases": []
+  }
+]
