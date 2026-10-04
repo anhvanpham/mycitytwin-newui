@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { lightLevel, lightMount, surveyDate, lightingLocations } from './lightingImport';
+import { lightLevel, lightMount, surveyDate, lightingLocations, showLightingAsset } from './lightingImport';
 
 describe('council lighting records', () => {
   it('preserves mounting distinctions and never calls a missing mount a pole', () => {
@@ -27,4 +27,12 @@ it('retains distinct nearby fixtures while grouping duplicate positions and cros
   const grouped=lightingLocations([asset('a',0),asset('duplicate',0.2),asset('b',1.2),asset('c',2.4),asset('osm',2,'osm'),asset('ground',0,'council','low'),asset('occupied',20)],([e])=>e<10);
   expect(grouped.map(l=>l.id)).toEqual(['a','b','c','ground']);
   expect(grouped[0].assetIds).toEqual(['a','duplicate','osm']);
+});
+
+it('omits the Lonsdale/Russell decorative array without hiding neighbouring street lamps',()=>{
+  const asset={id:'council-array',e:583,n:423,source:'council' as const,mount:'pole' as const,mounting:'Pole: Multiple Fixed',lampType:null,watts:null,description:'Feature Lighting - Intersection of Lonsdale Street and Russell Street',location:null};
+  expect(showLightingAsset(asset)).toBe(false);
+  const neighbour={...asset,id:'neighbour',description:'Feature Lighting - Lonsdale Street'};
+  expect(showLightingAsset(neighbour)).toBe(true);
+  expect(lightingLocations([asset,neighbour],()=>true).map(l=>l.id)).toEqual(['neighbour']);
 });

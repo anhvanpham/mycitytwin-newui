@@ -28,12 +28,17 @@ export function surveyDate(value: unknown): string | null {
   return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date ? date : null;
 }
 
+/** This decorative intersection array does not make useful individual street-pole geometry. */
+export function showLightingAsset(asset: LightingAsset): boolean {
+  return !(asset.source === 'council' && asset.description === 'Feature Lighting - Intersection of Lonsdale Street and Russell Street');
+}
+
 /** Retain distinct close fixtures. Merge near-identical council records and cross-source matches. */
 export function lightingLocations(assets: LightingAsset[], visible: (point: [number, number]) => boolean): StreetLamp[] {
   const lights: StreetLamp[] = [], cells = new Map<string, StreetLamp[]>();
   for (const asset of assets) {
     const {e,n,mount}=asset;
-    if (!visible([e,n])) continue;
+    if (!showLightingAsset(asset) || !visible([e,n])) continue;
     const x=Math.floor(e/3),y=Math.floor(n/3);let group:StreetLamp|undefined;
     for(let i=x-1;i<=x+1&&!group;i++)for(let j=y-1;j<=y+1&&!group;j++) {
       group=(cells.get(`${mount}:${i},${j}`)??[]).find(p=>Math.hypot(p.e-e,p.n-n)<(p.source===asset.source?0.5:3));
