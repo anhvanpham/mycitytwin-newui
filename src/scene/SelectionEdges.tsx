@@ -67,7 +67,7 @@ interface LineLike {
  * Put inside the chosen building's <mesh>, given the blocks the mesh was
  * built from and the same floor height, so the lines land on its walls.
  */
-export function SelectionEdges({ parts, floorAhdM }: { parts: Massing[]; floorAhdM: number }) {
+export function SelectionEdges({ parts, floorAhdM, pastel=false }: { parts: Massing[]; floorAhdM: number; pastel?: boolean }) {
   /*
    * The segments as the point pairs <Line segments> wants, and their
    * average: the point the camera's distance is measured to.
@@ -100,7 +100,7 @@ export function SelectionEdges({ parts, floorAhdM }: { parts: Massing[]; floorAh
     world.copy(centre);
     target.localToWorld(world);
     const t = Math.min(1, Math.max(0, (camera.position.distanceTo(world) - NEAR_M) / (FAR_M - NEAR_M)));
-    target.material.linewidth = NEAR_PX + (FAR_PX - NEAR_PX) * t;
+    target.material.linewidth = pastel?1+(2.1-1)*t:NEAR_PX + (FAR_PX - NEAR_PX) * t;
   });
 
   if (points.length < 2) return null;
@@ -110,8 +110,8 @@ export function SelectionEdges({ parts, floorAhdM }: { parts: Massing[]; floorAh
       ref={line as never}
       points={points}
       segments
-      color={INK}
-      lineWidth={NEAR_PX}
+      color={pastel?'#87749f':INK}
+      lineWidth={pastel?1:NEAR_PX}
       /*
        * Drawn after the building, not before. A proposal is slightly
        * see-through, and see-through things are drawn after everything

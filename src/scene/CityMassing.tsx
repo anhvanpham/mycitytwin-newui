@@ -1,8 +1,13 @@
 import { useEffect, useMemo, useRef } from 'react';
-import type { Group, Mesh } from 'three';
+import { Color, Float32BufferAttribute, type Group, type Mesh } from 'three';
 import type { CityModel, Development } from '../data/model';
 import { groundElevationOf, mergeMassingsOwned } from './massing';
 import { buildingCentres, buildingsUnder } from '../data/replaces';
+import { CBDClip } from './CBDClip';
+import { StreetDetails } from './StreetDetails';
+import { cbdGroundPlacement } from './cbdBoundary';
+import { useOpenBasemapTexture } from './useOpenBasemap';
+import type { StreetDetailsDoc, StreetLayers } from '../data/streetDetails';
 import { groundPlacement } from './basemap';
 import { useBasemapTexture } from './useBasemap';
 import { useMapboxConfig } from '../data/mapboxConfig';
@@ -17,6 +22,10 @@ import { HighlightedBuilding } from './HighlightedBuilding';
 import { BuildingPicker } from './BuildingPicker';
 
 interface CityMassingProps {
+  streetMap?: boolean;
+  sunAltitudeDeg?: number;
+  streetDetails?: StreetDetailsDoc | null;
+  streetLayers?: StreetLayers;
   model: CityModel;
   /** The development being examined. Its parts render as the proposal. */
   focus: Development | null;
@@ -69,6 +78,10 @@ interface CityMassingProps {
  */
 export function CityMassing({
   model,
+  streetMap = false,
+  sunAltitudeDeg = 45,
+  streetDetails = null,
+  streetLayers = {},
   focus,
   showProposed,
   showAllProposals,
@@ -110,7 +123,10 @@ export function CityMassing({
   }, [model.extent]);
 
   const mapbox = useMapboxConfig();
-  const basemap = useBasemapTexture(placement, mapbox);
+  const originalBasemap = useBasemapTexture(placement, streetMap ? null : mapbox);
+  const openPlacement=useMemo(()=>cbdGroundPlacement(),[]);
+  const openBasemap=useOpenBasemapTexture(openPlacement.placement,streetMap);
+  const basemap=streetMap?openBasemap:originalBasemap;
 
   /** Every building centre, once, so the sites can be looked up cheaply. */
   const centres = useMemo(() => buildingCentres(model.buildings), [model.buildings]);
@@ -150,11 +166,24 @@ export function CityMassing({
       b.parentId !== highlightedBuildingId && !replaced.has(b.parentId);
     const ok = model.buildings.filter((b) => b.readyFor3d && inCity(b));
     const bad = model.buildings.filter((b) => !b.readyFor3d && inCity(b));
-    return {
-      built: mergeMassingsOwned(ok, groundAhdM),
-      unresolved: mergeMassingsOwned(bad, groundAhdM),
-    };
-  }, [model.buildings, groundAhdM, highlightedBuildingId, replaced]);
+    const city = mergeMassingsOwned(ok, groundAhdM);
+    if (streetMap && city) {
+      // One consistent pearl tint per building, including all of its roof planes.
+      // The city stays welded into one mesh; ownership and shadow geometry stay intact.
+      const palette = ['#e9e0f9', '#e4eefb', '#f8ebe7', '#efebf9'].map(hex=>new Color(hex));
+      const colours = new Float32Array(city.geometry.getAttribute('position').count * 3);
+      let start = 0;
+      city.owners.forEach((owner,index)=>{
+        const id = (owner as typeof ok[number]).parentId;
+        let hash = 0; for(const char of id) hash=(Math.imul(hash,31)+char.charCodeAt(0))|0;
+        const tint = palette[(hash>>>0)%palette.length],end=city.ends[index];
+        for(let vertex=start;vertex<end;vertex++)tint.toArray(colours,vertex*3);
+        start=end;
+      });
+      city.geometry.setAttribute('color',new Float32BufferAttribute(colours,3));
+    }
+    return { built: city, unresolved: mergeMassingsOwned(bad, groundAhdM) };
+  }, [model.buildings, groundAhdM, highlightedBuildingId, replaced, streetMap]);
 
   /** What BuildingPicker casts its ray at, and what can stand in front. */
   const builtMesh = useRef<Mesh>(null);
@@ -178,12 +207,13 @@ export function CityMassing({
   );
 
   return (
-    <group>
+    <CBDClip enabled={streetMap} colour={haze}>
       {/* The blocks between the streets, dissolving where the data ends. */}
       <Ground
         model={model}
         groundAhdM={groundAhdM}
         basemap={basemap}
+        cbd={streetMap}
         walking={walking}
         onPick={onPickReceptor}
       />
@@ -193,7 +223,8 @@ export function CityMassing({
         so a park or a road at the far edge dissolves with the ground rather
         than staying sharp inside a fading surround.
       */}
-      <OpenSpace groundAhdM={groundAhdM} />
+      {!basemap && <OpenSpace groundAhdM={groundAhdM} />}
+      {streetMap && <StreetDetails doc={streetDetails} layers={streetLayers} ground={groundAhdM} sunAltitudeDeg={sunAltitudeDeg}/>}
 
       {/*
         The inferred carriageways stand down once a real map is under the
@@ -218,6 +249,7 @@ export function CityMassing({
       {showHighlighted && !(highlightedBuildingId && replaced.has(highlightedBuildingId)) && (
         <group ref={highlightGroup}>
           <HighlightedBuilding
+            pastel={streetMap}
             buildings={model.buildings}
             buildingId={highlightedBuildingId}
             groundAhdM={groundAhdM}
@@ -232,7 +264,7 @@ export function CityMassing({
 
       {built && (
         <mesh ref={builtMesh} castShadow receiveShadow geometry={built.geometry}>
-          <meshStandardMaterial color="#eeedf0" roughness={0.82} metalness={0} />
+          {streetMap ? <meshPhysicalMaterial key="crystal-city" vertexColors color="#ffffff" roughness={0.48} metalness={0.035} clearcoat={0.4} clearcoatRoughness={0.3} emissive="#d8d8f2" emissiveIntensity={sunAltitudeDeg>0?0.055:0.008}/> : <meshStandardMaterial color="#eeedf0" roughness={0.82} metalness={0} />}
         </mesh>
       )}
 
@@ -243,7 +275,7 @@ export function CityMassing({
       */}
       {unresolved && (
         <mesh ref={unresolvedMesh} castShadow receiveShadow geometry={unresolved.geometry}>
-          <meshStandardMaterial color="#d9d5cf" roughness={0.95} metalness={0} />
+          <meshStandardMaterial color={streetMap?'#e8e1f0':'#d9d5cf'} roughness={streetMap?0.65:0.95} metalness={0} />
         </mesh>
       )}
 
@@ -261,7 +293,7 @@ export function CityMassing({
         from height, and past it the sky dome's lower hemisphere is already
         painted the same haze.
       */}
-      {!walking && (
+      {!walking && !streetMap && (
       <HazeVeil
         centreE={hazeExtent.centreE}
         centreN={hazeExtent.centreN}
@@ -275,6 +307,7 @@ export function CityMassing({
       {showProposed && (
         <group ref={projectsGroup}>
           <DevelopmentMassings
+            pastel={streetMap}
             developments={model.developments}
             focus={focus}
             groundAhdM={groundAhdM}
@@ -294,6 +327,6 @@ export function CityMassing({
         highlighted={{ object: highlightGroup, id: highlightedBuildingId }}
         onSelect={interactive && !walking ? onSelectBuilding : undefined}
       />
-    </group>
+    </CBDClip>
   );
 }

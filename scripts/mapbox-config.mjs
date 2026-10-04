@@ -99,7 +99,7 @@ if (mode === 'releases') {
 
 console.log(
   [
-    token ? `${mode}/mapbox.json written` : `no VITE_MAPBOX_TOKEN — the app will run without a map`,
+    token ? `${mode}/mapbox.json written` : `no optional Mapbox token — the integrated sunlight map uses OpenFreeMap`,
     swept ? `swept ${swept} copy(s) out of the frozen versions` : '',
   ]
     .filter(Boolean)

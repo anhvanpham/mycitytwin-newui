@@ -25,6 +25,7 @@ const scene = (name: string) => readFileSync(resolve(__dirname, name), 'utf-8');
 /** Rendered within <WorldFrame>: coordinates are east/north/up as they are. */
 const INSIDE = [
   'CityMassing.tsx',
+  'StreetDetails.tsx',
   'Ground.tsx',
   'Roads.tsx',
   'OpenSpace.tsx',

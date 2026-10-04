@@ -19,9 +19,11 @@
  *   Written twice, the two copies of a licence line would drift.
  */
 
-import { useRef } from 'react';
+import { useId, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { NOT_AN_ASSESSMENT } from './words';
 import '../styles/sources.css';
+import streetSummary from '../data/street-details-summary.json';
 
 /**
  * Three figures about living in the CBD, each with where it came from.
@@ -83,15 +85,12 @@ const FIGURES = [
  */
 export function SourcesLink() {
   const dialog = useRef<HTMLDialogElement>(null);
-  return (
-    <>
-      <button type="button" className="sources__link" onClick={() => dialog.current?.showModal()}>
-        Sources &amp; limitations
-      </button>
+  const titleId = useId();
+  const content = (
       <dialog
         className="sources"
         ref={dialog}
-        aria-labelledby="sources-title"
+        aria-labelledby={titleId}
         // A click on the backdrop — outside the card — closes it.
         onClick={(event) => {
           if (event.target === event.currentTarget) event.currentTarget.close();
@@ -99,7 +98,7 @@ export function SourcesLink() {
       >
         <div className="sources-card">
           <div className="sources-head">
-            <h2 id="sources-title">Sources &amp; limitations</h2>
+            <h2 id={titleId}>Sources &amp; limitations</h2>
             <button
               type="button"
               className="sources__close"
@@ -145,6 +144,16 @@ export function SourcesLink() {
             trips; survey figures describe respondents.
           </p>
 
+          <h3>CBD street details</h3>
+          <p className="sources-note">
+            {streetSummary.trees.toLocaleString()} tree locations and {streetSummary.lights.toLocaleString()} mapped light poles cover the CBD and nearby streets in this extract. Council feature lighting is supplemented by OpenStreetMap street lamps; coverage is incomplete. Multiple lights at one pole are combined. Locations conflicting with building footprints are omitted.
+          </p>
+          <p className="sources-note">
+            The sunlight model uses a georeferenced OpenFreeMap basemap rendered by MapLibre, centred on the approximate Hoddle Grid with a softly fading edge (Spencer, Spring, La Trobe and Flinders streets). Trees and poles use recorded locations. The tree records contain trunk diameter, but no measured height: 3D tree heights (4–22 m) are illustrative estimates from trunk size, with a default where diameter is missing; crown shapes are illustrative. Pole height is an illustrative 8 m. Lights fade on as solar altitude drops from 1° to −5°, and fade off again at dawn. Warm ground glows and nearby lighting illustrate the effect; they are not measured illumination or a simulation of the council’s switching schedule. Road widths and lane divider paint are inferred from mapped lane counts. {streetSummary.crossings} crossings use explicitly mapped paint styles. Sunlight comparisons use the original building geometry and solar calculations on this same map. The basemap, trees and lamps do not supply new shadow calculations; the visual CBD fade does not remove buildings from the calculations.
+          </p>
+          <p className="sources-note">
+            Basemap: <a href="https://openfreemap.org/" target="_blank" rel="noreferrer">OpenFreeMap</a> / <a href="https://openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a>, based on OpenStreetMap. Sources: <a href={streetSummary.source.trees} target="_blank" rel="noreferrer">City of Melbourne tree inventory</a> and <a href={streetSummary.source.lights} target="_blank" rel="noreferrer">feature lighting</a> (CC BY; positions reprojected and shapes simplified). © <a href={streetSummary.source.osm} target="_blank" rel="noreferrer">OpenStreetMap contributors</a>, ODbL 1.0; road/crossing/lamp extract retrieved {streetSummary.source.retrievedAt.slice(0,10)}. Landmark names and locations use the supplied 51-place QA list; historical sites remain searchable but have no current map label.
+          </p>
           <h3>Data</h3>
           <p className="sources-note">
             Building Footprints 2023 and Development Activity Monitor © City of
@@ -154,6 +163,13 @@ export function SourcesLink() {
           </p>
         </div>
       </dialog>
+  );
+  return (
+    <>
+      <button type="button" className="sources__link" onClick={() => dialog.current?.showModal()}>
+        Sources &amp; limitations
+      </button>
+      {typeof document === 'undefined' ? content : createPortal(content, document.body)}
     </>
   );
 }

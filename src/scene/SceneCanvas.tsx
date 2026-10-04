@@ -77,6 +77,10 @@ function useStandNotice(
 }
 import { ScaleFigure } from './ScaleFigure';
 import { skyAppearance } from './sky';
+import { CBD_RING } from './cbdBoundary';
+import { LandmarkLabels } from './LandmarkLabels';
+import type { Landmark } from '../data/landmarks';
+import type { StreetDetailsDoc, StreetLayers } from '../data/streetDetails';
 import { CityMassing } from './CityMassing';
 import { StreetLabels } from './StreetLabels';
 import { SiteMarker, type SiteMarkerSubject } from './SiteMarker';
@@ -104,6 +108,11 @@ import type { SunAngles } from './sun';
 import type { CityModel, Development } from '../data/model';
 
 interface SceneCanvasProps {
+  streetMap?: boolean;
+  streetDetails?: StreetDetailsDoc | null;
+  streetLayers?: StreetLayers;
+  mapDimension?: '2d' | '3d';
+  onSelectLandmark?: (l:Landmark)=>void;
   model: CityModel;
   focus: Development | null;
   sun: SunAngles;
@@ -205,6 +214,11 @@ interface SceneCanvasProps {
 /** The canvas, the camera, the lights and the city — the whole 3D view. */
 export function SceneCanvas({
   model,
+  streetMap = false,
+  streetDetails = null,
+  streetLayers = {},
+  mapDimension = '3d',
+  onSelectLandmark,
   focus,
   sun,
   showProposed,
@@ -250,13 +264,17 @@ export function SceneCanvas({
    * the page has no business making before anyone has chosen anything.
    */
   const wholeCity = !lookAt && !focus;
+  const bounds = streetMap ? {
+    minE:Math.min(...CBD_RING.map(p=>p[0])), maxE:Math.max(...CBD_RING.map(p=>p[0])),
+    minN:Math.min(...CBD_RING.map(p=>p[1])), maxN:Math.max(...CBD_RING.map(p=>p[1])),
+  } : model.extent;
   const [targetE, targetN] = lookAt
     ? [lookAt.east, lookAt.north]
     : focus
       ? focus.anchorEN
       : [
-          (model.extent.minE + model.extent.maxE) / 2,
-          (model.extent.minN + model.extent.maxN) / 2,
+          (bounds.minE + bounds.maxE) / 2,
+          (bounds.minN + bounds.maxN) / 2,
         ];
 
   /*
@@ -279,8 +297,8 @@ export function SceneCanvas({
    * 1.2 times the widest span brings the far corners inside the frame.
    */
   const citySpan = Math.max(
-    model.extent.maxE - model.extent.minE,
-    model.extent.maxN - model.extent.minN,
+    bounds.maxE - bounds.minE,
+    bounds.maxN - bounds.minN,
   );
   const settled = wholeCity
     ? citySpan * 1.2
@@ -316,7 +334,7 @@ export function SceneCanvas({
   const APPROACH_ELEVATION_DEG = 52;
 
   const eye = approach ? settled * APPROACH_BACK : settled;
-  const ELEVATION = (approach ? APPROACH_ELEVATION_DEG : 38) * (Math.PI / 180);
+  const ELEVATION = (streetMap && mapDimension === '2d' ? 89.9 : approach ? APPROACH_ELEVATION_DEG : 38) * (Math.PI / 180);
   const BEARING = 150 * (Math.PI / 180);
   const horizontal = Math.cos(ELEVATION);
   // Both the camera and what it looks at are measured from the same height,
@@ -564,7 +582,7 @@ export function SceneCanvas({
       // The design views are high obliques with little perspective distortion,
       // so a long lens rather than the 50° default.
       camera={{ position: openingShot, fov: 30, near: 5, far: 20000 }}
-      gl={{ antialias: true, toneMapping: ACESFilmicToneMapping }}
+      gl={{ antialias: true, toneMapping: ACESFilmicToneMapping, localClippingEnabled:true }}
     >
       {/*
         ── EVERYTHING, WITH A HEADSET OPTIONALLY ATTACHED ───────────────────
@@ -618,6 +636,10 @@ export function SceneCanvas({
             castShadows={castShadows}
           />
           <CityMassing
+            streetMap={streetMap}
+            sunAltitudeDeg={sun.altitudeDeg}
+            streetDetails={streetDetails}
+            streetLayers={streetLayers}
             haze={sky.haze}
             walking={walking}
             model={model}
@@ -666,8 +688,9 @@ export function SceneCanvas({
           names are CSS 3D, which ignores the shift, so they would sit beside
           their streets.
         */}
+        {streetMap && streetLayers.landmarks !== false && !walking && <LandmarkLabels ground={ground} onSelect={interactive ? onSelectLandmark : undefined}/>}
         {!walking && !insetOn && !lensShifted && (
-          <StreetLabels initialEast={targetE} initialNorth={targetN} groundAhdM={ground} />
+          <StreetLabels cbd={streetMap} initialEast={targetE} initialNorth={targetN} groundAhdM={ground} />
         )}
 
         {/*
@@ -675,8 +698,8 @@ export function SceneCanvas({
           the approved massing is actually being shown; a searched building
           always does, because it is there either way.
         */}
-        {marker && (marker.kind === 'building' || showProposed) && (
-          <SiteMarker subject={marker} groundAhdM={ground} />
+        {marker && (marker.kind !== 'development' || showProposed) && (
+          <SiteMarker pastel={streetMap} subject={marker} groundAhdM={ground} />
         )}
 
         {/*
@@ -787,10 +810,11 @@ export function SceneCanvas({
           enableDamping={!reducedMotion}
           dampingFactor={0.09}
           enablePan
+          enableRotate={!streetMap || mapDimension !== '2d'}
           minDistance={120}
           maxDistance={Math.max(4000, citySpan * 1.6)}
           // Never let the camera drop below the ground plane.
-          maxPolarAngle={Math.PI / 2.15}
+          maxPolarAngle={streetMap && mapDimension === '2d' ? 0.005 : Math.PI / 2.15}
           // Swapped from the three.js default: left drag pans, right drag
           // orbits. Touch is left alone — one finger still orbits.
           mouseButtons={{

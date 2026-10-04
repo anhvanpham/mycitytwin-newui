@@ -1,0 +1,28 @@
+{
+  "source": {
+    "retrievedAt": "2026-10-04T06:39:44.023Z",
+    "bounds": {
+      "south": -37.823,
+      "west": 144.948,
+      "north": -37.804,
+      "east": 144.977
+    },
+    "extent": {
+      "minE": -881.24,
+      "maxE": 1426.06,
+      "minN": -989.46,
+      "maxN": 1030.52
+    },
+    "coverage": "CBD and nearby streets within the building extract, with a 100 m margin",
+    "trees": "https://data.melbourne.vic.gov.au/explore/dataset/trees-with-species-and-dimensions-urban-forest/",
+    "lights": "https://data.melbourne.vic.gov.au/explore/dataset/feature-lighting-including-light-type-wattage-and-location/",
+    "osm": "https://www.openstreetmap.org/copyright",
+    "licences": "City of Melbourne CC BY; OpenStreetMap contributors ODbL 1.0",
+    "notes": "Tree/pole positions are recorded; tree heights are estimated from trunk diameter and pole sizes are illustrative, not surveyed physical dimensions. Automatic lighting follows solar altitude at the selected date and time, not a measured switching schedule. Road widths/lane divider paint are inferred from OSM tags; crossing style is included only where explicitly mapped. Features conflicting with building footprints omitted. Does not model canopy shade, lighting lux, or every city asset."
+  },
+  "trees": 7036,
+  "lights": 1019,
+  "councilLights": 920,
+  "crossings": 222,
+  "paintPatches": 5537
+}

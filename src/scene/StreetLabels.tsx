@@ -2,10 +2,12 @@ import { useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import { enuToWorld } from './frame';
+import { cbdEdgeVisibility } from './cbdBoundary';
 import { streetLabelsNear } from './streets';
 import '../styles/street-labels.css';
 
 interface StreetLabelsProps {
+  cbd?: boolean;
   /** Where the names gather before the camera has moved, east/north metres. */
   initialEast: number;
   initialNorth: number;
@@ -81,7 +83,7 @@ const radiusFor = (cameraDistanceM: number) =>
  * (0,-1,0) instead, and the label lies face-down under the road, seen from
  * behind and mirrored.
  */
-export function StreetLabels({ initialEast, initialNorth, groundAhdM }: StreetLabelsProps) {
+export function StreetLabels({ initialEast, initialNorth, groundAhdM, cbd=false }: StreetLabelsProps) {
   const controls = useThree((state) => state.controls) as {
     target?: { x: number; y: number; z: number };
   } | null;
@@ -181,7 +183,7 @@ export function StreetLabels({ initialEast, initialNorth, groundAhdM }: StreetLa
           pointerEvents="none"
           zIndexRange={[1, 0]}
         >
-          <span className="street-label">{label.name}</span>
+          <span className="street-label" style={cbd?{opacity:cbdEdgeVisibility([label.east,label.north])}:undefined}>{label.name}</span>
         </Html>
       ))}
     </group>

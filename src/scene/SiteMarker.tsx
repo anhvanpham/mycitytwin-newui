@@ -40,9 +40,11 @@ export interface SiteMarkerSubject {
 const PIN_LIFT_M = 34;
 
 export function SiteMarker({
+  pastel=false,
   subject,
   groundAhdM,
 }: {
+  pastel?: boolean;
   subject: SiteMarkerSubject;
   groundAhdM: number;
 }) {
@@ -52,7 +54,7 @@ export function SiteMarker({
   // Pink for a search result, green for a proposal — the same rule the
   // buildings themselves follow, so the marker never contradicts the colour
   // of the thing it is marking.
-  const colour = subject.kind === 'landmark' ? '#7662aa' : found ? '#c9457f' : '#14624a';
+  const colour = pastel ? subject.kind === 'landmark' ? '#b3a4d5' : found ? '#dca9c8' : '#87bfb3' : subject.kind === 'landmark' ? '#7662aa' : found ? '#c9457f' : '#14624a';
 
   return (
     <>

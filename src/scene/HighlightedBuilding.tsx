@@ -44,6 +44,7 @@ import { mergeMassings } from './massing';
 import { SelectionEdges } from './SelectionEdges';
 
 interface HighlightedBuildingProps {
+  pastel?: boolean;
   /** Every part of the city; the matching ones are lifted out here. */
   buildings: BuildingMassing[];
   /** Which building to pick out, or null for none. */
@@ -54,6 +55,7 @@ interface HighlightedBuildingProps {
 
 /** The searched-for building, lifted out of the welded city and drawn pink. */
 export function HighlightedBuilding({
+  pastel = false,
   buildings,
   buildingId,
   groundAhdM,
@@ -81,17 +83,20 @@ export function HighlightedBuilding({
 
   return (
     <mesh geometry={geometry} castShadow receiveShadow>
-      <meshStandardMaterial
-        color="#e87ba8"
+      <meshPhysicalMaterial
+        clearcoat={pastel?0.55:0}
+        clearcoatRoughness={0.25}
+        iridescence={pastel?0.12:0}
+        color={pastel?'#f3bfdc':'#e87ba8'}
         roughness={0.5}
         metalness={0}
         // A little glow so it still reads as highlighted when it happens to
         // be standing in another building's shadow.
-        emissive="#c9457f"
-        emissiveIntensity={0.24}
+        emissive={pastel?'#dfaed7':'#c9457f'}
+        emissiveIntensity={pastel?0.14:0.24}
       />
       {/* Outlined as well as coloured — see SelectionEdges. */}
-      <SelectionEdges parts={parts} floorAhdM={groundAhdM} />
+      <SelectionEdges pastel={pastel} parts={parts} floorAhdM={groundAhdM} />
     </mesh>
   );
 }

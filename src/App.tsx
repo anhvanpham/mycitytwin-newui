@@ -1,3 +1,4 @@
+import { streetlightPower } from './scene/streetAppearance';
 /*
  * ─────────────────────────────────────────────────────────────────────────
  * THE WHOLE APPLICATION, IN ONE COMPONENT
@@ -57,7 +58,9 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import './styles/street-map.css';
 import { SceneCanvas } from './scene/SceneCanvas';
+import { DEFAULT_STREET_LAYERS, useStreetDetails } from './data/streetDetails';
 import type { ViewCommands } from './scene/ViewControls';
 import { describeShadow } from './scene/narrative';
 import { sunlightAtPoint } from './scene/sunlightAt';
@@ -118,6 +121,7 @@ import './styles/landmarks.css';
 import './styles/ui.css';
 
 /** Below this the sun is too low to see the city by, in a headset. See enterVr. */
+
 const LOW_SUN_DEG = 8;
 const MIDDAY_MINUTES = 12 * 60;
 
@@ -129,7 +133,9 @@ export default function App() {
 
   const [view, setView] = useState<ViewName>(initial.view);
   const [selectedKey, setSelectedKey] = useState<string | null>(initial.devKey);
-  const [layers, setLayers] = useState<Layers>({ developments: true, shadows: true });
+  const [layers, setLayers] = useState<Layers>({ developments: true, shadows: true, ...DEFAULT_STREET_LAYERS });
+  const streetData = useStreetDetails();
+  const [mapDimension,setMapDimension]=useState<'2d'|'3d'>('3d');
   const [date, setDate] = useState<SimulationDate>(initial.date);
   const [minutes, setMinutes] = useState(initial.minutes);
   const [receptor, setReceptor] = useState<[number, number] | null>(initial.receptor);
@@ -1259,6 +1265,7 @@ export default function App() {
 
   /** The front page is up — and with it the window the city is framed in. */
   const frontShown = !chromeHidden && view === 'landing';
+  const integratedMap = !frontShown;
 
   /*
    * What the shadow is doing, in words — the time bar's caption.
@@ -1409,6 +1416,11 @@ export default function App() {
         style={compareShown && compareFrames ? compareFrames.today : undefined}
       >
         <SceneCanvas
+          streetMap={integratedMap}
+          streetDetails={streetData.doc}
+          streetLayers={layers}
+          mapDimension={mapDimension}
+          onSelectLandmark={openLandmark}
           model={model}
           focus={focus}
           sun={sun}
@@ -1519,7 +1531,7 @@ export default function App() {
           onStandMoved={setStandMoved}
         />
         {/* The map is shown twice on the comparison screen, so its credit is too. */}
-        {compareShown && compareFrames && mapbox && <MapAttribution />}
+        {compareShown && compareFrames && <div className="cbd-attribution">OpenFreeMap · © OpenMapTiles · © OpenStreetMap</div>}
       </div>
 
       {/*
@@ -1534,6 +1546,10 @@ export default function App() {
       {compareShown && compareFrames && place && (
         <div className="compare__canvas" style={compareFrames.after}>
           <SceneCanvas
+            streetMap
+            streetDetails={streetData.doc}
+            streetLayers={layers}
+            mapDimension={mapDimension}
             model={model}
             focus={focus}
             sun={sun}
@@ -1567,7 +1583,7 @@ export default function App() {
             noHeadset
             link={{ link: cameraLink, id: 'after', seed: 'adopt' }}
           />
-          {mapbox && <MapAttribution />}
+          {<div className="cbd-attribution">OpenFreeMap · © OpenMapTiles · © OpenStreetMap</div>}
         </div>
       )}
 
@@ -1615,6 +1631,8 @@ export default function App() {
       */}
       {!chromeHidden && layersOpen && !howShown && (
         <MapLayers
+          streetDataStatus={streetData.status}
+          mode={integratedMap ? 'integrated' : 'model'}
           layers={layers}
           onChange={setLayers}
           onClose={() => setLayersOpen(false)}
@@ -1627,7 +1645,7 @@ export default function App() {
         see MapAttribution. On the front page it sits in the page's own
         window onto the map instead.
       */}
-      {mapbox && !frontShown && !compareShown && !howShown && <MapAttribution />}
+      {!frontShown && !compareShown && !howShown && <div className="cbd-attribution"><a href="https://openfreemap.org/" target="_blank" rel="noreferrer">OpenFreeMap</a> · © <a href="https://openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a> · © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a></div>}
 
       {/* ── IN THE STREET: the keys, the way into a headset, how far the stand moved */}
       {walking && (
@@ -1716,7 +1734,7 @@ export default function App() {
             in a product about shadows, should say somewhere that it was
             asked to be — otherwise it reads as broken.
           */
-          layersHidden={Number(!layers.developments) + Number(!layers.shadows)}
+          layersHidden={['developments','shadows','trees','streetlights','roadMarkings','landmarks'].filter(key => layers[key as keyof Layers] === false).length}
           onLayers={() => {
             setQuery('');
             setLayersOpen((open) => !open);
@@ -1754,6 +1772,11 @@ export default function App() {
         address in the header or by double-clicking any building on the map;
         the line at the foot says so.
       */}
+      {!chromeHidden && !frontShown && !howShown && <div className="map-dimension" aria-label="Map perspective">
+        <button type="button" aria-pressed={mapDimension === '2d'} onClick={() => setMapDimension('2d')}>2D view</button>
+        <button type="button" aria-pressed={mapDimension === '3d'} onClick={() => setMapDimension('3d')}>3D view</button>
+        {layers.streetlights !== false && <span className="map-lights-status">Streetlights {streetlightPower(sun.altitudeDeg) > 0 ? 'on · dusk to dawn' : 'off · daytime'}</span>}
+      </div>}
       {!chromeHidden && view === 'explore' && (
         foundLandmark ? (
           <aside className="explore-hint explore-hint--landmark" aria-label="Selected landmark">

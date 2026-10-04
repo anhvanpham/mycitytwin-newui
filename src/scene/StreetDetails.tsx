@@ -1,0 +1,127 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
+import {
+  AdditiveBlending, BoxGeometry, BufferGeometry, CircleGeometry, Color, CylinderGeometry,
+  DataTexture, Float32BufferAttribute, Group, IcosahedronGeometry, InstancedMesh,
+  LinearFilter, Matrix4, Quaternion, RGBAFormat, SphereGeometry, Vector3,
+} from 'three';
+import type { StreetDetailsDoc, StreetLayers, StreetLamp } from '../data/streetDetails';
+import { rectPoint } from '../data/streetGeometry';
+import { cbdEdgeVisibility } from './cbdBoundary';
+import { treeDimensions, streetlightPower, STREETLAMP_HEIGHT_M } from './streetAppearance';
+
+type Instance = { position: [number, number, number]; scale: [number, number, number]; colour?: string; angle?: number };
+type Shape = 'cylinder' | 'crown' | 'box' | 'bulb' | 'pool';
+const NO_RAYCAST = () => null;
+const ARM = 1.35;
+const LAMP_ANGLE = Math.PI / 10;
+
+function lightPoolTexture() {
+  const size=64, pixels=new Uint8Array(size*size*4);
+  for(let y=0;y<size;y++)for(let x=0;x<size;x++) {
+    const i=(y*size+x)*4, radius=Math.hypot((x+0.5)/size*2-1,(y+0.5)/size*2-1);
+    pixels[i]=255; pixels[i+1]=207; pixels[i+2]=133;
+    pixels[i+3]=Math.round(255*Math.pow(Math.max(0,1-radius),2));
+  }
+  const texture=new DataTexture(pixels,size,size,RGBAFormat);
+  texture.magFilter=LinearFilter;texture.minFilter=LinearFilter;texture.needsUpdate=true;
+  return texture;
+}
+
+/** Shared geometry and instancing keep thousands of trees/poles affordable. All coordinates are ENU. */
+function Instances({instances,shape,colour,power=0}:{instances:Instance[];shape:Shape;colour:string;power?:number}) {
+  const mesh=useRef<InstancedMesh>(null);
+  const geometry=useMemo(()=>{
+    if(shape==='cylinder')return new CylinderGeometry(1,1,1,6).rotateX(Math.PI/2);
+    if(shape==='crown')return new IcosahedronGeometry(1,1);
+    if(shape==='box')return new BoxGeometry(1,1,1);
+    if(shape==='bulb')return new SphereGeometry(1,8,6);
+    return new CircleGeometry(1,24);
+  },[shape]);
+  const pool=useMemo(()=>shape==='pool'?lightPoolTexture():null,[shape]);
+  useEffect(()=>{
+    const matrix=new Matrix4(),position=new Vector3(),scale=new Vector3(),rotation=new Quaternion(),axis=new Vector3(0,0,1),tint=new Color();
+    instances.forEach((p,i)=>{
+      matrix.compose(position.fromArray(p.position),rotation.setFromAxisAngle(axis,p.angle??0),scale.fromArray(p.scale));
+      mesh.current?.setMatrixAt(i,matrix);
+      if(p.colour)mesh.current?.setColorAt(i,tint.set(p.colour));
+    });
+    if(mesh.current){mesh.current.instanceMatrix.needsUpdate=true;if(mesh.current.instanceColor)mesh.current.instanceColor.needsUpdate=true;}
+  },[instances]);
+  useEffect(()=>()=>{geometry.dispose();pool?.dispose();},[geometry,pool]);
+  return <instancedMesh ref={mesh} args={[geometry,undefined,instances.length]} raycast={NO_RAYCAST} frustumCulled={false} receiveShadow={shape!=='pool'&&shape!=='bulb'}>
+    {shape==='pool' ? <meshBasicMaterial map={pool} transparent opacity={power*0.72} blending={AdditiveBlending} depthWrite={false} toneMapped={false} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-8}/> :
+      shape==='bulb' ? <meshStandardMaterial color={colour} emissive="#ffd899" emissiveIntensity={power*4} toneMapped={false} roughness={0.4}/> :
+      <meshStandardMaterial color={colour} roughness={0.95}/>}
+  </instancedMesh>;
+}
+
+/** Only nearby poles get actual lights; distant poles keep emissive bulbs and ground halos. */
+function NearbyLights({lights,ground,power}:{lights:StreetLamp[];ground:number;power:number}) {
+  const camera=useThree(s=>s.camera),controls=useThree(s=>s.controls) as {target?:Vector3}|null;
+  const [near,setNear]=useState<StreetLamp[]>([]);
+  const previous=useRef({e:Infinity,n:Infinity,elapsed:0});
+  useFrame((_,delta)=>{
+    previous.current.elapsed+=delta;
+    if(power===0||previous.current.elapsed<0.5)return;
+    const target=controls?.target??camera.position,e=target.x,n=-target.z;
+    if(Math.hypot(e-previous.current.e,n-previous.current.n)<20)return;
+    previous.current={e,n,elapsed:0};
+    setNear(lights.map(l=>({l,d:Math.hypot(l.e-e,l.n-n)})).filter(p=>p.d<150).sort((a,b)=>a.d-b.d).slice(0,6).map(p=>p.l));
+  });
+  return <group>{near.map(l=><pointLight key={l.id} position={[l.e+ARM*Math.cos(LAMP_ANGLE),l.n+ARM*Math.sin(LAMP_ANGLE),ground+STREETLAMP_HEIGHT_M-0.25]} color="#ffd7a0" intensity={power*220} distance={32} decay={2}/>)}</group>;
+}
+
+/** Trees and lamps add visual context; building-only sunlight calculations stay unchanged. */
+export function StreetDetails({doc,layers,ground,sunAltitudeDeg}:{doc:StreetDetailsDoc|null;layers:StreetLayers;ground:number;sunAltitudeDeg:number}) {
+  const paintGroup=useRef<Group>(null);
+  const camera=useThree(s=>s.camera),controls=useThree(s=>s.controls) as {target?:Vector3}|null;
+  const trees=useMemo(()=>doc?.trees.filter(p=>cbdEdgeVisibility([p.e,p.n])>0)??[],[doc]);
+  const lights=useMemo(()=>doc?.lights.filter(p=>cbdEdgeVisibility([p.e,p.n])>0)??[],[doc]);
+  const power=streetlightPower(sunAltitudeDeg);
+  const treeParts=useMemo(()=>{
+    const trunks:Instance[]=[],crowns:Instance[]=[];
+    trees.forEach((p,i)=>{
+      const size=treeDimensions(p.diameterCm,p.species),stem=size.heightM-size.crownHeightM*0.5;
+      trunks.push({position:[p.e,p.n,ground+stem/2],scale:[size.trunkRadiusM,size.trunkRadiusM,stem]});
+      crowns.push({position:[p.e,p.n,ground+size.heightM-size.crownHeightM/2],scale:[size.crownRadiusM,size.crownRadiusM*0.9,size.crownHeightM/2],colour:['#afd5bd','#a0ccb8','#bfdcc5','#9ecabc'][i%4]});
+    });return {trunks,crowns};
+  },[trees,ground]);
+  const lampParts=useMemo(()=>{
+    const poles:Instance[]=[],arms:Instance[]=[],heads:Instance[]=[],bulbs:Instance[]=[],pools:Instance[]=[];
+    const height=STREETLAMP_HEIGHT_M;
+    for(const l of lights){
+      const e=l.e+ARM*Math.cos(LAMP_ANGLE),n=l.n+ARM*Math.sin(LAMP_ANGLE);
+      poles.push({position:[l.e,l.n,ground+height/2],scale:[0.11,0.11,height]});
+      arms.push({position:[(l.e+e)/2,(l.n+n)/2,ground+height-0.15],scale:[ARM+0.15,0.14,0.14],angle:LAMP_ANGLE});
+      heads.push({position:[e,n,ground+height-0.15],scale:[0.9,0.45,0.24],angle:LAMP_ANGLE});
+      bulbs.push({position:[e,n,ground+height-0.31],scale:[0.35,0.2,0.13]});
+      pools.push({position:[e,n,ground+0.12],scale:[10,10,1]});
+    }return {poles,arms,heads,bulbs,pools};
+  },[lights,ground]);
+  const paint=useMemo(()=>{
+    const positions:number[]=[];
+    for(const p of doc?.paint??[]) {
+      if(cbdEdgeVisibility([p.e,p.n])<=0)continue;
+      const corners=[rectPoint(p,-p.length/2,-p.width/2),rectPoint(p,p.length/2,-p.width/2),rectPoint(p,p.length/2,p.width/2),rectPoint(p,-p.length/2,p.width/2)];
+      for(const i of [0,1,2,0,2,3])positions.push(...corners[i],ground+0.08);
+    }
+    const geometry=new BufferGeometry();geometry.setAttribute('position',new Float32BufferAttribute(positions,3));geometry.computeVertexNormals();return geometry;
+  },[doc,ground]);
+  useEffect(()=>()=>paint.dispose(),[paint]);
+  useFrame(()=>{
+    const target=controls?.target;if(!target)return;
+    if(paintGroup.current)paintGroup.current.visible=layers.roadMarkings!==false&&camera.position.distanceTo(target)<1800;
+  });
+  return <group>
+    {layers.trees!==false&&<group><Instances instances={treeParts.trunks} shape="cylinder" colour="#8b7863"/><Instances instances={treeParts.crowns} shape="crown" colour="#ffffff"/></group>}
+    {layers.streetlights!==false&&<group>
+      <Instances instances={lampParts.poles} shape="cylinder" colour="#969bb0"/>
+      <Instances instances={lampParts.arms} shape="box" colour="#969bb0"/>
+      <Instances instances={lampParts.heads} shape="box" colour="#858ca3"/>
+      <Instances instances={lampParts.bulbs} shape="bulb" colour={power>0?'#ffe4af':'#cad2d4'} power={power}/>
+      {power>0&&<><Instances instances={lampParts.pools} shape="pool" colour="#fff" power={power}/><NearbyLights lights={lights} ground={ground} power={power}/></>}
+    </group>}
+    <group ref={paintGroup} visible={false}><mesh geometry={paint} receiveShadow raycast={NO_RAYCAST}><meshStandardMaterial color="#ffffff" roughness={1} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-7}/></mesh></group>
+  </group>;
+}

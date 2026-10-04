@@ -1,3 +1,5 @@
+import type { StreetLayers, StreetDataStatus } from '../data/streetDetails';
+import streetSummary from '../data/street-details-summary.json';
 /*
  * ─────────────────────────────────────────────────────────────────────────
  * THE PANELS
@@ -392,7 +394,7 @@ export function ViewControls({
 /* ── 02 Discovery Map: the layers ─────────────────────── */
 
 /** What the map draws: the approved projects, and the sun's shadows. */
-export interface Layers {
+export interface Layers extends StreetLayers {
   developments: boolean;
   shadows: boolean;
 }
@@ -420,16 +422,20 @@ export interface Layers {
  *   A named padlock is more honest than a tick box that does nothing.
  */
 export function MapLayers({
+  mode = 'model',
+  streetDataStatus = 'ready',
   layers,
   onChange,
   onClose,
 }: {
+  mode?: 'street' | 'model' | 'integrated';
+  streetDataStatus?: StreetDataStatus;
   layers: Layers;
   onChange: (next: Layers) => void;
   onClose: () => void;
 }) {
   return (
-    <aside className="panel panel--left sheet" aria-labelledby="layers-title">
+    <aside className="panel panel--left sheet sheet--layers" aria-labelledby="layers-title">
       <div className="sheet__head">
         <h2 className="sheet__title" id="layers-title">
           Map layers
@@ -468,8 +474,12 @@ export function MapLayers({
               name: 'Sunlight & shadows',
               note: 'Preview shadows at the selected time',
             },
+            { key: 'trees', name: 'Trees', note: `${streetSummary.trees.toLocaleString()} recorded locations · 3D trees with estimated heights` },
+            { key: 'streetlights', name: 'Streetlights', note: `${streetSummary.lights.toLocaleString()} mapped poles · lights turn on automatically at dusk` },
+            { key: 'roadMarkings', name: 'Road markings', note: 'Mapped crossings and illustrative lane lines' },
+            { key: 'landmarks', name: 'Landmarks', note: 'Search or tap a landmark to find a place' },
           ] as const
-        ).map((layer) => (
+        ).filter(layer => layer.key === 'shadows' ? mode !== 'street' : layer.key === 'developments' || mode !== 'model').map((layer) => (
           <label className="switch" key={layer.key}>
             <span className="switch__text">
               <span className="switch__name">{layer.name}</span>
@@ -483,7 +493,7 @@ export function MapLayers({
             <input
               type="checkbox"
               className="switch__input"
-              checked={layers[layer.key]}
+              checked={layers[layer.key] !== false}
               onChange={(event) => onChange({ ...layers, [layer.key]: event.target.checked })}
             />
             <span className="switch__track" aria-hidden="true" />
@@ -491,6 +501,9 @@ export function MapLayers({
         ))}
       </div>
 
+      {mode !== 'model' && streetDataStatus === 'loading' && <p className="note" role="status">Loading trees, lamps and road details…</p>}
+      {mode !== 'model' && streetDataStatus === 'error' && <p className="note" role="alert">Street details could not load. The building map and landmark search are still available. Reload to try again.</p>}
+      {mode !== 'model' && <p className="note">Trees and streetlights add detail to the same sunlight map. Tree heights and pole sizes are estimated; lighting follows the selected date and time. Sunlight figures still measure building shadows. Lane paint is illustrative.</p>}
       <div className="soonlist">
         <p className="panel__eyebrow soonlist__head">Coming soon</p>
         {(

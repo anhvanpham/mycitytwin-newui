@@ -53,8 +53,9 @@
  */
 
 import { useEffect, useMemo, useRef } from 'react';
-import { BufferAttribute, Color, RingGeometry, type Group, type Texture } from 'three';
+import { BufferAttribute, Color, PlaneGeometry, RingGeometry, type Group, type Texture } from 'three';
 import type { CityModel } from '../data/model';
+import { cbdGroundPlacement, insideCBD } from './cbdBoundary';
 import { groundPlacement, textureCoordinate } from './basemap';
 import { groundSurfaceTexture, SURFACE_TILE_M } from './groundSurface';
 import { MeasureCursor } from './MeasureCursor';
@@ -65,9 +66,11 @@ export function Ground({
   groundAhdM,
   basemap,
   walking,
+  cbd = false,
   onPick,
 }: {
   model: CityModel;
+  cbd?: boolean;
   groundAhdM: number;
   /**
    * The map image, once it has arrived. Loaded by whoever owns this rather
@@ -90,8 +93,8 @@ export function Ground({
   // where the same identity change was tearing the map down on every refresh.
   const { minE, minN, maxE, maxN } = model.extent;
   const { centreE, centreN, size, placement } = useMemo(
-    () => groundPlacement({ minE, minN, maxE, maxN }),
-    [minE, minN, maxE, maxN],
+    () => cbd ? cbdGroundPlacement() : groundPlacement({ minE, minN, maxE, maxN }),
+    [cbd, minE, minN, maxE, maxN],
   );
 
   const geometry = useMemo(() => {
@@ -106,7 +109,7 @@ export function Ground({
      * generous because it is the only silhouette in the scene against the
      * sky, and a coarse one reads as a polygon.
      */
-    const plane = new RingGeometry(0, size / 2, 96, 48);
+    const plane = cbd ? new PlaneGeometry(size, size, 64, 64) : new RingGeometry(0, size / 2, 96, 48);
 
     /*
      * White under the map so the texture shows as itself. Under the walking
@@ -141,7 +144,7 @@ export function Ground({
     uv.needsUpdate = true;
     plane.setAttribute('color', new BufferAttribute(colours, 3));
     return plane;
-  }, [centreE, centreN, size, placement, basemap, walking]);
+  }, [centreE, centreN, size, placement, basemap, walking, cbd]);
 
   /*
    * The plane is rebuilt when the map arrives, and react-three-fiber replaces
@@ -290,7 +293,8 @@ export function Ground({
 
           // The hit is in three's world frame; enuToWorld sent
           // (east, north, up) to (east, up, -north), so this reads it back.
-          onPick([event.point.x, -event.point.z]);
+          const point:[number,number]=[event.point.x,-event.point.z];
+          if(!cbd || insideCBD(point))onPick(point);
         })
       }
     >

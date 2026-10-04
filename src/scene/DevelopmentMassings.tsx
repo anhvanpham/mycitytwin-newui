@@ -62,6 +62,7 @@ import { useInVr } from './xrStore';
 import { beginTap, trackTap, wasDragged, type Gesture } from './tap';
 
 interface DevelopmentMassingsProps {
+  pastel?: boolean;
   developments: Development[];
   /** The proposal being read about, drawn selected; null for none. */
   focus: Development | null;
@@ -75,6 +76,7 @@ interface DevelopmentMassingsProps {
 
 /** The approved projects as separate, clickable, state-coloured meshes. */
 export function DevelopmentMassings({
+  pastel = false,
   developments,
   focus,
   groundAhdM,
@@ -202,17 +204,21 @@ export function DevelopmentMassings({
               quietly enough that the eye still goes to the one being read
               about, but plainly enough to be seen and clicked.
             */}
-            <meshStandardMaterial
-              color={focused ? '#8fdcc7' : invites ? '#6fbfa6' : '#cfe6dd'}
-              roughness={focused ? 0.4 : 0.55}
+            <meshPhysicalMaterial
+              clearcoat={pastel?0.65:0}
+              clearcoatRoughness={0.22}
+              iridescence={pastel?0.16:0}
+              iridescenceIOR={1.25}
+              color={pastel ? focused ? '#b7eddf' : invites ? '#b1ddce' : '#e0f0ea' : focused ? '#8fdcc7' : invites ? '#6fbfa6' : '#cfe6dd'}
+              roughness={pastel?0.3:focused ? 0.4 : 0.55}
               metalness={0}
-              emissive="#2fbfa2"
-              emissiveIntensity={focused ? 0.3 : invites ? 0.16 : 0.05}
+              emissive={pastel?'#beece9':'#2fbfa2'}
+              emissiveIntensity={pastel?focused?0.16:invites?0.075:0.025:focused ? 0.3 : invites ? 0.16 : 0.05}
               transparent
               opacity={focused ? 0.95 : invites ? 0.9 : 0.78}
             />
             {/* The one being read about is outlined too — see SelectionEdges. */}
-            {focused && <SelectionEdges parts={development.parts} floorAhdM={groundAhdM} />}
+            {focused && <SelectionEdges pastel={pastel} parts={development.parts} floorAhdM={groundAhdM} />}
           </mesh>
         );
       })}

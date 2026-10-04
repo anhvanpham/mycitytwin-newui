@@ -1,0 +1,20 @@
+.map-dimension { position:absolute; top:calc(var(--h-header) + 12px); right:16px; z-index:6; display:flex; gap:4px; padding:4px; background:rgba(255,255,255,.95); border:1px solid #d9ded9; border-radius:12px; box-shadow:0 2px 8px #23392e12; }
+.map-dimension button { border:0; border-radius:8px; background:transparent; color:#24453b; padding:8px 13px; font:600 13px/1.2 'Nunito Variable',sans-serif; cursor:pointer; }
+.map-dimension button[aria-pressed="true"] { background:#dceee4; color:#13543e; }
+.map-dimension button:focus-visible { outline:2px solid #1d795c; outline-offset:2px; }
+.cbd-attribution { position:absolute; bottom:3px; right:8px; z-index:5; padding:2px 6px; background:#ffffffdf; color:#536057; font:10px/1.4 'Nunito Variable',sans-serif; border-radius:3px; }
+.cbd-attribution a { color:inherit; }
+.cbd-landmark { width:max-content; max-width:150px; padding:3px 7px; border:1px solid #ddd2e8; border-radius:6px; background:#fffffff0; color:#654777; font:600 11px/1.3 'Nunito Variable',sans-serif; box-shadow:0 1px 4px #0001; cursor:pointer; }
+.cbd-landmark:hover { background:#f3edf8; }
+@media(max-width:650px) { .map-dimension { right:8px; } .map-dimension button { padding:7px 10px; } .cbd-landmark { font-size:10px; max-width:110px; } }
+
+.map-dimension { flex-wrap:wrap; max-width:230px; }
+.map-lights-status { flex-basis:100%; padding:3px 8px; color:#536057; font:11px/1.3 "Nunito Variable",sans-serif; }
+
+/* Layer settings must sit above the sunlight sidebar and comparison canvases. */
+.panel.sheet--layers { z-index:8; }
+
+/* Keep map legends aligned with the crystal palette without changing the landing page. */
+body:has(.map-dimension) .mapkey__swatch--existing { background:#edf0ff; box-shadow:inset 0 0 0 1px #9a9ebc; }
+body:has(.map-dimension) .mapkey__swatch--approved { background:#b1ddce; box-shadow:inset 0 0 0 1px #87aaa4; }
+body:has(.map-dimension) .site-label--found { color:#986285; }
