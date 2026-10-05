@@ -17,6 +17,7 @@
 import { useEffect, useRef } from 'react';
 import { bundled } from '../data/bundled';
 import type { Development } from '../data/model';
+import { DEVELOPMENT_STATUS } from '../data/developmentStatus';
 
 /**
  * The credit Mapbox is owed for the map under the city.
@@ -167,6 +168,7 @@ export function Header({
   children?: React.ReactNode;
 }) {
   const field = useRef<HTMLInputElement>(null);
+  const mobileMenu = useRef<HTMLDetailsElement>(null);
 
   /*
    * "/" puts the cursor in the search, unless something is already being
@@ -278,6 +280,10 @@ export function Header({
       </div>
 
       <div className="header__actions">
+        {nav && <details className="header__mobile-menu" ref={mobileMenu}>
+          <summary aria-label="Navigation menu">Menu</summary>
+          <nav aria-label="Mobile navigation" onClick={event => { if ((event.target as HTMLElement).closest('button') && mobileMenu.current) mobileMenu.current.open = false; }}>{nav}</nav>
+        </details>}
         {nav}
         {onEnterVr && (
           /*
@@ -360,9 +366,8 @@ export function StatusBadge({
    */
   tone?: 'solid' | 'soft';
 }) {
-  const construction = status === 'UNDER CONSTRUCTION';
-  const variant = tone === 'soft' ? ' badge--soft' : construction ? ' badge--construction' : '';
-  return <span className={`badge${variant}`}>{status}</span>;
+  const appearance = DEVELOPMENT_STATUS[status];
+  return <span data-status={status} className={`badge badge--${appearance.key}${tone === 'soft' ? ' badge--soft' : ''}`} style={{ background: tone === 'soft' ? appearance.soft : appearance.ink, color: tone === 'soft' ? appearance.ink : '#ffffff' }}>{appearance.label}</span>;
 }
 
 /**

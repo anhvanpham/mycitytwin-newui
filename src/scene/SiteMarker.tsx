@@ -24,6 +24,8 @@
 
 import { Html } from '@react-three/drei';
 import { enuToWorld } from './frame';
+import type { DevelopmentStatus } from '../data/model';
+import { DEVELOPMENT_STATUS } from '../data/developmentStatus';
 
 export interface SiteMarkerSubject {
   /** Where it stands, east/north metres. */
@@ -34,6 +36,7 @@ export interface SiteMarkerSubject {
   label: string;
   /** Decides the colour, so the marker matches the massing beneath it. */
   kind: 'development' | 'building' | 'landmark';
+  status?: DevelopmentStatus;
 }
 
 /** Clearance above the roof, so the pin reads as pointing at the whole thing. */
@@ -54,7 +57,8 @@ export function SiteMarker({
   // Pink for a search result, green for a proposal — the same rule the
   // buildings themselves follow, so the marker never contradicts the colour
   // of the thing it is marking.
-  const colour = pastel ? subject.kind === 'landmark' ? '#b3a4d5' : found ? '#dca9c8' : '#87bfb3' : subject.kind === 'landmark' ? '#7662aa' : found ? '#c9457f' : '#14624a';
+  const appearance = subject.status ? DEVELOPMENT_STATUS[subject.status] : DEVELOPMENT_STATUS.APPROVED;
+  const colour = !found ? appearance.pin : pastel ? subject.kind === 'landmark' ? '#b3a4d5' : found ? '#dca9c8' : '#87bfb3' : subject.kind === 'landmark' ? '#7662aa' : found ? '#c9457f' : '#14624a';
 
   return (
     <>
@@ -97,7 +101,7 @@ export function SiteMarker({
         center
         zIndexRange={[1, 0]}
       >
-        <span className={`site-label${subject.kind === 'landmark' ? ' site-label--landmark' : found ? ' site-label--found' : ''}`}>
+        <span style={subject.kind === 'development' ? { color: appearance.ink } : undefined} className={`site-label${subject.kind === 'landmark' ? ' site-label--landmark' : found ? ' site-label--found' : ''}`}>
           {subject.label}
         </span>
       </Html>

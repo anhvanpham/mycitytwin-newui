@@ -36,6 +36,8 @@ import { useThree } from '@react-three/fiber';
 import { Raycaster, Vector2, type Mesh, type Object3D } from 'three';
 import type { Massing } from '../data/model';
 import { ownerAt } from './massing';
+import { worldToEnu } from './frame';
+import type { RoofPanel } from './solarPanel';
 import { beginTap, trackTap, wasDragged, type Gesture } from './tap';
 import { useInVr } from './xrStore';
 
@@ -47,18 +49,24 @@ export interface PickableCity {
 
 export function BuildingPicker({
   city,
+  panelMarkers,
   blockers,
   highlighted,
   onSelect,
+  onStopRoofPlacement,
+  onPickRoof,
 }: {
   /** The welded city meshes: the ready buildings and the unresolved ones. */
   city: PickableCity[];
   /** What can stand in front of the city: the projects' group. */
+  panelMarkers?: RefObject<Object3D | null>;
   blockers: RefObject<Object3D | null>;
   /** The highlighted building's group and id — drawn apart from the city. */
   highlighted: { object: RefObject<Object3D | null>; id: string | null };
   /** Undefined switches the picker off. */
   onSelect?: (buildingId: string) => void;
+  onStopRoofPlacement?: () => void;
+  onPickRoof?: (roof: RoofPanel) => void;
 }) {
   const gl = useThree((state) => state.gl);
   const camera = useThree((state) => state.camera);
@@ -68,12 +76,12 @@ export function BuildingPicker({
    * Read through a ref, so the listener below is not torn down and rebuilt
    * every time the parent renders with new arrays.
    */
-  const latest = useRef({ city, blockers, highlighted, onSelect, camera });
+  const latest = useRef({ city, panelMarkers, blockers, highlighted, onSelect, onStopRoofPlacement, onPickRoof, camera });
   useEffect(() => {
-    latest.current = { city, blockers, highlighted, onSelect, camera };
+    latest.current = { city, panelMarkers, blockers, highlighted, onSelect, onStopRoofPlacement, onPickRoof, camera };
   });
 
-  const enabled = onSelect !== undefined && !inVr;
+  const enabled = (onSelect !== undefined || onPickRoof !== undefined) && !inVr;
 
   useEffect(() => {
     if (!enabled) return;
@@ -81,23 +89,36 @@ export function BuildingPicker({
     const raycaster = new Raycaster();
     const ndc = new Vector2();
     let gesture: Gesture | null = null;
+    let touchTap = false;
+    let multiTouch = false;
+    const pointers = new Set<number>();
     /** Whether each of the last two clicks was a click and not a drag. */
     let clean: [boolean, boolean] = [false, false];
 
     const down = (event: PointerEvent) => {
-      if (event.button === 0) gesture = beginTap(event);
+      pointers.add(event.pointerId);
+      if (pointers.size === 1) multiTouch = false;
+      if (pointers.size > 1) multiTouch = true;
+      if (event.button === 0) {
+        touchTap = event.pointerType === 'touch';
+        gesture = multiTouch ? null : beginTap(event);
+      }
     };
     const move = (event: PointerEvent) => {
       gesture = trackTap(gesture, event);
     };
+    const up = (event: PointerEvent) => { pointers.delete(event.pointerId); };
+    const cancel = (event: PointerEvent) => { pointers.delete(event.pointerId); gesture = null; };
     const click = (event: MouseEvent) => {
-      clean = [clean[1], !wasDragged(gesture, event)];
+      clean = [clean[1], !multiTouch && gesture !== null && !wasDragged(gesture, event)];
       gesture = null;
+      if ((latest.current.onPickRoof || touchTap) && clean[1]) dblclick(event);
     };
     const dblclick = (event: MouseEvent) => {
-      if (!clean[0] || !clean[1]) return;
-      const { city, blockers, highlighted, onSelect, camera } = latest.current;
-      if (!onSelect) return;
+      if (event.type === 'dblclick' && latest.current.onPickRoof) return;
+      if (!latest.current.onPickRoof && !touchTap && (!clean[0] || !clean[1])) return;
+      const { city, panelMarkers, blockers, highlighted, onSelect, onPickRoof, camera } = latest.current;
+      if (!onSelect && !onPickRoof) return;
 
       const rect = canvas.getBoundingClientRect();
       ndc.set(
@@ -108,16 +129,28 @@ export function BuildingPicker({
 
       const meshes = city.map((part) => part.mesh.current).filter((m): m is Mesh => m !== null);
       const targets: Object3D[] = [...meshes];
+      if (panelMarkers?.current) targets.push(panelMarkers.current);
       if (blockers.current) targets.push(blockers.current);
       if (highlighted.object.current) targets.push(highlighted.object.current);
       const hit = raycaster.intersectObjects(targets, true)[0];
       if (!hit) return;
+      let panelNode: Object3D | null = hit.object;
+      while (panelNode) { if (panelNode.userData.solarPanelId) return; panelNode = panelNode.parent; }
 
+      const roofHit = !!hit.face && hit.face.normal.z > 0.9;
+      const choose = (id: string, kind: "building" | "development" = "building") => {
+        if (onPickRoof) {
+          if (!roofHit) return;
+          const enu = worldToEnu([hit.point.x, hit.point.y, hit.point.z]);
+          onPickRoof({ en: [enu[0], enu[1]], ahdM: enu[2], buildingId: id, kind });
+        } else onSelect?.(id);
+      };
+      if (onPickRoof && hit.object.userData.solarDevelopmentId) { choose(hit.object.userData.solarDevelopmentId, "development"); return; }
       // The highlighted building: anything inside its group.
       let node: Object3D | null = hit.object;
       while (node) {
         if (node === highlighted.object.current) {
-          if (highlighted.id) onSelect(highlighted.id);
+          if (highlighted.id) choose(highlighted.id);
           return;
         }
         node = node.parent;
@@ -127,16 +160,23 @@ export function BuildingPicker({
       // A project in front: its own handler has it.
       if (!part?.owned || hit.faceIndex == null) return;
       const owner = ownerAt(part.owned, hit.faceIndex);
-      if (owner) onSelect(owner.parentId);
+      if (owner) choose(owner.parentId);
     };
 
+    const stop = (event: MouseEvent) => { if (latest.current.onStopRoofPlacement) { event.preventDefault(); latest.current.onStopRoofPlacement(); } };
+    canvas.addEventListener('contextmenu', stop);
     canvas.addEventListener('pointerdown', down);
     canvas.addEventListener('pointermove', move);
+    canvas.addEventListener('pointerup', up);
+    canvas.addEventListener('pointercancel', cancel);
     canvas.addEventListener('click', click);
     canvas.addEventListener('dblclick', dblclick);
     return () => {
+      canvas.removeEventListener('contextmenu', stop);
       canvas.removeEventListener('pointerdown', down);
       canvas.removeEventListener('pointermove', move);
+      canvas.removeEventListener('pointerup', up);
+      canvas.removeEventListener('pointercancel', cancel);
       canvas.removeEventListener('click', click);
       canvas.removeEventListener('dblclick', dblclick);
     };

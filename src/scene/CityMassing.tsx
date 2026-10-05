@@ -1,3 +1,4 @@
+import type { SolarSystemHover } from './RoofPanelMarker';
 import { useEffect, useMemo, useRef } from 'react';
 import { Color, Float32BufferAttribute, type Group, type Mesh } from 'three';
 import type { CityModel, Development } from '../data/model';
@@ -21,7 +22,13 @@ import { OpenSpace } from './OpenSpace';
 import { HighlightedBuilding } from './HighlightedBuilding';
 import { BuildingPicker } from './BuildingPicker';
 
+import type { RoofPanel, PlacedPanel } from "./solarPanel";
+import { RoofPanelMarker } from "./RoofPanelMarker";
 interface CityMassingProps {
+  solarHover?: SolarSystemHover;
+  solarPanels?: PlacedPanel[];
+  onStopRoofPlacement?: () => void;
+  onPickRoof?: (roof: RoofPanel) => void;
   streetMap?: boolean;
   sunAltitudeDeg?: number;
   streetDetails?: StreetDetailsDoc | null;
@@ -87,6 +94,10 @@ export function CityMassing({
   showAllProposals,
   onSelectDevelopment,
   onSelectBuilding,
+  solarHover,
+  solarPanels,
+  onStopRoofPlacement,
+  onPickRoof,
   receptor,
   windowAt,
   onPickReceptor,
@@ -189,6 +200,7 @@ export function CityMassing({
   const builtMesh = useRef<Mesh>(null);
   const unresolvedMesh = useRef<Mesh>(null);
   const highlightGroup = useRef<Group>(null);
+  const panelMarkers = useRef<Group>(null);
   const projectsGroup = useRef<Group>(null);
 
   /*
@@ -318,14 +330,18 @@ export function CityMassing({
         </group>
       )}
 
+      <group ref={panelMarkers}>{solarPanels?.filter(panel => !replaced.has(panel.roof.buildingId) && (showHighlighted || panel.roof.buildingId !== highlightedBuildingId) && (panel.roof.kind !== "development" || showProposed)).map(panel => <RoofPanelMarker key={panel.id} {...panel} solarHover={solarHover}/> )}</group>
       <BuildingPicker
         city={[
           { mesh: builtMesh, owned: built },
           { mesh: unresolvedMesh, owned: unresolved },
         ]}
+        panelMarkers={panelMarkers}
         blockers={projectsGroup}
         highlighted={{ object: highlightGroup, id: highlightedBuildingId }}
-        onSelect={interactive && !walking ? onSelectBuilding : undefined}
+        onStopRoofPlacement={onStopRoofPlacement}
+        onPickRoof={interactive && !walking ? onPickRoof : undefined}
+        onSelect={interactive && !walking && !onPickRoof ? onSelectBuilding : undefined}
       />
     </CBDClip>
   );

@@ -38,13 +38,13 @@ describe('the comparison page', () => {
     expect(html).toContain('What is here today');
     expect(html).toContain('Planned projects at full height');
     // "Today" draws no approved project at all, including those being built.
-    expect(html).toContain('Approved and in-progress projects are not shown.');
+    expect(html).toContain('Approved and under-construction projects are hidden.');
   });
 
   it('has the way back, the way to another spot, and the sources', () => {
     const html = page();
     expect(html).toContain('Back to sunlight');
-    expect(html).toContain('Choose another spot');
+    expect(html).toContain('Choose another spot on the ground');
     expect(html).toContain('Sources &amp; limitations');
     expect(html).toContain('Views move together');
   });

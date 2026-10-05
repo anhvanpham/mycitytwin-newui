@@ -478,11 +478,7 @@ export function LandingPage({
         <div className="landing__hero">
           <div className="landing__welcome">
             <span className="landing__sun" aria-hidden="true">
-              <svg className="landing__sun-icon" viewBox="0 0 24 24" focusable="false">
-                <circle cx="12" cy="12" r="4.5" fill="currentColor" />
-                <path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.58 4.58l2.12 2.12M17.3 17.3l2.12 2.12M4.58 19.42l2.12-2.12M17.3 6.7l2.12-2.12"
-                  fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-              </svg>
+              <img className="landing__sun-icon" src="https://cdn-icons-png.flaticon.com/512/3050/3050031.png" alt="" width="24" height="24" />
             </span>
             <span>Melbourne CBD, from a new angle.</span>
           </div>

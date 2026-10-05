@@ -19,7 +19,7 @@
  *   - Step 02 shows the date, hour and season the app is set to now, in the
  *     chips the sunlight screen uses for them.
  *   - The key to the map. The design's "In progress" colour is left out: the
- *     model draws approved projects one way whatever their stage. In its
+ *     model uses mint for Approved and amber for Under construction. In its
  *     place, the pink a searched building is drawn in. "Selected" is the
  *     outline, shown as an outline — told apart by shape, not hue.
  *   - "Explore the city", and "Back to sunlight" when a place is chosen.
@@ -33,10 +33,11 @@ import { useEffect, useRef } from 'react';
 import { bundled } from '../data/bundled';
 import { SkylineFilm } from './LandingPage';
 import { SourcesLink } from './Sources';
+import { DEVELOPMENT_LEGEND } from '../data/developmentStatus';
 import '../styles/how.css';
 
 /** The map's credit, for the photographs of it. */
-const MAP_CREDIT = '© Mapbox © OpenStreetMap';
+const MAP_CREDIT = 'OpenFreeMap · © OpenMapTiles · © OpenStreetMap';
 
 export function HowItWorksPage({
   dateText,
@@ -93,7 +94,7 @@ export function HowItWorksPage({
             <div className="how__words">
               <span className="how__number" aria-hidden="true">01</span>
               <h2 className="how__step-title">Find any building</h2>
-              <p>Search an address to open its page. Or explore the map and double-click any building.</p>
+              <p>Search an address to open its page. On the map, tap a building on your phone or double-click on desktop.</p>
             </div>
           </li>
 
@@ -126,7 +127,7 @@ export function HowItWorksPage({
               <figure className="how__picture">
                 <img
                   src={bundled('how/after.jpg')}
-                  alt="The same view with the approved projects built."
+                  alt="The same view with approved and under-construction projects at full height."
                 />
                 <figcaption className="how__chip">After planned projects are built</figcaption>
               </figure>
@@ -150,10 +151,10 @@ export function HowItWorksPage({
             <span className="how__swatch how__swatch--existing" aria-hidden="true" />
             Existing
           </span>
-          <span className="how__key">
-            <span className="how__swatch how__swatch--approved" aria-hidden="true" />
-            Approved
-          </span>
+          {DEVELOPMENT_LEGEND.map(status => <span className="how__key" key={status.key}>
+            <span className="how__swatch" style={{ background: status.map }} aria-hidden="true" />
+            {status.label}
+          </span>)}
           <span className="how__key">
             <span className="how__swatch how__swatch--searched" aria-hidden="true" />
             Searched building
@@ -162,7 +163,7 @@ export function HowItWorksPage({
             <span className="how__swatch how__swatch--selected" aria-hidden="true" />
             Selected
           </span>
-          <span className="how__legend-note">Double-click any building to open it.</span>
+          <span className="how__legend-note">Tap on mobile or double-click on desktop to open a building.</span>
         </div>
 
         <div className="how__actions">

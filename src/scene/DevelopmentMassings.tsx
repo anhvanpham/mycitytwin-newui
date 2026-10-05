@@ -53,6 +53,7 @@
  *   exists to explain.
  */
 
+import { DEVELOPMENT_STATUS } from '../data/developmentStatus';
 import { useEffect, useMemo, useRef } from 'react';
 import type { BufferGeometry } from 'three';
 import type { Development } from '../data/model';
@@ -122,6 +123,7 @@ export function DevelopmentMassings({
   const pressedAt = useRef<Gesture | null>(null);
   /** Whether the latest click was a clean one, for the double click after it. */
   const lastClickClean = useRef(false);
+  const touchTap = useRef(false);
   const inVr = useInVr();
 
   // A pointer cursor left behind when this unmounts under the pointer.
@@ -147,13 +149,15 @@ export function DevelopmentMassings({
         return (
           <mesh
             key={development.devId}
+            userData={{ solarDevelopmentId: development.devId }}
             geometry={geometry}
             castShadow
             receiveShadow
             onPointerDown={
               interactive
                 ? (event) => {
-                    pressedAt.current = beginTap(event.nativeEvent);
+                    touchTap.current = event.nativeEvent.pointerType === "touch";
+                    pressedAt.current = event.nativeEvent.isPrimary === false ? null : beginTap(event.nativeEvent);
                   }
                 : undefined
             }
@@ -174,9 +178,9 @@ export function DevelopmentMassings({
                      */
                     const from = pressedAt.current;
                     pressedAt.current = null;
-                    lastClickClean.current = !wasDragged(from, event.nativeEvent);
+                    lastClickClean.current = from !== null && !wasDragged(from, event.nativeEvent);
                     // In a headset one pull opens it; at a desk, see onDoubleClick.
-                    if (inVr && lastClickClean.current) onSelect(development);
+                    if ((inVr || touchTap.current) && lastClickClean.current) onSelect(development);
                   }
                 : undefined
             }
@@ -209,10 +213,10 @@ export function DevelopmentMassings({
               clearcoatRoughness={0.22}
               iridescence={pastel?0.16:0}
               iridescenceIOR={1.25}
-              color={pastel ? focused ? '#b7eddf' : invites ? '#b1ddce' : '#e0f0ea' : focused ? '#8fdcc7' : invites ? '#6fbfa6' : '#cfe6dd'}
+              color={DEVELOPMENT_STATUS[development.status].map}
               roughness={pastel?0.3:focused ? 0.4 : 0.55}
               metalness={0}
-              emissive={pastel?'#beece9':'#2fbfa2'}
+              emissive={DEVELOPMENT_STATUS[development.status].map}
               emissiveIntensity={pastel?focused?0.16:invites?0.075:0.025:focused ? 0.3 : invites ? 0.16 : 0.05}
               transparent
               opacity={focused ? 0.95 : invites ? 0.9 : 0.78}

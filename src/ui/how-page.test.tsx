@@ -49,15 +49,15 @@ describe('the How it works page', () => {
   it('keys only the colours the map draws, each with its word', () => {
     const html = page();
     expect(html).not.toContain('In progress');
-    for (const key of ['Existing', 'Approved', 'Searched building', 'Selected']) {
-      expect(html).toMatch(new RegExp(`how__swatch[^"]*" aria-hidden="true"></span>${key}<`));
+    for (const key of ['Existing', 'Approved', 'Under construction', 'Searched building', 'Selected']) {
+      expect(html).toMatch(new RegExp(`how__swatch[^"]*"[^>]*aria-hidden="true"[^>]*></span>${key}<`));
     }
   });
 
   it('describes the pictures, and credits the map they show', () => {
     const html = page();
     expect(html.match(/<img [^>]*alt="[^"]+"/g)).toHaveLength(4);
-    expect(html).toContain('© Mapbox © OpenStreetMap');
+    expect(html).toContain('OpenFreeMap · © OpenMapTiles · © OpenStreetMap');
     expect(html).toContain('Sources &amp; limitations');
   });
 

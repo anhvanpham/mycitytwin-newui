@@ -1,3 +1,6 @@
+import type { SolarSystemHover } from './RoofPanelMarker';
+import { StreetActivityLayer } from './StreetActivityLayer';
+import type { ActivityDoc } from '../data/streetActivity';
 /*
  * ─────────────────────────────────────────────────────────────────────────
  * THE 3D VIEW
@@ -108,7 +111,13 @@ import type { CameraLink } from './cameraLink';
 import type { SunAngles } from './sun';
 import type { CityModel, Development } from '../data/model';
 
+import type { RoofPanel, PlacedPanel } from "./solarPanel";
 interface SceneCanvasProps {
+  solarHover?: SolarSystemHover;
+  solarPanels?: PlacedPanel[];
+  onStopRoofPlacement?: () => void;
+  onPickRoof?: (roof: RoofPanel) => void;
+  activity?: { doc: ActivityDoc; index: number; selected: number; onSelect: (id: number) => void };
   streetMap?: boolean;
   streetDetails?: StreetDetailsDoc | null;
   streetLayers?: StreetLayers;
@@ -214,6 +223,7 @@ interface SceneCanvasProps {
 
 /** The canvas, the camera, the lights and the city — the whole 3D view. */
 export function SceneCanvas({
+  activity,
   model,
   streetMap = false,
   streetDetails = null,
@@ -228,6 +238,10 @@ export function SceneCanvas({
   showAllProposals,
   onSelectDevelopment,
   onSelectBuilding,
+  solarHover,
+  solarPanels,
+  onStopRoofPlacement,
+  onPickRoof,
   receptor,
   windowAt,
   onPickReceptor,
@@ -648,6 +662,10 @@ export function SceneCanvas({
             showProposed={showProposed}
             showAllProposals={showAllProposals}
             onSelectDevelopment={onSelectDevelopment}
+            solarHover={solarHover}
+            solarPanels={solarPanels}
+            onStopRoofPlacement={onStopRoofPlacement}
+            onPickRoof={onPickRoof}
             onSelectBuilding={onSelectBuilding}
             receptor={receptor}
             windowAt={windowAt}
@@ -691,6 +709,7 @@ export function SceneCanvas({
           names are CSS 3D, which ignores the shift, so they would sit beside
           their streets.
         */}
+        {streetMap && activity && <StreetActivityLayer {...activity} ground={ground} onSelect={activity.onSelect} />}
         {streetMap && streetLayers.landmarks !== false && !walking && <LandmarkLabels ground={ground} onSelect={interactive ? onSelectLandmark : undefined}/>}
         {!walking && !insetOn && !lensShifted && (
           <StreetLabels cbd={streetMap} initialEast={targetE} initialNorth={targetN} groundAhdM={ground} />

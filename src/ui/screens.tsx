@@ -102,7 +102,7 @@ export function SearchResults({
     return (
       <p className="results__none">
         Nothing matches that. {model.searchable.length.toLocaleString()} buildings
-        and {model.developments.length} approved projects can be searched by
+        and {model.developments.length} developments can be searched by
         address, plus {LANDMARKS.length} landmarks by name. Some older buildings have no address on record.
       </p>
     );
@@ -466,8 +466,8 @@ export function MapLayers({
           [
             {
               key: 'developments',
-              name: 'Approved projects',
-              note: 'Approved, and those already under construction',
+              name: 'Developments',
+              note: 'Approved and under construction',
             },
             {
               key: 'shadows',
@@ -679,7 +679,7 @@ function SubjectHead({
       */}
       <div className="subject">
         {status && <StatusBadge status={status} tone="soft" />}
-        {existing && <span className="badge badge--soft">Existing</span>}
+        {existing && <span className="badge badge--soft badge--existing">Existing</span>}
         {/* Focusable from script only, for the arrow-key move above. */}
         <h2 className="sheet__title" id="subject-title" tabIndex={-1}>
           {title}
@@ -784,6 +784,7 @@ function splitUses(development: Development) {
  *   sunlight screen measures a point the reader chooses instead.
  */
 export function DevelopmentPanel({
+  onSolar,
   development,
   storeys,
   tab,
@@ -791,6 +792,7 @@ export function DevelopmentPanel({
   onBack,
   onClose,
 }: {
+  onSolar?: () => void;
   development: Development;
   /** From the details endpoint, when it has answered; left out until then. */
   storeys?: number;
@@ -882,6 +884,7 @@ export function DevelopmentPanel({
           The building reaches {tallest.topAhdM.toFixed(0)} m above the model datum.
         </p>
 
+        {onSolar && <button type="button" className="button button--block solar-overview-button" onClick={onSolar}>Place a solar panel here</button>}
         <button
           type="button"
           className="button button--block"
@@ -993,6 +996,7 @@ export const SUNLIGHT_HOWTO_ID = 'sunlight-howto';
  *   being placeholders.
  */
 export function SunlightSheet({
+  solar,
   status,
   title,
   locality,
@@ -1016,6 +1020,7 @@ export function SunlightSheet({
   onDetails,
   onBack,
 }: {
+  solar?: React.ReactNode;
   status?: Development['status'];
   title: string;
   /** Suburb, state and postcode, when the address had them to give. */
@@ -1264,10 +1269,10 @@ export function SunlightSheet({
           </div>
           <p className="block__note">
             {afterPlans
-              ? 'Approved and in-progress projects at their planned height.'
+              ? 'Approved and under-construction projects at their planned height.'
               : subjectKind === 'building'
                 ? 'The city as it stands.'
-                : 'The city as it stands — this project is not built yet.'}
+                : 'Baseline buildings; approved and under-construction projects are hidden.'}
           </p>
           {subjectShown && (
             <label className="choice__row choice__row--check">
@@ -1280,6 +1285,8 @@ export function SunlightSheet({
             </label>
           )}
         </section>
+
+        {solar}
 
         {/*
           ── WHICH QUESTION IS BEING ASKED ──────────────────────────────────
@@ -1410,7 +1417,7 @@ export function SunlightSheet({
                 aria-live="polite"
               >
                 {/* Not the date any more: the field above owns that. */}
-                <p className="result__eyebrow">At this spot</p>
+                <p className="result__eyebrow">At this ground spot</p>
                 {words?.none ? (
                   <p className="result__figure result__figure--none">{words.none}</p>
                 ) : (
@@ -1452,7 +1459,7 @@ export function SunlightSheet({
                 className="button button--block"
                 onClick={onChoose}
               >
-                Choose another point
+                Choose another spot on the ground
               </button>
 
               <div className="sheet__actions">
@@ -1556,8 +1563,8 @@ export function SunlightSheet({
             <li>Choose a date or a season above.</li>
             <li>Move the time along the bar at the bottom, or press play, to follow the shadow.</li>
             <li>{subjectKind === 'building'
-              ? 'Switch the neighbourhood view to see today against after the approved projects.'
-              : 'Switch the neighbourhood view, or compare the two side by side, to see today against after the approved projects.'}</li>
+              ? 'Switch the neighbourhood view to see today against after the approved and under-construction projects.'
+              : 'Switch the neighbourhood view, or compare the two side by side, to see today against after the approved and under-construction projects.'}</li>
             <li>Choose a spot on the ground to measure what this {noun} takes from it.</li>
           </ol>
         </details>
@@ -1587,7 +1594,7 @@ export function SunlightSheet({
       <p className="sheet__fine">
         {measuring === 'window'
           ? apartment?.sunlight
-            ? `${apartment.hostDemolished ? 'The approved plan replaces this building, so there is no “once built” figure to compare against. ' : ''}Sampled every ${apartment.sunlight.stepMinutes} minutes, counting every building in the model including this one. Measured at one representative point on that side — a flat at the far end of the same wall may differ. Buildings are flat-topped blocks: balconies, awnings, window reveals and the shape of the roof are not modelled, and nor is cloud. `
+            ? `${apartment.hostDemolished ? 'The development scenario replaces this building, so there is no “once built” figure to compare against. ' : ''}Sampled every ${apartment.sunlight.stepMinutes} minutes, counting every building in the model including this one. Measured at one representative point on that side — a flat at the far end of the same wall may differ. Buildings are flat-topped blocks: balconies, awnings, window reveals and the shape of the roof are not modelled, and nor is cloud. `
             : ''
           : measured
             ? spotFinePrint(measured.stepMinutes)
@@ -1856,6 +1863,7 @@ export function TimeBar({
  *   projects around it added to show what changes.
  */
 export function BuildingPanel({
+  onSolar,
   label,
   locality,
   heightM,
@@ -1865,6 +1873,7 @@ export function BuildingPanel({
   onBack,
   onClose,
 }: {
+  onSolar?: () => void;
   /** The street address, the title unless the record has a name. */
   label: string;
   /** Suburb, state and postcode, when the address had them to give. */
@@ -1973,6 +1982,7 @@ export function BuildingPanel({
           </p>
         )}
 
+        {onSolar && <button type="button" className="button button--block solar-overview-button" onClick={onSolar}>Place a solar panel here</button>}
         <button type="button" className="button button--block" onClick={onSunlight}>
           Explore sunlight &amp; shadow
         </button>

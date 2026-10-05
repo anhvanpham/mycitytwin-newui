@@ -11,7 +11,7 @@
  *   is turned to, the other shows from the same place.
  *
  * WHAT IS ON IT
- *   - "Back to sunlight", the page title and the place.
+ *   - A back button, the page title and the place.
  *   - "Views move together", and the key to the colours.
  *   - Two framed windows with a heading and a line under each saying what
  *     is drawn in it. The windows are empty: this page measures them and
@@ -51,6 +51,10 @@ function longDate({ day, month, year }: SimulationDate): string {
 
 export function ComparePage({
   title,
+  solar = false,
+  solarTotals,
+  solarDifference,
+  solarLoss,
   kindLabel,
   date,
   onDate,
@@ -68,6 +72,10 @@ export function ComparePage({
 }: {
   /** The place, as the sunlight screen names it. */
   title: string;
+  solar?: boolean;
+  solarDifference?: string;
+  solarLoss?: string;
+  solarTotals?: {before: string; after: string};
   /** "Existing building" or "Approved development". */
   kindLabel: string;
   date: SimulationDate;
@@ -170,10 +178,10 @@ export function ComparePage({
                 strokeLinejoin="round"
               />
             </svg>
-            Back to sunlight
+            {solar ? 'Back to rooftop solar' : 'Back to sunlight'}
           </button>
           <h1 className="compare__title" id="compare-title" ref={heading} tabIndex={-1}>
-            Compare sunlight
+            {solar ? 'Compare rooftop solar' : 'Compare sunlight'}
           </h1>
           <p className="compare__place">
             {title} · {kindLabel}
@@ -202,17 +210,21 @@ export function ComparePage({
           {/* Empty: App lays the "today" canvas over this box. */}
           <div className="compare__frame" ref={today} />
           <figcaption className="compare__caption">
-            The city as it stands. Approved and in-progress projects are not shown.
+            {solarTotals ? `Before · ${solarTotals?.before} per simulation day` : 'Baseline buildings. Approved and under-construction projects are hidden.'}
           </figcaption>
         </figure>
         <figure className="compare__view">
           <h2 className="compare__view-title">Planned projects at full height</h2>
           <div className="compare__frame" ref={after} />
           <figcaption className="compare__caption">
-            Approved and in-progress projects at their planned height.
+            {solarTotals ? `After · ${solarTotals?.after} per simulation day` : 'Approved and under-construction projects at their planned height.'}
           </figcaption>
         </figure>
       </div>
+
+      {solarDifference && <div className="compare__solar-difference">
+        <span className="compare__loss"><button type="button" aria-describedby="solar-loss-tooltip">Solar difference ⓘ</button><span id="solar-loss-tooltip" role="tooltip"><span>{solarDifference}</span>{solarLoss && <span className="compare__loss-detail">{solarLoss}</span>}</span></span>
+      </div>}
 
       <div className="compare__bar">
         {/*
@@ -220,7 +232,7 @@ export function ComparePage({
           the day of the month, as on the sunlight screen. A date that is not
           one of the four presets is offered as itself, so it can stay.
         */}
-        <label className="compare__when">
+        {!solar && <label className="compare__when">
           <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
             <rect x="2.5" y="3.5" width="13" height="12" rx="2" fill="none" stroke="currentColor" strokeWidth="1.5" />
             <path d="M2.5 7.5h13M6 2v3M12 2v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -240,7 +252,7 @@ export function ComparePage({
               </option>
             ))}
           </select>
-        </label>
+        </label>}
 
         <div className="compare__rail">
           <TimeBar
@@ -254,17 +266,17 @@ export function ComparePage({
           />
         </div>
 
-        <div className="compare__spot-controls">
+        {!solar && <div className="compare__spot-controls">
           <button type="button" className="button compare__spot"
             aria-pressed={choosing}
             aria-describedby={choosing ? 'compare-pick-instructions' : undefined}
             onClick={choosing ? onCancelChooseSpot : onChooseSpot}>
-            {choosing ? 'Cancel choosing' : 'Choose another spot'}
+            {choosing ? 'Cancel choosing' : 'Choose another spot on the ground'}
           </button>
           <p className="compare__pick-hint" id="compare-pick-instructions" role="status">
             {choosing ? 'Click a spot on the ground in either view.' : ''}
           </p>
-        </div>
+        </div>}
       </div>
 
       <footer className="compare__foot">

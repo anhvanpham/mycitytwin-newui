@@ -23,6 +23,7 @@ import { useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { NOT_AN_ASSESSMENT } from './words';
 import '../styles/sources.css';
+import { DEVELOPMENT_LEGEND } from '../data/developmentStatus';
 import streetSummary from '../data/street-details-summary.json';
 
 /**
@@ -197,10 +198,10 @@ export function MapKey({ className }: { className?: string }) {
         <span className="mapkey__swatch mapkey__swatch--existing" aria-hidden="true" />
         Existing
       </span>
-      <span className="mapkey__row">
-        <span className="mapkey__swatch mapkey__swatch--approved" aria-hidden="true" />
-        Approved
-      </span>
+      {DEVELOPMENT_LEGEND.map(status => <span className="mapkey__row" key={status.key}>
+        <span className={`mapkey__swatch mapkey__swatch--${status.key}`} style={{ background: status.map }} aria-hidden="true" />
+        {status.label}
+      </span>)}
     </aside>
   );
 }

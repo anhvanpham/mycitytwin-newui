@@ -1,0 +1,77 @@
+/* Friendly rounded headings, with clear reading text and steady figures. */
+.sheet__title { font-weight: 800; letter-spacing: -.018em; line-height: 1.25; }
+.sheet--sun .sheet__lede { font-weight: 850; letter-spacing: -.015em; line-height: 1.25; }
+.panel .button, .panel .seasons button, .solar-panel-sim button {
+ font-family: var(--font-display); font-weight: 750; letter-spacing: .005em;
+}
+.panel .field__label, .panel legend { font-weight: 700; letter-spacing: .01em; }
+.sheet__meta { line-height: 1.55; }
+.solar-generation > strong, .solar-panel-sim__heading, .solar-panel-sim h2, .solar-hover > strong {
+ font-family: var(--font-display); font-weight: 800; font-size: 1.125rem; line-height: 1.35;
+}
+.solar-generation p, .solar-hover p { font-variant-numeric: tabular-nums; line-height: 1.6; }
+.solar-generation summary, .solar-hover small { line-height: 1.55; }
+
+/* One compact, rounded type system for sunlight and solar placement. */
+.app .sheet--sun, .app .solar-panel-sim {
+ font-family: var(--font-display); font-size: .875rem; line-height: 1.35;
+ letter-spacing: -.015em; color: var(--ink);
+}
+.app .sheet--sun { gap: 10px; }
+.app .sheet--sun .sheet__tabpanel { gap: 10px; }
+.app .sheet--sun .sheet__tabpanel--flow { gap: 0; }
+.app .sheet--sun .sheet__title { font-size: 1.4rem; line-height: 1.15; letter-spacing: -.025em; }
+.app .sheet--sun .sheet__lede, .app .solar-panel-sim__heading { font-size: 1.25rem; font-weight: 800; line-height: 1.2; letter-spacing: -.02em; }
+.app .sheet--sun .block { padding-top: 10px; }
+.app .sheet--sun .block__head { margin-bottom: 5px; font-size: .8125rem; letter-spacing: -.01em; }
+.app .sheet--sun .block__note { margin-top: 6px; line-height: 1.35; }
+.app .sheet--sun .sheet__body, .app .sheet--sun .sheet__sub, .app .sheet--sun .sheet__meta { line-height: 1.35; }
+.app .sheet--sun .button, .app .sheet--sun .seasons button, .app .solar-panel-sim button { letter-spacing: -.015em; font-size: .875rem; }
+.app .sheet--sun .choice__row { gap: 8px; font-size: .875rem; }
+.app .solar-panel-sim label { margin: 6px 0; gap: 4px 8px; font-size: .875rem; }
+.app .solar-panel-sim h2 { margin: 10px 0 4px; font-size: 1rem; }
+.app .solar-panel-sim p { margin: 6px 0; line-height: 1.35; }
+.app .solar-panel-sim__subtitle { font-size: .75rem; }
+.app .solar-panel-sim details { margin-top: 8px; font-size: .75rem; line-height: 1.35; }
+.app .solar-panel-sim__place, .app .solar-panel-sim__actions { margin-bottom: 6px; }
+.app .solar-generation { padding: 10px 0; margin: 8px 0; }
+.app .solar-generation > strong { font-size: 1rem; line-height: 1.25; }
+.app .solar-generation p { margin: 4px 0; font-size: .8125rem; line-height: 1.35; }
+.app .solar-generation small { display: block; font-size: .6875rem; line-height: 1.35; }
+.app .solar-generation .button { margin-top: 8px; }
+@media(min-width:901px){
+ .app .panel.sheet--sun, .app .solar-panel-sim { padding: 16px 20px 12px; }
+ .app .solar-panel-sim input[type=range] { height: 24px; }
+}
+.app .sheet--sun input, .app .sheet--sun select, .app .solar-panel-sim input, .app .solar-panel-sim select { font-family: var(--font-display); letter-spacing: -.015em; }
+
+/* Softer weights across the two simulation panels. */
+.app .sheet--sun .sheet__title,
+.app .sheet--sun .sheet__lede,
+.app .solar-panel-sim__heading,
+.app .solar-panel-sim__heading strong,
+.app .solar-panel-sim h2,
+.app .solar-generation > strong { font-weight: 650; }
+.app .sheet--sun .block__head,
+.app .sheet--sun .field__label,
+.app .sheet--sun legend { font-weight: 600; }
+.app .sheet--sun .button,
+.app .sheet--sun .seasons button,
+.app .solar-panel-sim button,
+.app .solar-generation b { font-weight: 600; }
+
+/* Ground result: the same light, compact hierarchy as the controls. */
+.app .sheet--sun .result { padding: 14px 16px; margin: 6px 0; border-radius: 14px; }
+.app .sheet--sun .result__eyebrow { margin-bottom: 5px; font-size: .8125rem; font-weight: 450; }
+.app .sheet--sun .result__figure { font-weight: 600; font-size: 2rem; line-height: 1.1; letter-spacing: -.025em; }
+.app .sheet--sun .result__figure--none { font-size: 1.125rem; font-weight: 550; line-height: 1.3; letter-spacing: -.015em; }
+.app .sheet--sun .result__caption { margin-top: 6px; font-size: .875rem; }
+.app .sheet--sun .result__against { margin-top: 6px; font-size: .75rem; line-height: 1.35; }
+
+/* Concise comparison hover with larger rounded text. */
+.app .solar-hover { font-family: var(--font-display); font-size: 1rem; line-height: 1.35; letter-spacing: -.015em; width: 240px; padding: 14px 16px; }
+.app .solar-hover > strong { font-size: 1.125rem; font-weight: 650; }
+.app .solar-hover p { font-size: 1rem; line-height: 1.4; margin: 8px 0; }
+.app .solar-hover b { font-weight: 650; }
+.app .solar-hover__difference { font-size: .875rem; color: var(--green-700); }
+.app .solar-hover small { font-size: .75rem; }

@@ -6,8 +6,8 @@
  * is an accident waiting to be made twice.
  *
  * The original palette came from the design exports in MainProjectDoc. The
- * type no longer does: text is set in the operating system's own face — see
- * --font-ui — with headings sharing the same rounded face (--font-display). The
+ * type no longer does: text uses locally bundled Manrope for reading and Nunito
+ * for rounded headings (--font-display). The
  * note in global.css says why the root size is not fixed.
  */
 
@@ -85,16 +85,16 @@
 
   /* ── type ──────────────────────────────────────────────── */
 
-  /* Nunito is bundled locally; shared by headings, body and controls. */
-  --font-ui: 'Nunito Variable', -apple-system, BlinkMacSystemFont,
+  /* Locally bundled fonts: clear body text and soft rounded headings. */
+  --font-ui: 'Manrope Variable', -apple-system, BlinkMacSystemFont,
     'Segoe UI', sans-serif;
-  --font-display: var(--font-ui);
+  --font-display: 'Nunito Variable', var(--font-ui);
   --font-mono: var(--font-ui);
 
   /* Clear hierarchy with comfortable text and rounded, stronger headings. */
-  --weight-body: 400;
-  --weight-label: 600;
-  --weight-title: 700;
+  --weight-body: 450;
+  --weight-label: 650;
+  --weight-title: 800;
 
   /*
    * The scale, in rem so it rides the root size — see global.css.

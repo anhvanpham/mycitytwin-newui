@@ -1,3 +1,10 @@
+import { useSolarSystem, solarSystemDifference } from './ui/useSolarSystem';
+import { fromDateInput, toDateInput } from './scene/solar';
+import { SolarPanelSimulator, SolarGenerationSummary } from './ui/SolarPanelSimulator';
+import { DEVELOPMENT_STATUS } from './data/developmentStatus';
+import { DEFAULT_PANEL, MAX_PANELS, canPlacePanel, type PlacedPanel } from './scene/solarPanel';
+import { nearestHour, useStreetActivity, visibleSensors } from './data/streetActivity';
+import { StreetActivityPanel } from './ui/StreetActivityPanel';
 import { streetlightPower } from './scene/streetAppearance';
 /*
  * ─────────────────────────────────────────────────────────────────────────
@@ -119,6 +126,7 @@ import { shortAddress, type SearchHit } from './data/search';
 import { getLandmark, landmarkTarget, type Landmark } from './data/landmarks';
 import './styles/landmarks.css';
 import './styles/ui.css';
+import './styles/street-activity.css';
 
 /** Below this the sun is too low to see the city by, in a headset. See enterVr. */
 
@@ -132,12 +140,24 @@ export default function App() {
   const [initial] = useState(() => readUrlState());
 
   const [view, setView] = useState<ViewName>(initial.view);
+  const activity = useStreetActivity(view === 'activity');
+  const [activitySensor, setActivitySensor] = useState(initial.activitySensor ?? 3);
   const [selectedKey, setSelectedKey] = useState<string | null>(initial.devKey);
   const [layers, setLayers] = useState<Layers>({ developments: true, shadows: true, ...DEFAULT_STREET_LAYERS });
   const streetData = useStreetDetails();
-  const [mapDimension,setMapDimension]=useState<'2d'|'3d'>('3d');
+  const [mapDimension,setMapDimension]=useState<'2d'|'3d'>(initial.view === 'activity' ? '2d' : '3d');
   const [date, setDate] = useState<SimulationDate>(initial.date);
   const [minutes, setMinutes] = useState(initial.minutes);
+  const [solarOpen, setSolarOpen] = useState(false);
+  const [solarArmed, setSolarArmed] = useState(false);
+  const [solarPanels, setSolarPanels] = useState<PlacedPanel[]>([]);
+  const [solarSetId, setSolarSetId] = useState(1);
+  const [solarSettings, setSolarSettings] = useState({...DEFAULT_PANEL});
+  const [solarNotice, setSolarNotice] = useState('');
+  const nextPanelId = useRef(1);
+  const finishSolar = () => { setSolarArmed(false); setSolarOpen(false); setSolarNotice(''); };
+  const openSolar = () => { setView('sunlight'); setSolarOpen(true); setSolarArmed(false); setChoosing(false); setMapDimension('3d'); setSolarNotice(''); };
+  useEffect(() => { if (view !== "sunlight" && view !== "compare") { setSolarOpen(false); setSolarArmed(false); } }, [view]);
   const [receptor, setReceptor] = useState<[number, number] | null>(initial.receptor);
 
   /*
@@ -326,6 +346,21 @@ export default function App() {
   const [hasChosen, setHasChosen] = useState(
     Boolean(initial.devKey || initial.buildingId),
   );
+
+  const activityIndex = activity.doc ? Math.max(0, activity.doc.times.findIndex(t =>
+    t.slice(0, 10) === toDateInput(date) && Number(t.slice(11, 13)) === Math.floor(minutes / 60))) : 0;
+  useEffect(() => {
+    if (view !== 'activity' || !activity.doc) return;
+    const d = activity.doc;
+    if (!d.times.some(t => t.slice(0, 10) === toDateInput(date) && Number(t.slice(11, 13)) === Math.floor(minutes / 60))) {
+      const t = d.times[nearestHour(d, Date.now())];
+      setDate(fromDateInput(t.slice(0, 10))!);
+      setMinutes(Number(t.slice(11, 13)) * 60);
+      setNowNote(null);
+    }
+    const sensors = visibleSensors(d);
+    if (!sensors.some(s => s.id === activitySensor) && sensors.length) setActivitySensor(sensors[0].id);
+  }, [view, activity.doc, date, minutes, activitySensor]);
 
   /** Either way of hiding the interface. */
   const chromeHidden = focusMode || walking;
@@ -603,6 +638,7 @@ export default function App() {
   useEffect(() => {
     writeUrlState({
       view,
+      activitySensor,
       /*
        * The chosen subject, and only it. Writing whatever `focus` happened
        * to hold put a development in the URL alongside a searched building,
@@ -620,7 +656,7 @@ export default function App() {
       minutes,
       receptor,
     });
-  }, [view, focus, foundBuilding, foundLandmark, hasChosen, date, minutes, receptor]);
+  }, [activitySensor, view, focus, foundBuilding, foundLandmark, hasChosen, date, minutes, receptor]);
 
   // Only requested once a project is actually open, so the landing screen
   // never waits on a sleeping API.
@@ -1085,9 +1121,28 @@ export default function App() {
     setView('future-work');
   };
 
+  const showStreetActivity = () => {
+    clearChosen();
+    setQuery('');
+    setLayersOpen(false);
+    setPlaying(false);
+    setMapDimension('2d');
+    setRefit(n => n + 1);
+    setView('activity');
+  };
+  const activityNav = <button type="button" className="header__link header__link--accent header__link--activity" aria-current={view === 'activity' ? 'page' : undefined} onClick={showStreetActivity}>Street activity</button>;
+
+  const exploreNav = (
+    <button type="button" className="header__link" aria-current={view === 'explore' ? 'page' : undefined} onClick={() => setView('explore')}>
+      Explore the city
+    </button>
+  );
+  const mapNav = <>{exploreNav}{activityNav}</>;
+
   /** The links the header carries on the front page and the sunlight screen. */
   const frontNav = (
     <>
+      {exploreNav}
       <button
         type="button"
         className="header__link header__link--accent"
@@ -1095,9 +1150,7 @@ export default function App() {
       >
         Future plans
       </button>
-      <button type="button" className="header__link" onClick={() => setView('explore')}>
-        Explore the city
-      </button>
+      {activityNav}
       <button type="button" className="header__link" onClick={showHowItWorks}>
         How it works
       </button>
@@ -1122,6 +1175,8 @@ export default function App() {
     },
     reducedMotion,
   };
+
+  const solarSystem = useSolarSystem(model, solarPanels, date);
 
   // These pages do not require the 3D city to finish loading.
   if (view === 'future-work') {
@@ -1240,7 +1295,7 @@ export default function App() {
           locality: localityOf(focus.streetAddress),
           anchorEN: focus.anchorEN,
           kind: 'development',
-          detail: `Approved development · ${focus.maxHeightM.toFixed(0)} m`,
+          detail: `${DEVELOPMENT_STATUS[focus.status].label} · ${focus.maxHeightM.toFixed(0)} m`,
           topAhdM: focus.topAhdM,
           heightM: focus.maxHeightM,
           devId: focus.devId,
@@ -1305,7 +1360,7 @@ export default function App() {
             return {
               key: development.devKey,
               label,
-              detail: `Approved development · ${development.maxHeightM.toFixed(0)} m`,
+              detail: `${DEVELOPMENT_STATUS[development.status].label} · ${development.maxHeightM.toFixed(0)} m`,
               en: development.anchorEN,
               heightM: development.maxHeightM,
               street: label.replace(/^[^A-Za-z]*\d\S*\s+/, ''),
@@ -1416,6 +1471,7 @@ export default function App() {
         style={compareShown && compareFrames ? compareFrames.today : undefined}
       >
         <SceneCanvas
+          activity={view === 'activity' && activity.doc ? { doc: activity.doc, index: activityIndex, selected: activitySensor, onSelect: setActivitySensor } : undefined}
           streetMap={integratedMap}
           streetDetails={streetData.doc}
           streetLayers={layers}
@@ -1447,7 +1503,7 @@ export default function App() {
            * every one of them — so they have to be on screen, or the panel
            * is describing buildings the reader cannot see.
            */
-          showAllProposals={view !== 'sunlight' || place?.kind === 'building'}
+          showAllProposals={solarOpen || solarPanels.length > 0 || view !== 'sunlight' || place?.kind === 'building'}
           // Tied to the "after" view on the comparison screen — see ViewLink.
           link={compareShown ? { link: cameraLink, id: 'today', seed: 'publish' } : null}
           /*
@@ -1456,20 +1512,30 @@ export default function App() {
             DOM in there to show it on. See chooseInVr.
           */
           onSelectDevelopment={(development) =>
-            inVr ? chooseInVr(development, false) : open(development, 'development')
+            solarOpen && solarArmed ? undefined : inVr ? chooseInVr(development, false) : open(development, 'development')
           }
           /*
             Not while a spot is being chosen: there a click is a place on the
             ground, and the second of two would leave the screen.
           */
           onSelectBuilding={
-            armed
+            armed || (solarOpen && solarArmed)
               ? undefined
               : (buildingId) => {
                   const building = buildingEntry(model, buildingId);
                   if (building) openBuilding(building);
                 }
           }
+          solarHover={compareShown && solarPanels.length ? {result: solarSystem.today, difference: solarSystemDifference(solarSystem.today, solarSystem.after)} : undefined}
+          solarPanels={view === 'sunlight' || compareShown ? solarPanels : undefined}
+          onStopRoofPlacement={solarOpen && solarArmed ? finishSolar : undefined}
+          onPickRoof={solarOpen && solarArmed ? roof => {
+            if (!canPlacePanel(solarPanels, roof, null)) { setSolarNotice('Leave at least 2.2 m between panel centres; maximum 20 panels.'); return; }
+            const id = nextPanelId.current++;
+            setSolarPanels(previous => [...previous, { id, setId: solarSetId, roof, settings: {...solarSettings} }]);
+            if (solarPanels.length + 1 >= MAX_PANELS) finishSolar();
+            setSolarNotice('');
+          } : undefined}
           receptor={receptor}
           /*
            * Shown whenever a window has been chosen, whichever half of the
@@ -1503,6 +1569,7 @@ export default function App() {
                   topAhdM: place.topAhdM,
                   label: place.label,
                   kind: place.kind,
+                  status: place.kind === "development" ? focus?.status : undefined,
                 }
               : foundLandmark && landmarkLocation
                 ? { ...landmarkLocation, label: foundLandmark.name, kind: 'landmark' }
@@ -1553,6 +1620,8 @@ export default function App() {
             model={model}
             focus={focus}
             sun={sun}
+            solarHover={solarPanels.length ? {result: solarSystem.after, difference: solarSystemDifference(solarSystem.today, solarSystem.after)} : undefined}
+            solarPanels={solarPanels}
             showProposed
             castShadows={layers.shadows}
             showSunArrow={false}
@@ -1568,6 +1637,7 @@ export default function App() {
               topAhdM: place.topAhdM,
               label: place.label,
               kind: place.kind,
+              status: place.kind === "development" ? focus?.status : undefined,
             }}
             lookAt={lookAt}
             interactive={false}
@@ -1727,7 +1797,7 @@ export default function App() {
           */
           front={frontShown || view === 'sunlight' || compareShown || howShown}
           hideLayers={frontShown}
-          nav={frontShown || view === 'sunlight' || compareShown || howShown ? frontNav : undefined}
+          nav={frontShown || view === 'sunlight' || compareShown || howShown ? frontNav : mapNav}
           layersOpen={layersOpen}
           /*
             How many layers are switched off. A city drawn without shadows,
@@ -1788,15 +1858,36 @@ export default function App() {
             <button type="button" onClick={clearChosen} aria-label={`Clear ${foundLandmark.name}`}>×</button>
           </aside>
         ) : <p className="explore-hint" role="note" tabIndex={-1}>
-          Search a landmark or address, or double-click any building to select it.
+          <span className="map-instruction--desktop">Search a landmark or address, or double-click any building to select it.</span><span className="map-instruction--touch">Tap a building to select it, or search for a landmark or address.</span>
         </p>
       )}
+
+      {!chromeHidden && view === 'sunlight' && !inVr && solarOpen &&
+        <SolarPanelSimulator panels={solarPanels} setId={solarSetId} settings={solarSettings} armed={solarArmed} notice={solarNotice}
+          onAdd={() => { setSolarArmed(true); setChoosing(false); setSolarNotice(''); }}
+          onNewSet={() => { setSolarSetId(current => current + 1); setSolarNotice(''); }}
+          onCancel={finishSolar}
+          onUndo={() => setSolarPanels(previous => { const last = previous.filter(p => p.setId === solarSetId).at(-1); return previous.filter(p => p.id !== last?.id); })}
+          onSettings={settings => { setSolarSettings(settings); setSolarPanels(previous => previous.map(p => p.setId === solarSetId ? {...p, settings} : p)); }}
+          onClose={finishSolar}/>}
+            {!chromeHidden && view === 'activity'  && <StreetActivityPanel
+        doc={activity.doc} error={activity.error} retry={activity.retry}
+        sensorId={activitySensor} index={activityIndex}
+        onTime={index => {
+          const t = activity.doc?.times[index];
+          if (!t) return;
+          chooseDate(fromDateInput(t.slice(0, 10))!);
+          chooseMinutes(Number(t.slice(11, 13)) * 60);
+        }}
+        onBack={() => setView('explore')}
+      />}
 
       {/* ── ONE PROJECT ──────────────────────────────────────────────────── */}
       {!chromeHidden && view === 'development' && focus && (
         <>
           <DevelopmentPanel
             development={focus}
+            onSolar={openSolar}
             storeys={Number.isFinite(storeys) ? storeys : undefined}
             tab="overview"
             /*
@@ -1816,6 +1907,7 @@ export default function App() {
       {!chromeHidden && view === 'building' && foundBuilding && place && (
         <>
           <BuildingPanel
+            onSolar={openSolar}
             label={place.label}
             locality={place.locality}
             heightM={foundBuilding.heightM}
@@ -1835,8 +1927,11 @@ export default function App() {
       */}
       {compareShown && place && (
         <ComparePage
+          solarTotals={solarPanels.length ? {before: `${solarSystem.today.available ? solarSystem.today.kwh.toFixed(2)+' kWh · '+solarSystem.today.sunHours.toFixed(1)+' h average direct sun' : 'No roof available'}`, after: `${solarSystem.after.available ? solarSystem.after.kwh.toFixed(2)+' kWh · '+solarSystem.after.sunHours.toFixed(1)+' h average direct sun' : 'No roof available'}`} : undefined}
+          solarLoss={solarPanels.length ? `Estimated daily electricity lost to building shade: today ${solarSystem.today.available ? solarSystem.today.shadeLoss.toFixed(1)+'%' : 'unavailable'}; after planned projects ${solarSystem.after.available ? solarSystem.after.shadeLoss.toFixed(1)+'%' : 'unavailable'}. Compared with the same panels without building shade. Available roofs only; clear-sky estimate.` : undefined}
+          solarDifference={solarPanels.length ? solarSystemDifference(solarSystem.today, solarSystem.after) : undefined}
           title={place.label}
-          kindLabel={place.kind === 'building' ? 'Existing building' : 'Approved development'}
+          kindLabel={place.kind === 'building' ? 'Existing building' : focus ? DEVELOPMENT_STATUS[focus.status].label : 'Development'}
           date={date}
           onDate={chooseDate}
           minutes={minutes}
@@ -1896,7 +1991,8 @@ export default function App() {
 
       {!chromeHidden && view === 'sunlight' && place && (
         <>
-          <SunlightSheet
+          {!solarOpen && <SunlightSheet
+            solar={solarPanels.length > 0 ? <SolarGenerationSummary result={layers.developments ? solarSystem.after : solarSystem.today} onEdit={openSolar}/> : undefined}
             status={focus?.status}
             title={place.label}
             locality={place.locality}
@@ -1970,7 +2066,7 @@ export default function App() {
               setChoosing(false);
               setView('explore');
             }}
-          />
+          />}
           <TimeBar
             minutes={minutes}
             onChange={chooseMinutes}

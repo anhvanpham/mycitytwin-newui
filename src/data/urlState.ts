@@ -42,6 +42,7 @@ import { clampMinutes, outsideWindowNote, presentMoment } from './now';
 export type ViewName =
   | 'landing'
   | 'explore'
+  | 'activity'
   | 'development'
   | 'building'
   | 'sunlight'
@@ -54,10 +55,11 @@ export type ViewName =
   /** The features planned for later versions of My City Twin. */
   | 'future-work';
 
-const VIEWS: ViewName[] = ['landing', 'explore', 'development', 'building', 'sunlight', 'compare', 'how', 'future', 'future-work'];
+const VIEWS: ViewName[] = ['landing', 'explore', 'activity', 'development', 'building', 'sunlight', 'compare', 'how', 'future', 'future-work'];
 
 export interface UrlState {
   view: ViewName;
+  activitySensor?: number;
   devKey: string | null;
   /** An existing building, when that is what was chosen instead. */
   buildingId: string | null;
@@ -141,6 +143,7 @@ export function readUrlState(now: Date = new Date()): UrlState {
 
   return {
     view: resolved,
+    activitySensor: Number(params.get('sensor')) > 0 ? Number(params.get('sensor')) : undefined,
     devKey: subject.devKey,
     buildingId: subject.buildingId,
     landmarkId,
@@ -149,7 +152,9 @@ export function readUrlState(now: Date = new Date()): UrlState {
     // finite, so it survived the guard in clampMinutes and pinned the clock
     // to 06:00 instead of falling back to the default.
     minutes: statedTime
-      ? clampMinutes(Number(params.get('t')), DEFAULT_MINUTES)
+      ? resolved === 'activity'
+        ? Math.max(0, Math.min(1439, Number.isFinite(Number(params.get('t'))) ? Number(params.get('t')) : DEFAULT_MINUTES))
+        : clampMinutes(Number(params.get('t')), DEFAULT_MINUTES)
       : moment.minutes,
     /*
      * Said only when the app chose the time AND could not show it as it is.
@@ -191,9 +196,10 @@ export function writeUrlState(state: Omit<UrlState, 'nowNote'>): void {
     if (state.buildingId) params.set('bldg', state.buildingId);
   }
   // The comparison is the same question at the same moment, so it keeps it.
-  if (state.view === 'sunlight' || state.view === 'compare') {
+  if (state.view === 'sunlight' || state.view === 'compare' || state.view === 'activity') {
     params.set('d', toDateInput(state.date));
     params.set('t', String(state.minutes));
+    if (state.view === 'activity' && state.activitySensor) params.set('sensor', String(state.activitySensor));
     if (state.receptor) {
       params.set('at', `${state.receptor[0].toFixed(1)},${state.receptor[1].toFixed(1)}`);
     }
