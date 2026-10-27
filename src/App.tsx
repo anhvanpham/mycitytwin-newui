@@ -143,6 +143,7 @@ export default function App() {
   const activity = useStreetActivity(view === 'activity');
   const [activitySensor, setActivitySensor] = useState(initial.activitySensor ?? 3);
   const [selectedKey, setSelectedKey] = useState<string | null>(initial.devKey);
+  const [landingFeature, setLandingFeature] = useState<'developments' | 'sunlight' | 'solar' | 'activity' | 'inside'>('developments');
   const [layers, setLayers] = useState<Layers>({ developments: true, shadows: true, ...DEFAULT_STREET_LAYERS });
   const streetData = useStreetDetails();
   const [mapDimension,setMapDimension]=useState<'2d'|'3d'>(initial.view === 'activity' ? '2d' : '3d');
@@ -1140,7 +1141,12 @@ export default function App() {
   const mapNav = <>{exploreNav}{activityNav}</>;
 
   /** The links the header carries on the front page and the sunlight screen. */
-  const frontNav = (
+  const frontNav = (view === 'landing' ? <>
+    <button type="button" className="header__link" onClick={() => document.getElementById('landing-features-title')?.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth', block: 'start' })}>Discover</button>
+    <button type="button" className="header__link" onClick={showHowItWorks}>How it works</button>
+    <button type="button" className="header__link" onClick={() => { const details = document.getElementById('landing-background') as HTMLDetailsElement | null; if (details) details.open = true; requestAnimationFrame(() => document.getElementById('about-title')?.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth', block: 'center' })); }}>About</button>
+    <button type="button" className="header__link landing-nav-explore" onClick={() => setView('explore')}>Explore Melbourne CBD</button>
+  </> :
     <>
       {exploreNav}
       <button
@@ -1165,6 +1171,28 @@ export default function App() {
 
   /** What the front page is given in both branches below. */
   const frontProps = {
+    modelSummary: model ? { buildings: model.searchable.length, developments: model.developments.length, source: model.source } : null,
+    onFuturePlans: showFuturePlans,
+    onFeature: (feature: 'developments' | 'sunlight' | 'solar' | 'activity' | 'inside') => {
+      if (!model) return;
+      setLandingFeature(feature);
+      setQuery('');
+      setLayersOpen(false);
+      if (feature === 'activity') { showStreetActivity(); return; }
+      if (feature === 'developments') { setView('explore'); return; }
+      const building = foundBuilding ?? model.searchable.find(building => building.streetAddress.toLowerCase().includes('collins') && building.heightM > 20) ?? model.searchable[0];
+      if (!building) { setView('explore'); return; }
+      setSelectedLandmarkId(null);
+      setSelectedKey(null);
+      setSelectedBuildingId(building.buildingId);
+      setLookAt({ east: building.anchorEN[0], north: building.anchorEN[1], heightM: building.heightM });
+      setHasChosen(true);
+      setShowSubject(true);
+      setReceptor(null);
+      setChoosing(false);
+      if (feature === 'solar') openSolar();
+      else setView('sunlight');
+    },
     query,
     onQuery: setQuery,
     onSearchFocus: () => setSearchAt('front'),
@@ -1186,6 +1214,7 @@ export default function App() {
     return (
       <div className="app">
         <FuturePlansPage
+          mapExtent={model?.extent}
           reducedMotion={reducedMotion}
           onFutureWork={showFutureWork}
           onHome={() => setView('landing')}
@@ -1240,6 +1269,7 @@ export default function App() {
             onHome={() => undefined}
             front
             hideLayers
+            hideSearch
             nav={frontNav}
           />
         ) : (
@@ -1797,6 +1827,7 @@ export default function App() {
           */
           front={frontShown || view === 'sunlight' || compareShown || howShown}
           hideLayers={frontShown}
+          hideSearch={frontShown}
           nav={frontShown || view === 'sunlight' || compareShown || howShown ? frontNav : mapNav}
           layersOpen={layersOpen}
           /*
@@ -1992,6 +2023,7 @@ export default function App() {
       {!chromeHidden && view === 'sunlight' && place && (
         <>
           {!solarOpen && <SunlightSheet
+            initialMeasurement={landingFeature === 'inside' ? 'window' : 'spot'}
             solar={solarPanels.length > 0 ? <SolarGenerationSummary result={layers.developments ? solarSystem.after : solarSystem.today} onEdit={openSolar}/> : undefined}
             status={focus?.status}
             title={place.label}

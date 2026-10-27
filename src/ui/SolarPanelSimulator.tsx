@@ -9,18 +9,20 @@ export function SolarPanelSimulator({ panels, setId, settings, armed, notice, on
  const setCount = panels.filter(p => p.setId === setId).length;
  return <aside className={`solar-panel-sim sheet--sun${armed ? " solar-panel-sim--placing" : ""}`} aria-label="Rooftop solar panel simulation">
   <div className="solar-panel-sim__heading"><strong>Rooftop solar</strong><button onClick={onClose} aria-label="Close rooftop solar">×</button></div>
-  <p className="solar-panel-sim__subtitle">{panels.length}/{MAX_PANELS} panels · Estimated clear-sky generation</p>
+  <p className="solar-panel-sim__subtitle"><span className="solar-panel-sim__count">{panels.length}/{MAX_PANELS} panels</span> Clear-sky estimate</p>
   {notice && <p role="status" className="solar-panel-sim__notice">{notice}</p>}
   {armed ? <>
-   <p>Left-click or tap a flat roof to add panels to set {setId}. Right-click to stop. Drag or pinch to explore.</p>
+   <p className="solar-panel-sim__hint">Tap a roof to add to set {setId}.<br/><small>Right-click or Done to finish · Drag to explore</small></p>
    <button className="solar-panel-sim__place" onClick={onCancel}>Done placing</button>
    <button className="solar-panel-sim__undo" disabled={!setCount} onClick={onUndo}>Undo last panel</button>
   </> : <>
+   <div className="solar-panel-sim__settings">
    <h2>Set {setId} <small>· {setCount} panels</small></h2>
-   <p className="solar-panel-sim__subtitle">These settings apply to every panel in this set.</p>
+   <p className="solar-panel-sim__subtitle">One setting for the whole set.</p>
    <label>Panel rating <input aria-label="Panel rating" type="number" min="100" max="1000" step="10" value={settings.watts} onChange={e => onSettings({...settings, watts: Math.min(1000,Math.max(100,Number(e.target.value)||100))})}/> W</label>
    <label>Tilt <span>{settings.tilt}°</span><input aria-label="Panel tilt" type="range" min="0" max="60" value={settings.tilt} onChange={e => onSettings({...settings, tilt: Number(e.target.value)})}/></label>
    <label>Direction <span>{settings.azimuth}° · 0° North</span><input aria-label="Panel direction" type="range" min="0" max="359" value={settings.azimuth} onChange={e => onSettings({...settings, azimuth: Number(e.target.value)})}/></label>
+   </div>
    <button className="solar-panel-sim__place" disabled={panels.length >= MAX_PANELS} onClick={onAdd}>{panels.length >= MAX_PANELS ? '20-panel limit reached' : setCount ? 'Add panels to this set' : 'Place panels'}</button>
    {setCount > 0 && <div className="solar-panel-sim__actions"><button disabled={panels.length >= MAX_PANELS} onClick={onNewSet}>Add another set</button><button onClick={onUndo}>Undo last panel</button></div>}
    <details><summary>Estimate assumptions</summary><p> Maximum 20 panels is a usability limit, not roof capacity. Centres must be 2.2 m apart. No panel-to-panel shading or electrical string effects. Assumed 25°C air and 14% system losses. Simplified flat roofs, no equipment or roof-edge fit check, no measured weather. 10-minute samples; illustrative panel dimensions.</p></details>

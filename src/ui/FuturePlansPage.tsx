@@ -1,16 +1,31 @@
 import { useEffect, useRef, useState } from 'react';
+import type { CityModel } from '../data/model';
 import {
   PLANS, PLAN_QUESTIONS, PLAN_REPLIES, PLAN_SOURCES, appendPlanQuestion,
   type PlanId, type QuestionId,
 } from '../data/futurePlans';
 import '../styles/future-plans.css';
+import { FutureTimeline } from './FutureTimeline';
+import { FutureProjectCatalogue } from './FutureProjectCatalogue';
+import { LoadedRelatedPlans } from './RelatedPlans';
 
-export function FuturePlansPage({ onHome, onFutureWork, reducedMotion }: {
+export function FuturePlansPage({ onHome, onFutureWork, reducedMotion, mapExtent }: {
+  mapExtent?: CityModel['extent'];
   onHome: () => void;
   onFutureWork: () => void;
   reducedMotion: boolean;
 }) {
   const [selected, setSelected] = useState<PlanId | null>(null);
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const explore = (id: string) => {
+    if (id === 'transport') { setSelected('transport'); setSelectedProject(null); }
+    else {
+      setSelected(null); setSelectedProject(id);
+      if (selectedProject === id) requestAnimationFrame(() => {
+        root.current?.querySelector<HTMLElement>('.future-catalogue__conversation')?.scrollIntoView({ block: 'start' });
+      });
+    }
+  };
   const [histories, setHistories] = useState<Record<PlanId, QuestionId[]>>({ greenline: [], transport: [] });
   const root = useRef<HTMLElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -73,9 +88,8 @@ export function FuturePlansPage({ onHome, onFutureWork, reducedMotion }: {
 
         {!plan ? (
           <>
-            <section aria-labelledby="choose-plan-title">
-              <h2 className="future-plans__section-label" id="choose-plan-title">Explore a plan</h2>
-              <div className="future-plans__projects">
+            <FutureTimeline onExplore={explore} mapExtent={mapExtent} />
+            <FutureProjectCatalogue selected={selectedProject} onSelect={setSelectedProject} onExplore={explore}>
                 {PLANS.map(item => (
                   <button key={item.id} className={`future-plans__project future-plans__project--${item.id}`}
                     onClick={() => setSelected(item.id)} aria-label={`Explore ${item.title}`}>
@@ -85,18 +99,11 @@ export function FuturePlansPage({ onHome, onFutureWork, reducedMotion }: {
                     <span className="future-plans__project-action">Open a conversation <span aria-hidden="true">↗</span></span>
                   </button>
                 ))}
-              </div>
-            </section>
-            <section className="future-plans__how" aria-labelledby="conversation-how-title">
-              <h2 id="conversation-how-title">Your questions. One conversation.</h2>
-              <ol>
-                <li><span>01</span><h3>Pick a plan</h3><p>Start with the changes you’re curious about.</p></li>
-                <li><span>02</span><h3>Choose a question</h3><p>Your commute? A shadier street? Pick what matters to you.</p></li>
-                <li><span>03</span><h3>Keep exploring</h3><p>Read the reply and its sources, then ask another question.</p></li>
-              </ol>
-            </section>
+            </FutureProjectCatalogue>
           </>
         ) : (
+          <>
+          <LoadedRelatedPlans id={plan.id} onExplore={explore} />
           <div className="future-plans__conversation" key={plan.id}>
             <section className="future-plans__chat" aria-labelledby="conversation-title">
               <div className="future-plans__chat-heading">
@@ -145,11 +152,12 @@ export function FuturePlansPage({ onHome, onFutureWork, reducedMotion }: {
               {history.length > 0 && <button className="future-plans__reset" onClick={() => setHistories(previous => ({ ...previous, [plan.id]: [] }))}>Start this conversation again</button>}
             </aside>
           </div>
+          </>
         )}
 
         <footer className="future-plans__footer">
           <div><strong>Possible effects, not promises.</strong><p>These guides explain what to consider. They don’t calculate prices, rent, travel times or local conditions.</p></div>
-          <span>Based on council plans · Guided prototype</span>
+          <span>Project sources · Guided conversations</span>
         </footer>
       </div>
     </section>

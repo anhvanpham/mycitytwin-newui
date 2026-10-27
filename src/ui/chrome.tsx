@@ -129,6 +129,7 @@ export function Header({
   onSearchFocus,
   front = false,
   hideLayers = false,
+  hideSearch = false,
   nav,
   children,
 }: {
@@ -162,6 +163,7 @@ export function Header({
    * and its mark the only thing that says they were.
    */
   hideLayers?: boolean;
+  hideSearch?: boolean;
   /** The links set before the buttons on the right, where `front` is set. */
   nav?: React.ReactNode;
   /** The search results, rendered by the caller under the field. */
@@ -243,7 +245,7 @@ export function Header({
         <span>My City Twin</span>
       </button>
 
-      <div className="header__search">
+      {!hideSearch && <div className="header__search">
         <label className="field">
           <svg width="17" height="17" viewBox="0 0 17 17" aria-hidden="true">
             <circle cx="7" cy="7" r="5.4" fill="none" stroke="currentColor" strokeWidth="1.7" />
@@ -278,6 +280,8 @@ export function Header({
         </label>
         {children}
       </div>
+
+      }
 
       <div className="header__actions">
         {nav && <details className="header__mobile-menu" ref={mobileMenu}>

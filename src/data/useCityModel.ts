@@ -10,7 +10,7 @@
  *
  * THE ORDER IT DOES THINGS, AND WHY
  *
- *   1. Read the two files bundled with the app (public/data/*.json).
+ *   1. Read the files bundled with the app (public/data/*.json).
  *      These are a copy of the API taken at build time. They are on the
  *      same server as the page, so they arrive in under a second.
  *
@@ -35,6 +35,7 @@ import { useEffect, useRef, useState } from 'react';
 import { buildCityModel, type AdapterReport } from './adapter';
 import type { CityModel } from './model';
 import { bundled } from './bundled';
+import { withFringe } from './buildingCoverage';
 import { fetchJsonWithProgress, yieldToPaint } from './fetchWithProgress';
 import type {
   ApiBuildingPart,
@@ -48,6 +49,7 @@ export const API_BASE =
 const SNAPSHOT = {
   buildings: bundled('data/building-footprints.json'),
   developments: bundled('data/development-footprints.json'),
+  fringe: bundled('data/building-fringe.json'),
 };
 
 const LIVE = {
@@ -126,6 +128,8 @@ export function useCityModel(): CityModelState {
       setState((s) => ({ ...s, progress: { ...s.progress, ...progress } }));
 
     (async () => {
+      // Retain the council supplement when the live API refreshes the original core.
+      let fringe: ApiFeatureCollection<ApiBuildingPart> | null = null;
       try {
         setProgress({ phase: 'downloading', label: 'Approved developments', percent: 1 });
 
@@ -136,28 +140,37 @@ export function useCityModel(): CityModelState {
           setProgress({ percent: Math.round(share * WEIGHT.developments) });
         });
 
-        setProgress({ label: 'Melbourne CBD building footprints' });
+        setProgress({ label: 'CBD and fringe building footprints' });
 
-        const buildings = await fetchJsonWithProgress<
-          ApiFeatureCollection<ApiBuildingPart>
-        >(SNAPSHOT.buildings, (loaded, total) => {
-          const share = total ? loaded / total : 0;
+        const bytes = [
+          { loaded: 0, total: null as number | null },
+          { loaded: 0, total: null as number | null },
+        ];
+        const track = (index: number) => (loaded: number, total: number | null) => {
+          bytes[index] = { loaded, total };
+          const loadedBytes = bytes.reduce((sum, file) => sum + file.loaded, 0);
+          const totalBytes = bytes.every(file => file.total !== null)
+            ? bytes.reduce((sum, file) => sum + file.total!, 0) : null;
           setProgress({
-            percent: WEIGHT.developments + Math.round(share * WEIGHT.buildings),
-            loadedBytes: loaded,
-            totalBytes: total,
+            percent: WEIGHT.developments + (totalBytes ? Math.round(loadedBytes / totalBytes * WEIGHT.buildings) : 0),
+            loadedBytes, totalBytes,
           });
-        });
-
+        };
+        const [buildings, supplement] = await Promise.all([
+          fetchJsonWithProgress<ApiFeatureCollection<ApiBuildingPart>>(SNAPSHOT.buildings, track(0)),
+          fetchJsonWithProgress<ApiFeatureCollection<ApiBuildingPart>>(SNAPSHOT.fringe, track(1)),
+        ]);
+        fringe = supplement;
+        const expanded = withFringe(buildings, fringe);
         setProgress({
           phase: 'modelling',
-          label: 'Placing 1,548 buildings',
+          label: `Placing ${new Set(expanded.features.map(f => f.properties.buildingId)).size.toLocaleString()} buildings`,
           percent: WEIGHT.developments + WEIGHT.buildings,
         });
         // Let the bar paint before the main thread goes into the projection.
         await yieldToPaint();
 
-        const { model, report } = buildCityModel(buildings, developments, 'snapshot');
+        const { model, report } = buildCityModel(expanded, developments, 'snapshot');
 
         setState((s) => ({
           ...s,
@@ -191,7 +204,7 @@ export function useCityModel(): CityModelState {
             controller.signal,
           ),
         ]);
-        const { model, report } = buildCityModel(buildings, developments, 'live');
+        const { model, report } = buildCityModel(withFringe(buildings, fringe ?? await fetchJsonWithProgress<ApiFeatureCollection<ApiBuildingPart>>(SNAPSHOT.fringe, () => {}, controller.signal)), developments, 'live');
         setState((s) => ({ ...s, model, report, error: null, refreshing: false }));
       } catch {
         // Staying on the snapshot is a normal outcome, not a failure worth

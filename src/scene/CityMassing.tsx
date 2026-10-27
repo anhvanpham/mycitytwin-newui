@@ -1,3 +1,4 @@
+import { SolarSystemTooltip } from './SolarSystemTooltip';
 import type { SolarSystemHover } from './RoofPanelMarker';
 import { useEffect, useMemo, useRef } from 'react';
 import { Color, Float32BufferAttribute, type Group, type Mesh } from 'three';
@@ -9,12 +10,10 @@ import { StreetDetails } from './StreetDetails';
 import { cbdGroundPlacement } from './cbdBoundary';
 import { useOpenBasemapTexture } from './useOpenBasemap';
 import type { StreetDetailsDoc, StreetLayers } from '../data/streetDetails';
-import { groundPlacement } from './basemap';
 import { useBasemapTexture } from './useBasemap';
 import { useMapboxConfig } from '../data/mapboxConfig';
 import { Roads } from './Roads';
 import { Ground } from './Ground';
-import { HazeVeil } from './HazeVeil';
 import { DevelopmentMassings } from './DevelopmentMassings';
 import { ReceptorMarker } from './ReceptorMarker';
 import { WindowMarker } from './WindowMarker';
@@ -112,31 +111,12 @@ export function CityMassing({
     [model.buildings],
   );
 
-  /*
-    * Keyed on the numbers, not on the object. The model is rebuilt when the
-    * live API answers, and its extent is then a NEW object holding the SAME
-    * four values — which changed the placement by identity, restarted the
-    * image request, and took the map off the screen while an image it already
-    * had was fetched again.
-    */
-  const { minE, minN, maxE, maxN } = model.extent;
-  const { placement } = useMemo(
-    () => groundPlacement({ minE, minN, maxE, maxN }),
-    [minE, minN, maxE, maxN],
-  );
-  /*
-   * Where the distance haze runs. It has to finish at or beyond the ground's
-   * own rim, or a ring of un-hazed ground shows past it against the sky.
-   */
-  const hazeExtent = useMemo(() => {
-    const { centreE, centreN, span, size } = groundPlacement(model.extent);
-    return { centreE, centreN, innerM: span * 0.62, outerM: size * 0.5 };
-  }, [model.extent]);
-
+  // Use the same grid placement in every scene, including the landing page.
+  const { placement } = useMemo(() => cbdGroundPlacement(), []);
+  const originalPlacement=useMemo(()=>({...placement,zoom:placement.zoom+Math.log2(1280/placement.widthPx),widthPx:1280,heightPx:1280}),[placement]);
   const mapbox = useMapboxConfig();
-  const originalBasemap = useBasemapTexture(placement, streetMap ? null : mapbox);
-  const openPlacement=useMemo(()=>cbdGroundPlacement(),[]);
-  const openBasemap=useOpenBasemapTexture(openPlacement.placement,streetMap);
+  const originalBasemap = useBasemapTexture(originalPlacement, streetMap ? null : mapbox);
+  const openBasemap=useOpenBasemapTexture(placement,streetMap);
   const basemap=streetMap?openBasemap:originalBasemap;
 
   /** Every building centre, once, so the sites can be looked up cheaply. */
@@ -219,13 +199,13 @@ export function CityMassing({
   );
 
   return (
-    <CBDClip enabled={streetMap} colour={haze}>
+    <CBDClip enabled colour={haze}>
       {/* The blocks between the streets, dissolving where the data ends. */}
       <Ground
         model={model}
         groundAhdM={groundAhdM}
         basemap={basemap}
-        cbd={streetMap}
+        cbd
         walking={walking}
         onPick={onPickReceptor}
       />
@@ -291,30 +271,7 @@ export function CityMassing({
         </mesh>
       )}
 
-      {/*
-        Not while walking.
 
-        It is a horizontal sheet a metre above the ground, and the eye is
-        only 1.7 m up — so from a footpath the line of sight runs ALONG it
-        and out through its opaque outer region, washing everything below the
-        horizon to the haze colour. From above, where it hides the edge of
-        the modelled ground, it works; at eye height it is a fog bank lying
-        on the city.
-
-        Nothing is lost by dropping it here. The disc's rim is only visible
-        from height, and past it the sky dome's lower hemisphere is already
-        painted the same haze.
-      */}
-      {!walking && !streetMap && (
-      <HazeVeil
-        centreE={hazeExtent.centreE}
-        centreN={hazeExtent.centreN}
-        groundAhdM={groundAhdM}
-        innerM={hazeExtent.innerM}
-        outerM={hazeExtent.outerM}
-        colour={haze}
-      />
-      )}
 
       {showProposed && (
         <group ref={projectsGroup}>
@@ -330,7 +287,8 @@ export function CityMassing({
         </group>
       )}
 
-      <group ref={panelMarkers}>{solarPanels?.filter(panel => !replaced.has(panel.roof.buildingId) && (showHighlighted || panel.roof.buildingId !== highlightedBuildingId) && (panel.roof.kind !== "development" || showProposed)).map(panel => <RoofPanelMarker key={panel.id} {...panel} solarHover={solarHover}/> )}</group>
+      <group ref={panelMarkers}>{solarPanels?.filter(panel => !replaced.has(panel.roof.buildingId) && (showHighlighted || panel.roof.buildingId !== highlightedBuildingId) && (panel.roof.kind !== "development" || showProposed)).map(panel => <RoofPanelMarker key={panel.id} {...panel}/> )}</group>
+      {solarHover && <SolarSystemTooltip panels={panelMarkers} blockers={[builtMesh, unresolvedMesh, projectsGroup, highlightGroup]} info={solarHover}/>}
       <BuildingPicker
         city={[
           { mesh: builtMesh, owned: built },

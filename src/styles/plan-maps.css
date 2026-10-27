@@ -1,0 +1,11 @@
+.plan-maps { margin: 1.5rem 0 2rem; color: #294b50; }
+.plan-maps h3 { margin: 0 0 .8rem; font-size: 1.15rem; }
+.plan-maps__figure { margin: 0 0 1rem; padding: 1rem; background: #fffdfa; border: 1px solid #cdded4; border-radius: 1.25rem; }
+.plan-maps__figure h4 { margin: 0 0 .85rem; font-size: 1rem; }
+.plan-maps__image { display: flex; align-items: center; justify-content: center; width: 100%; background: white; border: 1px solid #e2e9e5; border-radius: .65rem; overflow: hidden; }
+.plan-maps__image img { display: block; width: 100%; height: auto; max-height: 28rem; object-fit: contain; }
+.plan-maps figcaption { font-size: .8rem; line-height: 1.6; color: #526d6a; }
+.plan-maps__links { display: flex; flex-wrap: wrap; gap: .6rem 1.25rem; }
+.plan-maps a { color: #326253; text-underline-offset: .2rem; }
+.plan-maps a:focus-visible { outline: 3px solid #507d68; outline-offset: 3px; }
+@media (max-width: 640px) { .plan-maps__image img { max-height: 22rem; } }

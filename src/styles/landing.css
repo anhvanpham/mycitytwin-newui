@@ -153,6 +153,19 @@
   color: var(--ink);
 }
 
+.landing__stat {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+.landing__stat a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 /* ── the search ─────────────────────────────────────────── */
 
 .landing__search {
@@ -857,6 +870,11 @@
 @media (min-width: 901px) and (min-height: 641px) and (max-height: 850px) {
   .landing__hero { gap: var(--space-2); }
   .landing__film video { width: min(100%, 17rem); }
+}
+
+/* Short desktop screens: the stat line would push the buttons under the steps bar. */
+@media (min-width: 901px) and (max-height: 880px) {
+  .landing__stat { display: none; }
 }
 
 @media (min-width: 901px) and (min-height: 641px) {

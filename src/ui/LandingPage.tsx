@@ -1,76 +1,19 @@
-/*
- * ─────────────────────────────────────────────────────────────────────────
- * THE FRONT PAGE
- * ─────────────────────────────────────────────────────────────────────────
- *
- * WHAT THIS IS
- *   The page a bare visit arrives at. Its first screen has the words on the
- *   left, the live city in a window on the right, the three steps along the
- *   bottom and the fine print under them. Below that the page scrolls on
- *   into the sections in LandingMore. It replaced two things — a full-screen
- *   cover with a film on it, and a panel floated over the city — with one
- *   page.
- *
- * WHAT IS ON IT
- *   - The film: the skyline drawn once, above the heading.
- *   - The search: the field, its matches (rendered by App), and the row
- *     that holds the chosen place with a way to clear it.
- *   - "Explore sunlight", and the hint when it is pressed too soon.
- *   - "Enter in VR", on a device that can.
- *   - "Just explore the map".
- *   - The three steps — the place "How it works" in the header moves to.
- *   - The fine print: what the model is, Sources & limitations, the moment
- *     shown.
- *   - The window onto the city: the download's progress, then the map key
- *     and the map's credit.
- *   - LandingMore, under all of it.
- *
- * WHAT IS UNDER IT
- *   The canvas still fills the screen. This page covers the left and the
- *   bottom and leaves a window over the city; it measures that window on
- *   every resize and every scroll and reports it, and ViewInset frames the
- *   city inside it. Leaving the page takes the covers away and the same
- *   city slides to the middle — nothing is reloaded or rebuilt.
- *
- * THE FILM
- *   The one-line drawing of the skyline that used to be the cover now sits
- *   above the heading. It plays once and stops on the finished skyline. It
- *   is white on its own ground, so it is multiplied onto the page: the white
- *   drops out and only the line is left on the cream.
- *
- * WHY IT IS UP BEFORE THE CITY
- *   The city takes a few seconds to build — 4,443 roof planes and a five
- *   megabyte snapshot. This page does not need it, so it is drawn at once and
- *   the wait happens while somebody is reading, with the progress shown in
- *   the city's own window. App mounts this under the same key in both of its
- *   branches so that the city arriving does not rebuild the page and restart
- *   the film — see the note there.
- *
- * WHAT IT HOLDS
- *   Nothing that matters. The text in the field is App's, because the field
- *   in the header shares it; the chosen place is App's; this only knows
- *   whether the film is showing and whether the main button was pressed
- *   too soon.
+/**
+ * Local landing redesign: the live city sits beside address search, with
+ * five feature entry points and a compact footer. The map window reports
+ * its bounds to ViewInset; sources and background remain accessible below.
  */
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { bundled } from '../data/bundled';
 import type { LoadProgress } from '../data/useCityModel';
 import type { ScreenInset } from '../scene/ViewInset';
-import { MapKey, SourcesLink } from './Sources';
+import { SourcesLink } from './Sources';
 import { LandingMore } from './LandingMore';
+import { LANDING_FEATURES, LandingFeatureIcon, type LandingFeature } from './LandingFeatures';
 import { useLandingReveal } from './useLandingReveal';
 import '../styles/landing.css';
-
-/** The three steps along the bottom, in the order the app is used. */
-const STEPS = [
-  { title: 'Find a place', body: 'Search for an address or explore the map.' },
-  { title: 'Choose a building', body: 'Double-click a building to see its details.' },
-  {
-    title: 'Compare sunlight',
-    body: 'See how planned developments could affect sunlight on your street.',
-  },
-];
+import '../styles/landing-reference.css';
 
 /**
  * How much of the city's window must stay clear of the header for the map
@@ -98,8 +41,14 @@ export function LandingPage({
   credit,
   onInset,
   reducedMotion,
+  onFeature,
+  modelSummary,
+  onFuturePlans,
 }: {
   /** The text in the search field — App's, shared with the header's field. */
+  onFeature: (feature: LandingFeature) => void;
+  modelSummary: { buildings: number; developments: number; source: 'live' | 'snapshot' } | null;
+  onFuturePlans: () => void;
   query: string;
   onQuery: (next: string) => void;
   /** The field here has the keyboard, so the results belong under it. */
@@ -141,7 +90,7 @@ export function LandingPage({
    * the button being disabled: a greyed-out button tells somebody that
    * something is wrong without telling them what to do about it.
    */
-  const [askedTooSoon, setAskedTooSoon] = useState(false);
+
 
   /*
    * The callback, held where the observer can reach the current one without
@@ -187,7 +136,8 @@ export function LandingPage({
        * credit. The bar's height is where the window starts on the unscrolled
        * page, its offset in the grid.
        */
-      const clearOfBar = inner.bottom - outer.top - hole.offsetTop;
+      const headerBottom = document.querySelector('.header')?.getBoundingClientRect().bottom ?? outer.top;
+      const clearOfBar = inner.bottom - Math.max(outer.top, headerBottom);
       hole.toggleAttribute('data-covered', clearOfBar < CREDIT_ROOM);
     };
     measure();
@@ -206,264 +156,16 @@ export function LandingPage({
     };
   }, []);
 
-  useEffect(() => {
-    const page = root.current;
-    if (!page) return;
 
-    const desktop = window.matchMedia(
-      '(min-width: 901px) and (hover: hover) and (pointer: fine)',
-    );
-
-    const DURATION = 950;
-    const THRESHOLD = 55;
-    const GESTURE_GAP = 180;
-
-    let frame = 0;
-    let animating = false;
-    let animationDirection = 0;
-    let accumulated = 0;
-    let lastWheel = 0;
-    let consumed = false;
-
-    const stop = () => {
-      cancelAnimationFrame(frame);
-      animating = false;
-      accumulated = 0;
-      consumed = false;
-    };
-
-    const getStops = () => {
-      const sections = Array.from(
-        page.querySelectorAll<HTMLElement>(
-          '.landing__screen, .more > section, .more > footer',
-        ),
-      );
-
-      const outer = page.getBoundingClientRect();
-      const header = document.querySelector('.header');
-      const headerHeight = header
-        ? Math.max(
-            0,
-            Math.min(
-              page.clientHeight,
-              header.getBoundingClientRect().bottom - outer.top,
-            ),
-          )
-        : 0;
-
-      const available = page.clientHeight - headerHeight;
-      const maximum = Math.max(0, page.scrollHeight - page.clientHeight);
-      const clamp = (value: number) =>
-        Math.max(0, Math.min(maximum, value));
-
-      const stops = sections.flatMap((section, index) => {
-        const rect = section.getBoundingClientRect();
-        const top = rect.top - outer.top + page.scrollTop;
-
-        if (index === 0) {
-          return [0, clamp(top + rect.height - page.clientHeight)];
-        }
-
-        // Tall sections remain freely scrollable between these two stops.
-        if (rect.height > available) {
-          return [
-            clamp(top - headerHeight),
-            clamp(top + rect.height - page.clientHeight),
-          ];
-        }
-
-        // Centre shorter sections in the space below the header.
-        return [
-          clamp(top - headerHeight - (available - rect.height) / 2),
-        ];
-      });
-
-      return [...new Set([0, ...stops, maximum])].sort((a, b) => a - b);
-    };
-
-    const insideTallSection = (direction: number) => {
-      const outer = page.getBoundingClientRect();
-      const header = document.querySelector('.header');
-      const headerHeight = header
-        ? Math.max(0, header.getBoundingClientRect().bottom - outer.top)
-        : 0;
-
-      const sections = page.querySelectorAll<HTMLElement>(
-        '.landing__screen, .more > section',
-      );
-
-      return Array.from(sections).some((section) => {
-        const rect = section.getBoundingClientRect();
-        const top = rect.top - outer.top + page.scrollTop;
-        const start = section.matches('.landing__screen')
-          ? top
-          : top - headerHeight;
-        const end = top + rect.height - page.clientHeight;
-
-        return (
-          end > start + 2 &&
-          (direction > 0
-            ? page.scrollTop >= start - 2 && page.scrollTop < end - 2
-            : page.scrollTop > start + 2 && page.scrollTop <= end + 2)
-        );
-      });
-    };
-
-    const glide = (destination: number, direction: number) => {
-      cancelAnimationFrame(frame);
-
-      const start = page.scrollTop;
-      const started = performance.now();
-      animating = true;
-      animationDirection = direction;
-
-      const tick = (now: number) => {
-        const progress = Math.min(1, (now - started) / DURATION);
-
-        // Gentle acceleration and deceleration.
-        const eased = progress * progress * (3 - 2 * progress);
-        page.scrollTop = start + (destination - start) * eased;
-
-        if (progress < 1) {
-          frame = requestAnimationFrame(tick);
-        } else {
-          animating = false;
-        }
-      };
-
-      frame = requestAnimationFrame(tick);
-    };
-
-    const onWheel = (event: WheelEvent) => {
-      if (
-        !desktop.matches ||
-        reducedMotion ||
-        event.ctrlKey ||
-        Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
-        event.deltaY === 0
-      ) {
-        return;
-      }
-
-      const target = event.target;
-      if (!(target instanceof Element)) return;
-
-      // Keep map zoom, search results and form controls working normally.
-      if (
-        target.closest(
-          '.landing__window, input, textarea, select, [role="listbox"]',
-        )
-      ) {
-        return;
-      }
-
-      // Let nested scrollable elements handle their own wheel input.
-      for (
-        let element = target;
-        element && element !== page;
-        element = element.parentElement!
-      ) {
-        const overflow = getComputedStyle(element).overflowY;
-        if (
-          /auto|scroll/.test(overflow) &&
-          element.scrollHeight > element.clientHeight
-        ) {
-          return;
-        }
-      }
-
-      const now = performance.now();
-      const direction = Math.sign(event.deltaY);
-      const reversed = animating && direction !== animationDirection;
-
-      if (now - lastWheel > GESTURE_GAP || reversed) {
-        accumulated = 0;
-        consumed = false;
-      }
-      lastWheel = now;
-
-      if (reversed) stop();
-
-      if (animating || consumed) {
-        event.preventDefault();
-        return;
-      }
-
-      // Read long sections using ordinary scrolling.
-      if (insideTallSection(direction)) {
-        accumulated = 0;
-        return;
-      }
-
-      const stops = getStops();
-      const destination =
-        direction > 0
-          ? stops.find((position) => position > page.scrollTop + 3)
-          : [...stops]
-              .reverse()
-              .find((position) => position < page.scrollTop - 3);
-
-      if (destination === undefined) return;
-
-      event.preventDefault();
-
-      const delta =
-        event.deltaY *
-        (event.deltaMode === 1
-          ? 16
-          : event.deltaMode === 2
-            ? page.clientHeight
-            : 1);
-
-      if (accumulated && Math.sign(accumulated) !== direction) {
-        accumulated = 0;
-      }
-
-      accumulated += delta;
-
-      if (Math.abs(accumulated) >= THRESHOLD) {
-        accumulated = 0;
-        consumed = true;
-        glide(destination, direction);
-      }
-    };
-
-    // Manual navigation can interrupt the glide.
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (
-        ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ']
-          .includes(event.key)
-      ) {
-        stop();
-      }
-    };
-
-    page.addEventListener('wheel', onWheel, { passive: false });
-    page.addEventListener('pointerdown', stop);
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('resize', stop);
-
-    return () => {
-      stop();
-      page.removeEventListener('wheel', onWheel);
-      page.removeEventListener('pointerdown', stop);
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('resize', stop);
-    };
-  }, [reducedMotion]);
-
-  /** The main button: on to the sunlight screen, or ask for a place first. */
-  const sunlight = () => {
-    if (chosen) {
-      onSunlight();
-      return;
-    }
-    setAskedTooSoon(true);
-    field.current?.focus();
+  const explore = () => chosen ? onSunlight() : onExplore();
+  const showInfo = (target: string) => {
+    const details = root.current?.querySelector<HTMLDetailsElement>('#landing-background');
+    if (details) details.open = true;
+    requestAnimationFrame(() => document.getElementById(target)?.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth', block: 'center' }));
   };
 
   return (
-    <section className="landing" ref={root} aria-labelledby="landing-title">
+    <section className="landing landing--reference" ref={root} aria-labelledby="landing-title">
       {/*
         The first screen, laid out as a grid. `.landing` around it is the
         part that scrolls, carrying this and LandingMore under it.
@@ -476,20 +178,14 @@ export function LandingPage({
       */}
       <div className="landing__sheet">
         <div className="landing__hero">
-          <div className="landing__welcome">
-            <span className="landing__sun" aria-hidden="true">
-              <img className="landing__sun-icon" src="https://cdn-icons-png.flaticon.com/512/3050/3050031.png" alt="" width="24" height="24" />
-            </span>
-            <span>Melbourne CBD, from a new angle.</span>
-          </div>
-          <SkylineFilm reducedMotion={true} />
-
-          <h1 className="landing__title" id="landing-title">
-            Your street. A new perspective.
-          </h1>
-
-          <p className="landing__body">
-            Explore nearby developments. Follow the sunlight.
+          <p className="landing__kicker">YOUR CITY. A NEW PERSPECTIVE.</p>
+          <h1 className="landing__title" id="landing-title">See Melbourne CBD from a new perspective.</h1>
+          <p className="landing__body">Explore developments, shadows, rooftop solar, pedestrian forecasts and sunlight at your window—all in one 3D city.</p>
+          <p className="landing__stat">
+            99.2% of occupied private dwellings in Melbourne suburb were flats or apartments.{' '}
+            <a href="https://www.abs.gov.au/census/find-census-data/quickstats/2021/SAL21640" target="_blank" rel="noreferrer noopener">
+              ABS Census 2021<span className="visually-hidden"> (opens in a new tab)</span>
+            </a>
           </p>
 
           <div className="landing__search">
@@ -513,7 +209,7 @@ export function LandingPage({
                 value={query}
                 onChange={(event) => onQuery(event.target.value)}
                 onFocus={onSearchFocus}
-                placeholder={loading ? 'The city is loading…' : 'Search a landmark, street or address'}
+                placeholder={loading ? 'The city is loading…' : 'Search a street or address'}
                 aria-label="Search for a landmark, street or address"
                 // Nothing to search until the buildings are here.
                 disabled={loading !== null}
@@ -559,9 +255,16 @@ export function LandingPage({
             )}
           </div>
 
+
+
+          <button type="button" className="button button--block landing__cta" onClick={explore}>
+            Explore Melbourne CBD
+            <Arrow />
+          </button>
+
           {!query && !chosen && (
             <div className="landing__suggestions" aria-label="Suggested street searches">
-              <span>Try a street</span>
+              <span>Suggested streets:</span>
               {['Bourke Street', 'Collins Street', 'Swanston Street'].map(street => (
                 <button key={street} type="button" disabled={loading !== null}
                   onClick={() => {
@@ -574,21 +277,6 @@ export function LandingPage({
               ))}
             </div>
           )}
-
-          <button type="button" className="button button--block landing__cta" onClick={sunlight}>
-            Explore sunlight
-            <Arrow />
-          </button>
-
-          {/*
-            Polite: it answers a press, it does not interrupt one. Gone as
-            soon as something is chosen: it would be answering nothing.
-          */}
-          <p className="landing__hint" aria-live="polite">
-            {askedTooSoon && !chosen
-              ? 'Search for a landmark or address above, then choose it from the list.'
-              : ''}
-          </p>
 
           {onEnterVr && (
             <button
@@ -605,36 +293,14 @@ export function LandingPage({
             </button>
           )}
 
-          <button type="button" className="landing__explore" onClick={onExplore}>
-            Just explore the map
-            <Arrow />
-          </button>
+
         </div>
 
         {/*
           Focusable so "How it works" in the header can move the keyboard
           here as well as the eye; -1 keeps it out of the tab order.
         */}
-        <section
-          className="landing__steps"
-          id={HOW_IT_WORKS_ID}
-          tabIndex={-1}
-          aria-label="How it works"
-        >
-          <ol role="list">
-            {STEPS.map((step, index) => (
-              <li key={step.title} className="landing__step">
-                <span className="landing__step-number" aria-hidden="true">
-                  {index + 1}
-                </span>
-                <span>
-                  <span className="landing__step-title">{step.title}</span>
-                  <span className="landing__step-body">{step.body}</span>
-                </span>
-              </li>
-            ))}
-          </ol>
-        </section>
+
 
         <footer className="landing__foot">
           <p>
@@ -644,7 +310,7 @@ export function LandingPage({
             </span>
             <SourcesLink />
           </p>
-          {when && <p className="landing__when">{when}</p>}
+
         </footer>
       </div>
 
@@ -655,15 +321,61 @@ export function LandingPage({
       */}
       <div className="landing__window" ref={window_}>
         {loading && <Loading progress={loading.progress} error={loading.error} />}
-        {!loading && (
-          <MapKey className="landing__legend" />
-        )}
+        {!loading && <>
+          <div className="landing__feature-pins" aria-label="Explore city features">
+            {LANDING_FEATURES.map(feature => <button key={feature.key} type="button" className={`landing__pin landing__pin--${feature.key}`} onClick={() => onFeature(feature.key)}>
+              <LandingFeatureIcon feature={feature.key} /><span>{feature.pin}</span>
+            </button>)}
+          </div>
+          <p className="landing__model-label">Interactive 3D model · {when}</p>
+        </>}
         {credit}
       </div>
       </div>
 
-      {/* The sections under the first screen, reached by scrolling. */}
-      <LandingMore onExplore={onExplore} />
+      <nav className="landing__feature-rail" aria-label="Choose a city feature">
+        {LANDING_FEATURES.map(feature => <button key={feature.key} type="button" disabled={loading !== null} onClick={() => onFeature(feature.key)}>
+          <LandingFeatureIcon feature={feature.key} /><span>{feature.short}</span>
+        </button>)}
+      </nav>
+      <section className="landing__features" aria-labelledby="landing-features-title">
+        <h2 id="landing-features-title">One city. Five ways to explore.</h2>
+        <p className="landing__features-lead">Choose what matters to your everyday life.</p>
+        <div className="landing__feature-grid">
+          {LANDING_FEATURES.map(feature => <button type="button" className={`landing__feature landing__feature--${feature.key}`} key={feature.key} disabled={loading !== null} onClick={() => onFeature(feature.key)}>
+            <div className="landing__feature-picture"><img src={bundled(`how/${feature.image}`)} alt="" loading="lazy" /><span className="landing__picture-icon"><LandingFeatureIcon feature={feature.key} /></span></div>
+            <h3><LandingFeatureIcon feature={feature.key} />{feature.title}</h3><p>{feature.body}</p>
+          </button>)}
+        </div>
+        <p className="landing__image-credit">Illustrative model previews · OpenFreeMap · © OpenMapTiles · © OpenStreetMap</p>
+        <section className="landing__steps" id={HOW_IT_WORKS_ID} tabIndex={-1} aria-label="How it works">
+          <h3>Start with a place you know.</h3>
+          <ol role="list">{['Find a street', 'Choose a building', 'Explore your perspective'].map((step, index) => <li key={step} className="landing__step"><span className="landing__step-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span><span className="landing__step-title">{step}</span></li>)}</ol>
+        </section>
+      </section>
+      <section className="landing__project-info" aria-labelledby="landing-project-title">
+        <div>
+          <h2 id="landing-project-title">Made for Melbourne, by Team TE01.</h2>
+          <p>A Monash FIT5120 project using City of Melbourne’s Building Footprints 2023 and Development Activity Monitor data to explore how the CBD could change.</p>
+          {modelSummary && <p className="landing__data-summary">{modelSummary.developments.toLocaleString('en-AU')} development records · {modelSummary.buildings.toLocaleString('en-AU')} address-searchable buildings · {modelSummary.source === 'live' ? 'Refreshed from the team API' : 'Saved model snapshot'}</p>}
+        </div>
+        <div>
+          <p>The city is a simplified model. Solar output is an estimate; pedestrian forecasts are predictions at mapped sensors.</p>
+          <button type="button" className="landing__future-link" onClick={onFuturePlans}>Explore future plans &amp; project questions <Arrow /></button>
+          <details className="landing__repo-links"><summary>Project repositories</summary><a href="https://github.com/Monash-FIT5120-TE01/my-city-twin" target="_blank" rel="noreferrer noopener">My City Twin frontend ↗</a><a href="https://github.com/Monash-FIT5120-TE01/fit5120-te01-be" target="_blank" rel="noreferrer noopener">Team data API &amp; backend ↗</a></details>
+        </div>
+      </section>
+      <footer className="landing__site-footer">
+        <span className="landing__footer-brand"><LandingFeatureIcon feature="developments" />My City Twin</span>
+        <span>Illustrative model · Demo data</span>
+        <SourcesLink />
+        <button type="button" onClick={() => showInfo('country-title')}>Acknowledgement of Country</button>
+      </footer>
+      <details className="landing__background" id="landing-background">
+        <summary>About this project &amp; Melbourne’s open data</summary>
+        <LandingMore onExplore={onExplore} onFeature={onFeature} />
+      </details>
+
     </section>
   );
 }

@@ -1,0 +1,19 @@
+{
+  "retrievedAt": "2026-10-05T12:17:43.815Z",
+  "sourceUrl": "https://data.melbourne.vic.gov.au/explore/dataset/2023-building-footprints/",
+  "sourceYear": 2023,
+  "licence": "City of Melbourne CC BY 4.0",
+  "bounds": {
+    "south": -37.831,
+    "west": 144.94,
+    "north": -37.799,
+    "east": 144.983
+  },
+  "coverage": "CBD and surrounding fringe: RMIT/Queen Victoria Market, Carlton edge, Docklands, Southbank and the Parliament/gardens edge. Preview bounds, not an administrative boundary.",
+  "sourceParts": 16549,
+  "coreBuildings": 1548,
+  "fringeBuildings": 5395,
+  "fringeParts": 12102,
+  "excludedMissingGeometryOrElevation": 0,
+  "notes": "Canonical API buildings and addresses are retained. Fringe polygons are grouped by council structure ID, with measured AHD elevations. No census attributes or addresses are invented. Import uses feature centroids within the bounds; geometry at the outer edge may extend beyond them."
+}

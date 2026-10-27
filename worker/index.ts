@@ -1,3 +1,6 @@
+import { fetchFuture, type FutureEnv } from './future';
+import { fetchRoadDisruptions, type RoadEnv } from './roadDisruptions';
+
 /*
  * ─────────────────────────────────────────────────────────────────────────
  * SERVING EVERY ITERATION AT ONCE
@@ -27,18 +30,23 @@
  * it points mycitytwin.com at a half-built version, which is the one URL
  * everybody types from memory.
  */
-const LATEST = 'ver-4';
+const LATEST = 'ver-5';
 
 /** '/ver-2/anything' and bare '/ver-2' alike. */
 const VERSION_PATH = /^\/(ver-\d+)(?:\/|$)/;
 
-interface Env {
-  ASSETS: { fetch(request: Request): Promise<Response> };
-}
+interface Env extends FutureEnv, RoadEnv {}
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+    if (url.pathname === '/road-disruptions-api' || url.pathname.startsWith('/road-disruptions-api/')) {
+      const cache = typeof caches === 'undefined' ? undefined : (caches as CacheStorage & { default?: Cache }).default;
+      return fetchRoadDisruptions(request, env, cache);
+    }
+    if (url.pathname === '/future-api' || url.pathname.startsWith('/future-api/')) {
+      return fetchFuture(request, env);
+    }
 
     if (url.pathname === '/') {
       /*

@@ -1013,13 +1013,14 @@ export function SunlightSheet({
   onCancelChoose,
   afterPlans,
   onAfterPlans,
-  subjectShown,
   onCompare,
   subjectKind = 'development',
+  initialMeasurement = 'spot',
   apartment,
   onDetails,
   onBack,
 }: {
+  initialMeasurement?: 'spot' | 'window';
   solar?: React.ReactNode;
   status?: Development['status'];
   title: string;
@@ -1098,7 +1099,7 @@ export function SunlightSheet({
    * App already holds, so it does not need to know which of the two
    * questions the panel is showing.
    */
-  const [measuring, setMeasuring] = useState<'spot' | 'window'>('spot');
+  const [measuring, setMeasuring] = useState<'spot' | 'window'>(initialMeasurement);
   const onMeasuring = (next: 'spot' | 'window') => setMeasuring(next);
 
   const preset = matchingSeason(date);
@@ -1274,16 +1275,6 @@ export function SunlightSheet({
                 ? 'The city as it stands.'
                 : 'Baseline buildings; approved and under-construction projects are hidden.'}
           </p>
-          {subjectShown && (
-            <label className="choice__row choice__row--check">
-              <input
-                type="checkbox"
-                checked={subjectShown.shown}
-                onChange={(event) => subjectShown.onShown(event.target.checked)}
-              />
-              Show this building
-            </label>
-          )}
         </section>
 
         {solar}
@@ -1526,11 +1517,10 @@ export function SunlightSheet({
         {/*
           -- COMPARE SIDE BY SIDE -------------------------------------------
 
-          For planned developments only: today and after on ComparePage,
+          For buildings and planned developments: today and after on ComparePage,
           with the two views moving together. The switch above shows one at a
           time on this map; this shows both at once.
         */}
-        {subjectKind === 'development' && (
           <button
             type="button"
             className="button button--ghost button--block button--compare"
@@ -1548,7 +1538,6 @@ export function SunlightSheet({
               />
             </svg>
           </button>
-        )}
 
         {/*
           -- HOW IT WORKS ---------------------------------------------------

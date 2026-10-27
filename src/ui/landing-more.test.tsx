@@ -19,7 +19,9 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { LandingMore } from './LandingMore';
 import { MapKey, SourcesLink } from './Sources';
 
-const markup = renderToStaticMarkup(<LandingMore onExplore={() => undefined} />);
+const markup = renderToStaticMarkup(
+  <LandingMore onExplore={() => undefined} onFeature={() => undefined} />,
+);
 /** The markup as plain words, for reading sentences across tags. */
 const words = markup
   .replace(/<[^>]+>/g, ' ')
@@ -89,6 +91,21 @@ describe('the sections under the first screen', () => {
 
   it('keeps the drawings out of the reading order', () => {
     for (const img of markup.match(/<img [^>]*>/g) ?? []) expect(img).toContain('alt=""');
+  });
+});
+
+describe('follow your curiosity', () => {
+  it('offers a question for the window, the roof and the street, alongside the original three', () => {
+    for (const label of [
+      'What’s changing?',
+      'Where will shadows fall?',
+      'What could feel different?',
+      'What about my window?',
+      'Is a roof good for solar?',
+      'How busy will it be?',
+    ]) {
+      expect(words).toContain(label);
+    }
   });
 });
 

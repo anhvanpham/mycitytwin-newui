@@ -6,7 +6,7 @@
  * is an accident waiting to be made twice.
  *
  * The original palette came from the design exports in MainProjectDoc. The
- * type no longer does: text uses locally bundled Manrope for reading and Nunito
+ * type no longer does: text uses locally bundled Comic Neue for reading and
  * for rounded headings (--font-display). The
  * note in global.css says why the root size is not fixed.
  */
@@ -85,16 +85,16 @@
 
   /* ── type ──────────────────────────────────────────────── */
 
-  /* Locally bundled fonts: clear body text and soft rounded headings. */
-  --font-ui: 'Manrope Variable', -apple-system, BlinkMacSystemFont,
+  /* One friendly handwritten face, at a light regular weight. */
+  --font-ui: 'Comic Neue', -apple-system, BlinkMacSystemFont,
     'Segoe UI', sans-serif;
-  --font-display: 'Nunito Variable', var(--font-ui);
+  --font-display: var(--font-ui);
   --font-mono: var(--font-ui);
 
   /* Clear hierarchy with comfortable text and rounded, stronger headings. */
-  --weight-body: 450;
-  --weight-label: 650;
-  --weight-title: 800;
+  --weight-body: 400;
+  --weight-label: 400;
+  --weight-title: 400;
 
   /*
    * The scale, in rem so it rides the root size — see global.css.

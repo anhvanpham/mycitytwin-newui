@@ -80,7 +80,7 @@ function useStandNotice(
 }
 import { ScaleFigure } from './ScaleFigure';
 import { skyAppearance } from './sky';
-import { CBD_RING } from './cbdBoundary';
+import { CBD_EXTENT, insideCBD } from './cbdBoundary';
 import { LandmarkLabels } from './LandmarkLabels';
 import type { Landmark } from '../data/landmarks';
 import type { StreetDetailsDoc, StreetLayers } from '../data/streetDetails';
@@ -279,10 +279,7 @@ export function SceneCanvas({
    * the page has no business making before anyone has chosen anything.
    */
   const wholeCity = !lookAt && !focus;
-  const bounds = streetMap ? {
-    minE:Math.min(...CBD_RING.map(p=>p[0])), maxE:Math.max(...CBD_RING.map(p=>p[0])),
-    minN:Math.min(...CBD_RING.map(p=>p[1])), maxN:Math.max(...CBD_RING.map(p=>p[1])),
-  } : model.extent;
+  const bounds = CBD_EXTENT;
   const [targetE, targetN] = lookAt
     ? [lookAt.east, lookAt.north]
     : focus
@@ -712,7 +709,7 @@ export function SceneCanvas({
         {streetMap && activity && <StreetActivityLayer {...activity} ground={ground} onSelect={activity.onSelect} />}
         {streetMap && streetLayers.landmarks !== false && !walking && <LandmarkLabels ground={ground} onSelect={interactive ? onSelectLandmark : undefined}/>}
         {!walking && !insetOn && !lensShifted && (
-          <StreetLabels cbd={streetMap} initialEast={targetE} initialNorth={targetN} groundAhdM={ground} />
+          <StreetLabels cbd initialEast={targetE} initialNorth={targetN} groundAhdM={ground} />
         )}
 
         {/*
@@ -720,7 +717,7 @@ export function SceneCanvas({
           the approved massing is actually being shown; a searched building
           always does, because it is there either way.
         */}
-        {marker && (marker.kind !== 'development' || showProposed) && (
+        {marker && insideCBD(marker.anchorEN) && (marker.kind !== 'development' || showProposed) && (
           <SiteMarker pastel={streetMap} subject={marker} groundAhdM={ground} />
         )}
 

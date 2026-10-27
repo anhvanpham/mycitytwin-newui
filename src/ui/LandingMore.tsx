@@ -145,7 +145,11 @@ function SourceLink({ href, children }: { href: string; children: React.ReactNod
  * The sections under the front page's first screen. `onExplore` is the
  * same "explore the city" the first screen offers, for the last button.
  */
-const CURIOSITIES = [
+const CURIOSITIES: {
+  label: string; icon: string; title: string; body: string; action: string;
+  /** Present only when the answer should open that feature directly, bypassing onExplore. */
+  feature?: 'sunlight' | 'solar' | 'activity';
+}[] = [
   {
     label: 'What’s changing?', icon: '↗', title: 'Meet your future neighbours.',
     body: 'See what’s here and what’s planned nearby.',
@@ -161,9 +165,31 @@ const CURIOSITIES = [
     body: 'Compare today’s shadows with the planned city, side by side.',
     action: 'Start with the map',
   },
+  {
+    label: 'What about my window?', icon: '▤', title: 'Check the sunlight at your window.',
+    body: 'Pick a building, then a floor and a side. See how much sun reaches it through the day.',
+    action: 'Check a window', feature: 'sunlight' as const,
+  },
+  {
+    label: 'Is a roof good for solar?', icon: '◈', title: 'See what a roof could earn.',
+    body: 'Try rooftop panels on a building and see the sunlight they would catch.',
+    action: 'Try rooftop solar', feature: 'solar' as const,
+  },
+  {
+    label: 'How busy will it be?', icon: '◷', title: 'Check how busy the street will be.',
+    body: 'See the pedestrian forecast for streets near you, hour by hour.',
+    action: 'See the forecast', feature: 'activity' as const,
+  },
 ];
 
-export function LandingMore({ onExplore }: { onExplore: () => void }) {
+export function LandingMore({
+  onExplore,
+  onFeature,
+}: {
+  onExplore: () => void;
+  /** Takes a curiosity's answer straight to that feature, bypassing onExplore. */
+  onFeature: (feature: 'developments' | 'sunlight' | 'solar' | 'activity' | 'inside') => void;
+}) {
   const [curiosity, setCuriosity] = useState(0);
   const selected = CURIOSITIES[curiosity];
   return (
@@ -262,7 +288,11 @@ export function LandingMore({ onExplore }: { onExplore: () => void }) {
             <h3>{selected.title}</h3>
             <p>{selected.body}</p>
           </div>
-          <button type="button" className="button" onClick={onExplore}>
+          <button
+            type="button"
+            className="button"
+            onClick={() => (selected.feature ? onFeature(selected.feature) : onExplore())}
+          >
             {selected.action}<span aria-hidden="true"> ↗</span>
           </button>
         </div>

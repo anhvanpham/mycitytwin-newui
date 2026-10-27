@@ -1,0 +1,1175 @@
+{
+  "exported_at": "2026-10-05T11:55:43.420801+00:00",
+  "topics": [
+    {
+      "id": "buildings",
+      "name": "Buildings and development",
+      "description": "Building proposals, approvals and construction stages."
+    },
+    {
+      "id": "city-news",
+      "name": "CBD news",
+      "description": "Other news with an explicit connection to the CBD."
+    },
+    {
+      "id": "planning",
+      "name": "Planning and policy",
+      "description": "Consultations, planning changes and council decisions."
+    },
+    {
+      "id": "public-space",
+      "name": "Public space",
+      "description": "Streetscapes, squares and public facilities."
+    },
+    {
+      "id": "transport",
+      "name": "Transport and infrastructure",
+      "description": "Rail, tram, road, cycling and pedestrian projects."
+    },
+    {
+      "id": "urban-greening",
+      "name": "Urban greening",
+      "description": "Trees, canopy, parks and urban forest plans."
+    }
+  ],
+  "projects": [
+    {
+      "id": "central-city-urban-forest",
+      "title": "Central City Urban Forest Precinct Plan 2025–2035",
+      "summary": "A ten-year plan to plant trees on low-canopy streets, support new tree growth and care for older avenues in the Central City.",
+      "status": "approved",
+      "location": "Central City, Melbourne",
+      "cbd_relevance": "Direct: central-city urban greening.",
+      "latitude": null,
+      "longitude": null,
+      "geometry_geojson": null,
+      "source_id": "forest-part-b",
+      "verified_on": "2026-10-05",
+      "source_url": "https://hdp-au-prod-app-com-participate-files.s3.ap-southeast-2.amazonaws.com/1617/4245/3285/Central-City-Urban-Forest-Precinct-Plan-2025-35-Part-B.pdf",
+      "maps": [
+        {
+          "id": "forest-planting",
+          "plan_id": "central-city-urban-forest",
+          "title": "Central City tree planting plan",
+          "image_url": "data/plan-maps/urban-forest-planting-08.png",
+          "caption": "Map 8, printed page 31 of the 2025–2035 plan. Colours show planting priorities and areas to grow or care for trees; they do not show live completed works.",
+          "alt_text": "Official Central City street planting priority map with its plant, grow and care-for legend.",
+          "source_id": "forest-part-b",
+          "verified_on": "2026-10-05",
+          "source_url": "https://hdp-au-prod-app-com-participate-files.s3.ap-southeast-2.amazonaws.com/1617/4245/3285/Central-City-Urban-Forest-Precinct-Plan-2025-35-Part-B.pdf",
+          "publisher": "City of Melbourne"
+        }
+      ],
+      "answers": [
+        {
+          "project_id": "central-city-urban-forest",
+          "question_id": "location",
+          "title": "Where it fits into the city",
+          "body": "The plan covers Central City streets. Its maps compare canopy cover and planting needs street by street. A street with few trees and no recent planting receives different attention from an established avenue or a street where young trees are already growing.",
+          "source_id": "forest-part-b",
+          "verified_on": "2026-10-05",
+          "source_url": "https://hdp-au-prod-app-com-participate-files.s3.ap-southeast-2.amazonaws.com/1617/4245/3285/Central-City-Urban-Forest-Precinct-Plan-2025-35-Part-B.pdf",
+          "source_title": "Central City Urban Forest Precinct Plan 2025–35 Part B"
+        },
+        {
+          "project_id": "central-city-urban-forest",
+          "question_id": "news",
+          "title": "Updates we have checked",
+          "body": "The plan was endorsed on 18 March 2025 after community input. Its next steps are street-level planting, monitoring growth and caring for mature trees. We have not verified a live planting completion report, so these priorities are not presented as completed works.",
+          "source_id": "forest-endorsement",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/cbd-urban-forest/project-endorsed-council",
+          "source_title": "Project endorsed by Council"
+        },
+        {
+          "project_id": "central-city-urban-forest",
+          "question_id": "overview",
+          "title": "What the plan changes",
+          "body": "This plan guides the Central City’s street trees over 2025–2035. It prioritises streets with little canopy, supports new trees as they grow and protects older avenues. The aim is a healthier urban forest, rather than replacing every street at once.",
+          "source_id": "forest-part-b",
+          "verified_on": "2026-10-05",
+          "source_url": "https://hdp-au-prod-app-com-participate-files.s3.ap-southeast-2.amazonaws.com/1617/4245/3285/Central-City-Urban-Forest-Precinct-Plan-2025-35-Part-B.pdf",
+          "source_title": "Central City Urban Forest Precinct Plan 2025–35 Part B"
+        },
+        {
+          "project_id": "central-city-urban-forest",
+          "question_id": "sources",
+          "title": "What you will find in the original plan",
+          "body": "Part B explains existing canopy, tree diversity and the planting approach. Map 8 groups streets by planting priority and tree-care needs. Use it to understand a street’s planned treatment; it is not a live works calendar or a prediction of its future temperature.",
+          "source_id": "forest-part-b",
+          "verified_on": "2026-10-05",
+          "source_url": "https://hdp-au-prod-app-com-participate-files.s3.ap-southeast-2.amazonaws.com/1617/4245/3285/Central-City-Urban-Forest-Precinct-Plan-2025-35-Part-B.pdf",
+          "source_title": "Central City Urban Forest Precinct Plan 2025–35 Part B"
+        },
+        {
+          "project_id": "central-city-urban-forest",
+          "question_id": "stages",
+          "title": "Completed work and next steps",
+          "body": "The plan organises work into planting, growing and caring for trees. Low-canopy streets without recent planting are prioritised for new trees; recent plantings are monitored; older avenues receive care. Approval alone does not confirm which individual street works have finished.",
+          "source_id": "forest-part-b",
+          "verified_on": "2026-10-05",
+          "source_url": "https://hdp-au-prod-app-com-participate-files.s3.ap-southeast-2.amazonaws.com/1617/4245/3285/Central-City-Urban-Forest-Precinct-Plan-2025-35-Part-B.pdf",
+          "source_title": "Central City Urban Forest Precinct Plan 2025–35 Part B"
+        },
+        {
+          "project_id": "central-city-urban-forest",
+          "question_id": "timing",
+          "title": "The timeline explained",
+          "body": "The planting map groups priorities into years 1–4, 5–7 and 8–10 of the plan. New trees receive three years of maintenance. The plan also targets assessment of all Central City streetscapes for planting potential by 2032; individual works can move around other projects.",
+          "source_id": "forest-part-b",
+          "verified_on": "2026-10-05",
+          "source_url": "https://hdp-au-prod-app-com-participate-files.s3.ap-southeast-2.amazonaws.com/1617/4245/3285/Central-City-Urban-Forest-Precinct-Plan-2025-35-Part-B.pdf",
+          "source_title": "Central City Urban Forest Precinct Plan 2025–35 Part B"
+        }
+      ],
+      "topics": [
+        {
+          "id": "planning",
+          "name": "Planning and policy",
+          "description": "Consultations, planning changes and council decisions."
+        },
+        {
+          "id": "urban-greening",
+          "name": "Urban greening",
+          "description": "Trees, canopy, parks and urban forest plans."
+        }
+      ],
+      "stages": [
+        {
+          "id": "forest-endorsement",
+          "project_id": "central-city-urban-forest",
+          "position": 1,
+          "title": "Plan endorsement",
+          "status": "completed",
+          "planned_start": null,
+          "planned_end": null,
+          "actual_start": null,
+          "actual_end": "2025-03-18",
+          "date_precision": "day",
+          "summary": "Endorsed by the Future Melbourne Committee.",
+          "source_id": "forest-endorsement",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/cbd-urban-forest/project-endorsed-council"
+        }
+      ],
+      "news": [
+        {
+          "id": "forest-approved-news",
+          "title": "Central City Urban Forest Plan endorsed",
+          "summary": "Council announced endorsement of the 2025–2035 plan.",
+          "source_id": "forest-endorsement",
+          "location": "Central City, Melbourne",
+          "cbd_relevance": "Direct: CBD urban greening policy.",
+          "review_status": "reviewed",
+          "source_url": "https://participate.melbourne.vic.gov.au/cbd-urban-forest/project-endorsed-council",
+          "published_on": "2025-03-21"
+        }
+      ]
+    },
+    {
+      "id": "franklin-street",
+      "title": "Franklin Street transformation",
+      "summary": "Street redesign connecting the market and CBD; initial road works are complete and Stage 2 is planned.",
+      "status": "approved",
+      "location": "Franklin Street, Peel Street to Stewart Street",
+      "cbd_relevance": "Direct: cycling, walking and access between the CBD and market.",
+      "latitude": null,
+      "longitude": null,
+      "geometry_geojson": null,
+      "source_id": "franklin",
+      "verified_on": "2026-10-05",
+      "source_url": "https://participate.melbourne.vic.gov.au/transforming-franklin-street",
+      "maps": [],
+      "answers": [
+        {
+          "project_id": "franklin-street",
+          "question_id": "location",
+          "title": "Where it fits into the city",
+          "body": "The two stages cover Peel Street to Queen Street, then Queen Street to Stewart Street. The route is important because it connects Queen Victoria Market with central-city streets and the neighbouring Gurrowa Place precinct.",
+          "source_id": "franklin",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/transforming-franklin-street",
+          "source_title": "Transforming Franklin Street"
+        },
+        {
+          "project_id": "franklin-street",
+          "question_id": "news",
+          "title": "Updates we have checked",
+          "body": "The source now lists an endorsed Stage 2 design and early-2027 construction. This places the next street transformation after the completed road realignment; it should not be described as already delivered.",
+          "source_id": "franklin",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/transforming-franklin-street",
+          "source_title": "Transforming Franklin Street"
+        },
+        {
+          "project_id": "franklin-street",
+          "question_id": "overview",
+          "title": "What the plan changes",
+          "body": "Franklin Street is being redesigned to improve walking, cycling and public space between the market and CBD. The design includes protected bike lanes, wider pedestrian space and planting, while retaining traffic in both directions.",
+          "source_id": "franklin",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/transforming-franklin-street",
+          "source_title": "Transforming Franklin Street"
+        },
+        {
+          "project_id": "franklin-street",
+          "question_id": "sources",
+          "title": "What you will find in the original plan",
+          "body": "Council’s page explains both stages, the design changes and their sequencing. It is especially useful for distinguishing finished road realignment from future streetscape works and the finishing work dependent on Gurrowa Place.",
+          "source_id": "franklin",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/transforming-franklin-street",
+          "source_title": "Transforming Franklin Street"
+        },
+        {
+          "project_id": "franklin-street",
+          "question_id": "stages",
+          "title": "Completed work and next steps",
+          "body": "Roundabout removal and road realignment finished in May 2024. Stage 2’s concept was endorsed in September 2024. Pathways and signals associated with the first stage still depend on Gurrowa Place; the initial road works are not the entire transformation.",
+          "source_id": "franklin",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/transforming-franklin-street",
+          "source_title": "Transforming Franklin Street"
+        },
+        {
+          "project_id": "franklin-street",
+          "question_id": "timing",
+          "title": "The timeline explained",
+          "body": "Council currently lists Stage 2 construction for early 2027. Some first-stage finishing works are tied to completion of Gurrowa Place. An exact start day and final opening date are not confirmed in the reviewed material.",
+          "source_id": "franklin",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/transforming-franklin-street",
+          "source_title": "Transforming Franklin Street"
+        }
+      ],
+      "topics": [
+        {
+          "id": "public-space",
+          "name": "Public space",
+          "description": "Streetscapes, squares and public facilities."
+        },
+        {
+          "id": "transport",
+          "name": "Transport and infrastructure",
+          "description": "Rail, tram, road, cycling and pedestrian projects."
+        },
+        {
+          "id": "urban-greening",
+          "name": "Urban greening",
+          "description": "Trees, canopy, parks and urban forest plans."
+        }
+      ],
+      "stages": [
+        {
+          "id": "franklin-initial",
+          "project_id": "franklin-street",
+          "position": 1,
+          "title": "Roundabout removal and road realignment",
+          "status": "completed",
+          "planned_start": null,
+          "planned_end": null,
+          "actual_start": null,
+          "actual_end": "2024-05",
+          "date_precision": "month",
+          "summary": "Initial major road works completed; final pathways and signals depend on Gurrowa Place.",
+          "source_id": "franklin",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/transforming-franklin-street"
+        },
+        {
+          "id": "franklin-design",
+          "project_id": "franklin-street",
+          "position": 2,
+          "title": "Stage 2 concept endorsement",
+          "status": "completed",
+          "planned_start": null,
+          "planned_end": null,
+          "actual_start": null,
+          "actual_end": "2024-09-03",
+          "date_precision": "day",
+          "summary": "Stage 2 design endorsed.",
+          "source_id": "franklin",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/transforming-franklin-street"
+        },
+        {
+          "id": "franklin-stage-2",
+          "project_id": "franklin-street",
+          "position": 3,
+          "title": "Stage 2 construction",
+          "status": "planned",
+          "planned_start": "2027",
+          "planned_end": null,
+          "actual_start": null,
+          "actual_end": null,
+          "date_precision": "year",
+          "summary": "Council lists early 2027; exact start date is not supplied.",
+          "source_id": "franklin",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/transforming-franklin-street"
+        }
+      ],
+      "news": []
+    },
+    {
+      "id": "greenline",
+      "title": "Greenline",
+      "summary": "Riverfront renewal with one section delivered and further sections in planning.",
+      "status": "approved",
+      "location": "North bank of the Yarra, Birrarung Marr to Victoria Harbour",
+      "cbd_relevance": "Direct: riverfront public space alongside the CBD.",
+      "latitude": null,
+      "longitude": null,
+      "geometry_geojson": null,
+      "source_id": "greenline",
+      "verified_on": "2026-10-05",
+      "source_url": "https://participate.melbourne.vic.gov.au/greenline",
+      "maps": [
+        {
+          "id": "greenline-site-plan",
+          "plan_id": "greenline",
+          "title": "Greenline overall site plan",
+          "image_url": "https://hdp-au-prod-app-com-participate-files.s3.ap-southeast-2.amazonaws.com/6816/9162/2983/greenline-base-map-crop.png",
+          "caption": "Council’s overall site plan for the north bank of the Yarra–Birrarung. The plan includes completed and future precincts; this is not a live works map.",
+          "alt_text": "Official Greenline overall site plan along the northern river bank.",
+          "source_id": "greenline",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/greenline",
+          "publisher": "City of Melbourne"
+        }
+      ],
+      "answers": [
+        {
+          "project_id": "greenline",
+          "question_id": "location",
+          "title": "Where it fits into the city",
+          "body": "The project runs beside the CBD from Birrarung Marr towards Victoria Harbour. It links riverfront destinations with surrounding streets, giving people places to walk and spend time near the city centre.",
+          "source_id": "greenline",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/greenline",
+          "source_title": "The Greenline Project"
+        },
+        {
+          "project_id": "greenline",
+          "question_id": "news",
+          "title": "Updates we have checked",
+          "body": "Council reports a completed 450-metre first section and funding for planning subsequent sections. This is a progress update: it does not mean every future precinct has funding or a final construction schedule.",
+          "source_id": "greenline",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/greenline",
+          "source_title": "The Greenline Project"
+        },
+        {
+          "project_id": "greenline",
+          "question_id": "overview",
+          "title": "What the plan changes",
+          "body": "Greenline connects promenades, parks, planting and public spaces along the Yarra’s north bank. Delivery is staged: the Birrarung Marr section is complete, while other stretches remain in planning. The whole riverfront project is not finished.",
+          "source_id": "greenline",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/greenline",
+          "source_title": "The Greenline Project"
+        },
+        {
+          "project_id": "greenline",
+          "question_id": "sources",
+          "title": "What you will find in the original plan",
+          "body": "Council’s project page includes the master plan, engagement findings and a timeline. The master plan explains the intended connections; the current progress text distinguishes the completed section from planning still underway.",
+          "source_id": "greenline",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/greenline",
+          "source_title": "The Greenline Project"
+        },
+        {
+          "project_id": "greenline",
+          "question_id": "stages",
+          "title": "Completed work and next steps",
+          "body": "Birrarung Marr Site 1 was delivered in December 2025. Further riverfront plans are being developed, including sections towards the aquarium. A finished first section should not be read as completion of all Greenline precincts.",
+          "source_id": "greenline",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/greenline",
+          "source_title": "The Greenline Project"
+        },
+        {
+          "project_id": "greenline",
+          "question_id": "timing",
+          "title": "The timeline explained",
+          "body": "The first section opened in December 2025. The older implementation plan indicated delivery through 2028, subject to approvals. That indicative date does not establish a confirmed opening date for every remaining section.",
+          "source_id": "greenline",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/greenline",
+          "source_title": "The Greenline Project"
+        }
+      ],
+      "topics": [
+        {
+          "id": "planning",
+          "name": "Planning and policy",
+          "description": "Consultations, planning changes and council decisions."
+        },
+        {
+          "id": "public-space",
+          "name": "Public space",
+          "description": "Streetscapes, squares and public facilities."
+        },
+        {
+          "id": "urban-greening",
+          "name": "Urban greening",
+          "description": "Trees, canopy, parks and urban forest plans."
+        }
+      ],
+      "stages": [
+        {
+          "id": "greenline-masterplan",
+          "project_id": "greenline",
+          "position": 1,
+          "title": "Master plan endorsement",
+          "status": "completed",
+          "planned_start": null,
+          "planned_end": null,
+          "actual_start": null,
+          "actual_end": "2023-12-05",
+          "date_precision": "day",
+          "summary": "Council endorsed the master plan.",
+          "source_id": "greenline",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/greenline"
+        },
+        {
+          "id": "greenline-site-1",
+          "project_id": "greenline",
+          "position": 2,
+          "title": "Birrarung Marr Site 1 delivery",
+          "status": "completed",
+          "planned_start": null,
+          "planned_end": null,
+          "actual_start": null,
+          "actual_end": "2025-12",
+          "date_precision": "month",
+          "summary": "The first riverfront section was delivered.",
+          "source_id": "greenline",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/greenline"
+        },
+        {
+          "id": "greenline-next",
+          "project_id": "greenline",
+          "position": 3,
+          "title": "Further riverfront planning",
+          "status": "underway",
+          "planned_start": null,
+          "planned_end": null,
+          "actual_start": null,
+          "actual_end": null,
+          "date_precision": "unknown",
+          "summary": "Detailed planning for subsequent sections continues; delivery dates are not confirmed here.",
+          "source_id": "greenline",
+          "verified_on": "2026-10-05",
+          "source_url": "https://participate.melbourne.vic.gov.au/greenline"
+        }
+      ],
+      "news": []
+    },
+    {
+      "id": "gurrowa-place",
+      "title": "Gurrowa Place",
+      "summary": "Housing, student accommodation, heritage restoration and a new Market Square. Current construction stage is not confirmed by the reviewed overview.",
+      "status": "unknown",
+      "location": "South of Queen Victoria Market",
+      "cbd_relevance": "Direct: housing and public space in the market precinct.",
+      "latitude": null,
+      "longitude": null,
+      "geometry_geojson": null,
+      "source_id": "gurrowa",
+      "verified_on": "2026-10-05",
+      "source_url": "https://www.gurrowapl.com.au/",
+      "maps": [],
+      "answers": [
+        {
+          "project_id": "gurrowa-place",
+          "question_id": "location",
+          "title": "Where it fits into the city",
+          "body": "The precinct is south of Queen Victoria Market, on its existing car-park side. It connects new residential uses and public space with the market and surrounding CBD streets.",
+          "source_id": "gurrowa",
+          "verified_on": "2026-10-05",
+          "source_url": "https://www.gurrowapl.com.au/",
+          "source_title": "Gurrowa Place"
+        },
+        {
+          "project_id": "gurrowa-place",
+          "question_id": "news",
+          "title": "Updates we have checked",
+          "body": "The developer’s current overview describes housing, student accommodation, Franklin Street Stores restoration and Market Square. These are stated project components; the overview does not establish which construction milestones have been reached.",
+          "source_id": "gurrowa",
+          "verified_on": "2026-10-05",
+          "source_url": "https://www.gurrowapl.com.au/",
+          "source_title": "Gurrowa Place"
+        },
+        {
+          "project_id": "gurrowa-place",
+          "question_id": "overview",
+          "title": "What the plan changes",
+          "body": "Gurrowa Place combines new housing and student accommodation with heritage restoration and public space. The developer describes three buildings, restoration of the Franklin Street Stores and a new Market Square as parts of the precinct.",
+          "source_id": "gurrowa",
+          "verified_on": "2026-10-05",
+          "source_url": "https://www.gurrowapl.com.au/",
+          "source_title": "Gurrowa Place"
+        },
+        {
+          "project_id": "gurrowa-place",
+          "question_id": "sources",
+          "title": "What you will find in the original plan",
+          "body": "The developer page explains the intended precinct, building uses and public-space components. Its images include design impressions. They illustrate proposals and should not be used as proof that construction or opening has occurred.",
+          "source_id": "gurrowa",
+          "verified_on": "2026-10-05",
+          "source_url": "https://www.gurrowapl.com.au/",
+          "source_title": "Gurrowa Place"
+        },
+        {
+          "project_id": "gurrowa-place",
+          "question_id": "stages",
+          "title": "Completed work and next steps",
+          "body": "The reviewed overview identifies the precinct’s components, but does not confirm a construction-stage breakdown. We cannot reliably label demolition, foundations or tower construction as finished. Those stages remain unconfirmed rather than inferred from artist impressions.",
+          "source_id": "gurrowa",
+          "verified_on": "2026-10-05",
+          "source_url": "https://www.gurrowapl.com.au/",
+          "source_title": "Gurrowa Place"
+        },
+        {
+          "project_id": "gurrowa-place",
+          "question_id": "timing",
+          "title": "The timeline explained",
+          "body": "The reviewed developer overview does not give a confirmed delivery timetable for each component. Market Square, heritage restoration and the buildings should therefore not be assigned one invented opening date.",
+          "source_id": "gurrowa",
+          "verified_on": "2026-10-05",
+          "source_url": "https://www.gurrowapl.com.au/",
+          "source_title": "Gurrowa Place"
+        }
+      ],
+      "topics": [
+        {
+          "id": "buildings",
+          "name": "Buildings and development",
+          "description": "Building proposals, approvals and construction stages."
+        },
+        {
+          "id": "public-space",
+          "name": "Public space",
+          "description": "Streetscapes, squares and public facilities."
+        }
+      ],
+      "stages": [],
+      "news": []
+    },
+    {
+      "id": "melbourne-airport-rail",
+      "title": "Melbourne Airport Rail",
+      "summary": "Rail infrastructure delivered in separate stages. Stage completion dates do not establish an opening date for the full airport connection.",
+      "status": "under_construction",
+      "location": "Western Melbourne rail corridor",
+      "cbd_relevance": "Indirect: rail connections to the CBD via the Metro Tunnel; works are outside the CBD.",
+      "latitude": null,
+      "longitude": null,
+      "geometry_geojson": null,
+      "source_id": "airport-rail",
+      "verified_on": "2026-10-05",
+      "source_url": "https://bigbuild.vic.gov.au/projects/melbourne-airport-rail",
+      "maps": [
+        {
+          "id": "airport-rail-route",
+          "plan_id": "melbourne-airport-rail",
+          "title": "Melbourne Airport Rail project map",
+          "image_url": "https://bigbuild.vic.gov.au/__data/assets/image/0020/1050608/MAR13088-MARS2-Overarching-Map-A4-V10-FA-1.jpg",
+          "caption": "Published with Big Build’s 30 September 2026 Stage 2 announcement. Shows the project route and stages, rather than an operating airport service.",
+          "alt_text": "Official Melbourne Airport Rail project route and stages map.",
+          "source_id": "airport-stage-2-news",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/news/melbourne-airport-rail/melbourne-airport-rail-takes-off-with-stage-2-works",
+          "publisher": "Victoria’s Big Build"
+        }
+      ],
+      "answers": [
+        {
+          "project_id": "melbourne-airport-rail",
+          "question_id": "location",
+          "title": "Where it fits into the city",
+          "body": "Stage 1 runs from West Footscray to Albion and Stage 2 from Albion to Keilor East. Works are outside the CBD, but the rail connections link with the Metro Tunnel and central-city travel.",
+          "source_id": "airport-rail",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/projects/melbourne-airport-rail",
+          "source_title": "Melbourne Airport Rail"
+        },
+        {
+          "project_id": "melbourne-airport-rail",
+          "question_id": "news",
+          "title": "Updates we have checked",
+          "body": "The 30 September 2026 announcement advances Stage 2, with investigations and development work preceding major construction. Stage 1 remains a separate package already underway; the two stages should be followed independently.",
+          "source_id": "airport-rail",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/projects/melbourne-airport-rail",
+          "source_title": "Melbourne Airport Rail"
+        },
+        {
+          "project_id": "melbourne-airport-rail",
+          "question_id": "overview",
+          "title": "What the plan changes",
+          "body": "Airport Rail is being delivered in stages. The first upgrades tracks and stations around Sunshine; the second adds a line towards Keilor East. These are steps towards an airport connection, rather than evidence of a complete airport service.",
+          "source_id": "airport-rail",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/projects/melbourne-airport-rail",
+          "source_title": "Melbourne Airport Rail"
+        },
+        {
+          "project_id": "melbourne-airport-rail",
+          "question_id": "sources",
+          "title": "What you will find in the original plan",
+          "body": "Big Build separates the Stage 1 and Stage 2 scope, maps, timelines and news. Reading those separately helps distinguish track-capacity upgrades from new line construction and avoids mistaking a stage completion date for airport services starting.",
+          "source_id": "airport-rail",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/projects/melbourne-airport-rail",
+          "source_title": "Melbourne Airport Rail"
+        },
+        {
+          "project_id": "melbourne-airport-rail",
+          "question_id": "stages",
+          "title": "Completed work and next steps",
+          "body": "Stage 1 works are underway. Stage 2 investigations and development work are announced ahead of major construction. Finishing either stage does not by itself complete the airport link.",
+          "source_id": "airport-rail",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/projects/melbourne-airport-rail",
+          "source_title": "Melbourne Airport Rail"
+        },
+        {
+          "project_id": "melbourne-airport-rail",
+          "question_id": "timing",
+          "title": "The timeline explained",
+          "body": "Stage 1 is planned to finish in 2030. Stage 2 major construction is scheduled for 2028–2031. Those dates describe the published stages, not a confirmed opening date for the full airport service.",
+          "source_id": "airport-rail",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/projects/melbourne-airport-rail",
+          "source_title": "Melbourne Airport Rail"
+        }
+      ],
+      "topics": [
+        {
+          "id": "transport",
+          "name": "Transport and infrastructure",
+          "description": "Rail, tram, road, cycling and pedestrian projects."
+        }
+      ],
+      "stages": [
+        {
+          "id": "airport-stage-1",
+          "project_id": "melbourne-airport-rail",
+          "position": 1,
+          "title": "Stage 1: West Footscray to Albion Rail Upgrade",
+          "status": "underway",
+          "planned_start": null,
+          "planned_end": "2030",
+          "actual_start": null,
+          "actual_end": null,
+          "date_precision": "year",
+          "summary": "Track and station upgrades including Sunshine Superhub.",
+          "source_id": "airport-rail",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/projects/melbourne-airport-rail"
+        },
+        {
+          "id": "airport-stage-2",
+          "project_id": "melbourne-airport-rail",
+          "position": 2,
+          "title": "Stage 2: Albion to Keilor East — major construction",
+          "status": "planned",
+          "planned_start": "2028",
+          "planned_end": "2031",
+          "actual_start": null,
+          "actual_end": null,
+          "date_precision": "year",
+          "summary": "A new rail line and Keilor East station; site investigations are separately announced for 2026.",
+          "source_id": "airport-rail",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/projects/melbourne-airport-rail"
+        }
+      ],
+      "news": [
+        {
+          "id": "airport-stage-2-announcement",
+          "title": "Airport Rail Stage 2 announced",
+          "summary": "Development work is announced before major construction planned for 2028–2031.",
+          "source_id": "airport-stage-2-news",
+          "location": "Albion to Keilor East",
+          "cbd_relevance": "Indirect: future transport access to the CBD.",
+          "review_status": "reviewed",
+          "source_url": "https://bigbuild.vic.gov.au/news/melbourne-airport-rail/melbourne-airport-rail-takes-off-with-stage-2-works",
+          "published_on": "2026-09-30"
+        }
+      ]
+    },
+    {
+      "id": "state-library-overstation",
+      "title": "State Library Exchange",
+      "summary": "Scape’s overstation development combining student accommodation with education, retail and commercial space; target completion early 2029.",
+      "status": "under_construction",
+      "location": "State Library Station, Melbourne CBD",
+      "cbd_relevance": "Direct: development above a CBD station.",
+      "latitude": null,
+      "longitude": null,
+      "geometry_geojson": null,
+      "source_id": "state-library-exchange",
+      "verified_on": "2026-10-05",
+      "source_url": "https://www.scape.com.au/scape-state-library-exchange/",
+      "maps": [
+        {
+          "id": "library-exchange-context",
+          "plan_id": "state-library-overstation",
+          "title": "State Library Exchange station context",
+          "image_url": "https://bigbuild.vic.gov.au/__data/assets/image/0009/978111/MT-StateLibrary-Location.png",
+          "caption": "Station location map showing the Swanston/La Trobe entrance beneath the development. This is a precinct context map, not a building footprint or construction boundary.",
+          "alt_text": "Official State Library Station map providing location context for the overstation development.",
+          "source_id": "library-location",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/use-metro-tunnel/stations/state-library",
+          "publisher": "Victoria’s Big Build"
+        }
+      ],
+      "answers": [
+        {
+          "project_id": "state-library-overstation",
+          "question_id": "location",
+          "title": "Where it fits into the city",
+          "body": "The development is at 393 Swanston Street, above State Library Station near La Trobe Street. Its entrance is described on Literature Lane, between La Trobe and Little La Trobe streets.",
+          "source_id": "state-library-exchange",
+          "verified_on": "2026-10-05",
+          "source_url": "https://www.scape.com.au/scape-state-library-exchange/",
+          "source_title": "Scape State Library Exchange"
+        },
+        {
+          "project_id": "state-library-overstation",
+          "question_id": "news",
+          "title": "Updates we have checked",
+          "body": "Scape’s overview describes the RMIT partnership, student accommodation and education space, with early 2029 as its target. This provides more detail than the transport project page, which mainly explains the separate overstation development.",
+          "source_id": "state-library-exchange",
+          "verified_on": "2026-10-05",
+          "source_url": "https://www.scape.com.au/scape-state-library-exchange/",
+          "source_title": "Scape State Library Exchange"
+        },
+        {
+          "project_id": "state-library-overstation",
+          "question_id": "overview",
+          "title": "What the plan changes",
+          "body": "State Library Exchange combines student accommodation with retail, commercial and education space above State Library Station. Scape describes around 1,400 student beds and a partnership with RMIT, connecting living and learning in the CBD.",
+          "source_id": "state-library-exchange",
+          "verified_on": "2026-10-05",
+          "source_url": "https://www.scape.com.au/scape-state-library-exchange/",
+          "source_title": "Scape State Library Exchange"
+        },
+        {
+          "project_id": "state-library-overstation",
+          "question_id": "sources",
+          "title": "What you will find in the original plan",
+          "body": "Scape’s page sets out accommodation, education and commercial uses, the location and target completion. Big Build supplies the station relationship. Together they distinguish the building’s intended uses from the operating rail station below.",
+          "source_id": "state-library-exchange",
+          "verified_on": "2026-10-05",
+          "source_url": "https://www.scape.com.au/scape-state-library-exchange/",
+          "source_title": "Scape State Library Exchange"
+        },
+        {
+          "project_id": "state-library-overstation",
+          "question_id": "stages",
+          "title": "Completed work and next steps",
+          "body": "Big Build reports the overstation building under construction and treats it separately from the station. The reviewed sources do not provide a completed-floor or fit-out schedule. The station is intended to stay open during development.",
+          "source_id": "town-hall-works",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/projects/metro-tunnel/construction/town-hall",
+          "source_title": "Current works at Town Hall Station"
+        },
+        {
+          "project_id": "state-library-overstation",
+          "question_id": "timing",
+          "title": "The timeline explained",
+          "body": "Scape gives a target completion of early 2029. This is a developer target, not a confirmed opening or move-in date. It also does not mean station services must wait for the building to finish.",
+          "source_id": "state-library-exchange",
+          "verified_on": "2026-10-05",
+          "source_url": "https://www.scape.com.au/scape-state-library-exchange/",
+          "source_title": "Scape State Library Exchange"
+        }
+      ],
+      "topics": [
+        {
+          "id": "buildings",
+          "name": "Buildings and development",
+          "description": "Building proposals, approvals and construction stages."
+        }
+      ],
+      "stages": [
+        {
+          "id": "library-building",
+          "project_id": "state-library-overstation",
+          "position": 1,
+          "title": "Building construction",
+          "status": "underway",
+          "planned_start": null,
+          "planned_end": "2029",
+          "actual_start": null,
+          "actual_end": null,
+          "date_precision": "year",
+          "summary": "Scape targets completion in early 2029; this is a planned date, not confirmation of opening.",
+          "source_id": "state-library-exchange",
+          "verified_on": "2026-10-05",
+          "source_url": "https://www.scape.com.au/scape-state-library-exchange/"
+        }
+      ],
+      "news": []
+    },
+    {
+      "id": "town-hall-overstation",
+      "title": "Town Hall Place",
+      "summary": "Lendlease’s commercial overstation development with office, retail and laneway connections above Town Hall Station.",
+      "status": "under_construction",
+      "location": "Town Hall Station, Melbourne CBD",
+      "cbd_relevance": "Direct: development above a CBD station.",
+      "latitude": null,
+      "longitude": null,
+      "geometry_geojson": null,
+      "source_id": "town-hall-works",
+      "verified_on": "2026-10-05",
+      "source_url": "https://bigbuild.vic.gov.au/projects/metro-tunnel/construction/town-hall",
+      "maps": [
+        {
+          "id": "town-hall-place-context",
+          "plan_id": "town-hall-overstation",
+          "title": "Town Hall Place station context",
+          "image_url": "https://bigbuild.vic.gov.au/__data/assets/image/0011/978113/MT-TownHall-Location.png",
+          "caption": "Station location map showing the Swanston Street entrance beneath the development. This is a precinct context map, not a building footprint or construction boundary.",
+          "alt_text": "Official Town Hall Station map providing location context for the overstation development.",
+          "source_id": "town-hall-location",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/use-metro-tunnel/stations/town-hall",
+          "publisher": "Victoria’s Big Build"
+        }
+      ],
+      "answers": [
+        {
+          "project_id": "town-hall-overstation",
+          "question_id": "location",
+          "title": "Where it fits into the city",
+          "body": "The building sits above the Swanston Street entrance near Flinders Street. The design connects with Scott and Cocker Alleys towards Flinders Lane, placing the development directly within the southern CBD.",
+          "source_id": "town-hall-place",
+          "verified_on": "2026-10-05",
+          "source_url": "https://www.townhallplace.com.au/",
+          "source_title": "Town Hall Place developer overview"
+        },
+        {
+          "project_id": "town-hall-overstation",
+          "question_id": "news",
+          "title": "Updates we have checked",
+          "body": "The developer presents office floors, retail and laneway connections; Big Build identifies Town Hall Place as Lendlease’s separate development. These sources explain its scope, but do not establish a new verified completion milestone.",
+          "source_id": "town-hall-place",
+          "verified_on": "2026-10-05",
+          "source_url": "https://www.townhallplace.com.au/",
+          "source_title": "Town Hall Place developer overview"
+        },
+        {
+          "project_id": "town-hall-overstation",
+          "question_id": "overview",
+          "title": "What the plan changes",
+          "body": "Town Hall Place is a commercial development above the station entrance, with offices, retail and pedestrian connections. It adds building uses at a transport gateway, while the station itself is a separate operating facility.",
+          "source_id": "town-hall-place",
+          "verified_on": "2026-10-05",
+          "source_url": "https://www.townhallplace.com.au/",
+          "source_title": "Town Hall Place developer overview"
+        },
+        {
+          "project_id": "town-hall-overstation",
+          "question_id": "sources",
+          "title": "What you will find in the original plan",
+          "body": "The Town Hall Place page explains the building’s commercial uses and intended laneway connections. Big Build’s overstation page explains its relationship to the station. Design impressions show intentions rather than proving an area is open.",
+          "source_id": "town-hall-place",
+          "verified_on": "2026-10-05",
+          "source_url": "https://www.townhallplace.com.au/",
+          "source_title": "Town Hall Place developer overview"
+        },
+        {
+          "project_id": "town-hall-overstation",
+          "question_id": "stages",
+          "title": "Completed work and next steps",
+          "body": "Big Build reports construction of the overstation development separately from the station. We have not verified a detailed structural or fit-out milestone schedule. Town Hall Station is intended to remain open during the building works.",
+          "source_id": "town-hall-works",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/projects/metro-tunnel/construction/town-hall",
+          "source_title": "Current works at Town Hall Station"
+        },
+        {
+          "project_id": "town-hall-overstation",
+          "question_id": "timing",
+          "title": "The timeline explained",
+          "body": "The reviewed developer page does not confirm a final opening date. Completion of the station, or a target for its Federation Square entrance, cannot be used as the completion date for this separate commercial building.",
+          "source_id": "town-hall-place",
+          "verified_on": "2026-10-05",
+          "source_url": "https://www.townhallplace.com.au/",
+          "source_title": "Town Hall Place developer overview"
+        }
+      ],
+      "topics": [
+        {
+          "id": "buildings",
+          "name": "Buildings and development",
+          "description": "Building proposals, approvals and construction stages."
+        }
+      ],
+      "stages": [
+        {
+          "id": "town-hall-building",
+          "project_id": "town-hall-overstation",
+          "position": 1,
+          "title": "Building construction",
+          "status": "underway",
+          "planned_start": null,
+          "planned_end": null,
+          "actual_start": null,
+          "actual_end": null,
+          "date_precision": "unknown",
+          "summary": "Construction is reported; detailed stage dates are not confirmed here.",
+          "source_id": "town-hall-works",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/projects/metro-tunnel/construction/town-hall"
+        }
+      ],
+      "news": []
+    },
+    {
+      "id": "town-hall-finishing",
+      "title": "Town Hall Station finishing works",
+      "summary": "Federation Square entrance construction and surface reinstatement remain after major station construction.",
+      "status": "under_construction",
+      "location": "Federation Square, Flinders Street",
+      "cbd_relevance": "Direct: access to Town Hall Station and the CBD riverfront.",
+      "latitude": null,
+      "longitude": null,
+      "geometry_geojson": null,
+      "source_id": "town-hall-works",
+      "verified_on": "2026-10-05",
+      "source_url": "https://bigbuild.vic.gov.au/projects/metro-tunnel/construction/town-hall",
+      "maps": [
+        {
+          "id": "town-hall-precinct",
+          "plan_id": "town-hall-finishing",
+          "title": "Town Hall Station precinct and entrances",
+          "image_url": "https://bigbuild.vic.gov.au/__data/assets/image/0011/978113/MT-TownHall-Location.png",
+          "caption": "Official station location map, including the Federation Square entrance. Entrance opening notes belong to the published map; consult the current works notice for access today.",
+          "alt_text": "Official Town Hall Station precinct map showing entrances and surrounding streets.",
+          "source_id": "town-hall-location",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/use-metro-tunnel/stations/town-hall",
+          "publisher": "Victoria’s Big Build"
+        }
+      ],
+      "answers": [
+        {
+          "project_id": "town-hall-finishing",
+          "question_id": "location",
+          "title": "Where it fits into the city",
+          "body": "The works are at Federation Square beside Flinders Street, providing another access point to Town Hall Station. They affect the station precinct and pedestrian space near the southern edge of the CBD.",
+          "source_id": "town-hall-works",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/projects/metro-tunnel/construction/town-hall",
+          "source_title": "Current works at Town Hall Station"
+        },
+        {
+          "project_id": "town-hall-finishing",
+          "question_id": "news",
+          "title": "Updates we have checked",
+          "body": "Big Build reports continuing entrance and surface works. Portions of Federation Square may close temporarily for reinstatement. The station remains distinct from the separate building developments above the CBD stations.",
+          "source_id": "town-hall-works",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/projects/metro-tunnel/construction/town-hall",
+          "source_title": "Current works at Town Hall Station"
+        },
+        {
+          "project_id": "town-hall-finishing",
+          "question_id": "overview",
+          "title": "What the plan changes",
+          "body": "These works finish the Federation Square entrance to Town Hall Station and restore the surrounding surface. Major station construction is already complete; this record follows the remaining entrance and public-space works.",
+          "source_id": "town-hall-works",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/projects/metro-tunnel/construction/town-hall",
+          "source_title": "Current works at Town Hall Station"
+        },
+        {
+          "project_id": "town-hall-finishing",
+          "question_id": "sources",
+          "title": "What you will find in the original plan",
+          "body": "The current works page sets out the remaining station works, pedestrian impacts and construction notices. It helps identify entrance and public-space work, while explaining that nearby overstation buildings are outside the Metro Tunnel project.",
+          "source_id": "town-hall-works",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/projects/metro-tunnel/construction/town-hall",
+          "source_title": "Current works at Town Hall Station"
+        },
+        {
+          "project_id": "town-hall-finishing",
+          "question_id": "stages",
+          "title": "Completed work and next steps",
+          "body": "Major station construction is complete. Entrance finishing and surface reinstatement remain in progress. Nearby overstation buildings are separate projects, so finishing the station precinct does not finish those developments.",
+          "source_id": "town-hall-works",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/projects/metro-tunnel/construction/town-hall",
+          "source_title": "Current works at Town Hall Station"
+        },
+        {
+          "project_id": "town-hall-finishing",
+          "question_id": "timing",
+          "title": "The timeline explained",
+          "body": "The Federation Square entrance is planned to open in late 2026. Big Build also lists the eastern St Kilda Road crossing reopening in October 2026. These are published targets, rather than confirmation that either is already open.",
+          "source_id": "town-hall-works",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/projects/metro-tunnel/construction/town-hall",
+          "source_title": "Current works at Town Hall Station"
+        }
+      ],
+      "topics": [
+        {
+          "id": "public-space",
+          "name": "Public space",
+          "description": "Streetscapes, squares and public facilities."
+        },
+        {
+          "id": "transport",
+          "name": "Transport and infrastructure",
+          "description": "Rail, tram, road, cycling and pedestrian projects."
+        }
+      ],
+      "stages": [
+        {
+          "id": "town-hall-entrance",
+          "project_id": "town-hall-finishing",
+          "position": 1,
+          "title": "Federation Square entrance and surface works",
+          "status": "underway",
+          "planned_start": null,
+          "planned_end": "2026",
+          "actual_start": null,
+          "actual_end": null,
+          "date_precision": "year",
+          "summary": "Entrance opening is planned for late 2026, with surface reinstatement works.",
+          "source_id": "town-hall-works",
+          "verified_on": "2026-10-05",
+          "source_url": "https://bigbuild.vic.gov.au/projects/metro-tunnel/construction/town-hall"
+        }
+      ],
+      "news": []
+    }
+  ],
+  "news": [
+    {
+      "id": "airport-stage-2-announcement",
+      "title": "Airport Rail Stage 2 announced",
+      "summary": "Development work is announced before major construction planned for 2028–2031.",
+      "source_id": "airport-stage-2-news",
+      "location": "Albion to Keilor East",
+      "cbd_relevance": "Indirect: future transport access to the CBD.",
+      "review_status": "reviewed",
+      "source_url": "https://bigbuild.vic.gov.au/news/melbourne-airport-rail/melbourne-airport-rail-takes-off-with-stage-2-works",
+      "publisher": "Victoria’s Big Build",
+      "published_on": "2026-09-30",
+      "verified_on": "2026-10-05"
+    },
+    {
+      "id": "forest-approved-news",
+      "title": "Central City Urban Forest Plan endorsed",
+      "summary": "Council announced endorsement of the 2025–2035 plan.",
+      "source_id": "forest-endorsement",
+      "location": "Central City, Melbourne",
+      "cbd_relevance": "Direct: CBD urban greening policy.",
+      "review_status": "reviewed",
+      "source_url": "https://participate.melbourne.vic.gov.au/cbd-urban-forest/project-endorsed-council",
+      "publisher": "City of Melbourne",
+      "published_on": "2025-03-21",
+      "verified_on": "2026-10-05"
+    }
+  ],
+  "maps": [
+    {
+      "id": "airport-rail-route",
+      "plan_id": "melbourne-airport-rail",
+      "title": "Melbourne Airport Rail project map",
+      "image_url": "https://bigbuild.vic.gov.au/__data/assets/image/0020/1050608/MAR13088-MARS2-Overarching-Map-A4-V10-FA-1.jpg",
+      "caption": "Published with Big Build’s 30 September 2026 Stage 2 announcement. Shows the project route and stages, rather than an operating airport service.",
+      "alt_text": "Official Melbourne Airport Rail project route and stages map.",
+      "source_id": "airport-stage-2-news",
+      "verified_on": "2026-10-05",
+      "source_url": "https://bigbuild.vic.gov.au/news/melbourne-airport-rail/melbourne-airport-rail-takes-off-with-stage-2-works",
+      "publisher": "Victoria’s Big Build"
+    },
+    {
+      "id": "forest-planting",
+      "plan_id": "central-city-urban-forest",
+      "title": "Central City tree planting plan",
+      "image_url": "data/plan-maps/urban-forest-planting-08.png",
+      "caption": "Map 8, printed page 31 of the 2025–2035 plan. Colours show planting priorities and areas to grow or care for trees; they do not show live completed works.",
+      "alt_text": "Official Central City street planting priority map with its plant, grow and care-for legend.",
+      "source_id": "forest-part-b",
+      "verified_on": "2026-10-05",
+      "source_url": "https://hdp-au-prod-app-com-participate-files.s3.ap-southeast-2.amazonaws.com/1617/4245/3285/Central-City-Urban-Forest-Precinct-Plan-2025-35-Part-B.pdf",
+      "publisher": "City of Melbourne"
+    },
+    {
+      "id": "greenline-site-plan",
+      "plan_id": "greenline",
+      "title": "Greenline overall site plan",
+      "image_url": "https://hdp-au-prod-app-com-participate-files.s3.ap-southeast-2.amazonaws.com/6816/9162/2983/greenline-base-map-crop.png",
+      "caption": "Council’s overall site plan for the north bank of the Yarra–Birrarung. The plan includes completed and future precincts; this is not a live works map.",
+      "alt_text": "Official Greenline overall site plan along the northern river bank.",
+      "source_id": "greenline",
+      "verified_on": "2026-10-05",
+      "source_url": "https://participate.melbourne.vic.gov.au/greenline",
+      "publisher": "City of Melbourne"
+    },
+    {
+      "id": "library-exchange-context",
+      "plan_id": "state-library-overstation",
+      "title": "State Library Exchange station context",
+      "image_url": "https://bigbuild.vic.gov.au/__data/assets/image/0009/978111/MT-StateLibrary-Location.png",
+      "caption": "Station location map showing the Swanston/La Trobe entrance beneath the development. This is a precinct context map, not a building footprint or construction boundary.",
+      "alt_text": "Official State Library Station map providing location context for the overstation development.",
+      "source_id": "library-location",
+      "verified_on": "2026-10-05",
+      "source_url": "https://bigbuild.vic.gov.au/use-metro-tunnel/stations/state-library",
+      "publisher": "Victoria’s Big Build"
+    },
+    {
+      "id": "town-hall-place-context",
+      "plan_id": "town-hall-overstation",
+      "title": "Town Hall Place station context",
+      "image_url": "https://bigbuild.vic.gov.au/__data/assets/image/0011/978113/MT-TownHall-Location.png",
+      "caption": "Station location map showing the Swanston Street entrance beneath the development. This is a precinct context map, not a building footprint or construction boundary.",
+      "alt_text": "Official Town Hall Station map providing location context for the overstation development.",
+      "source_id": "town-hall-location",
+      "verified_on": "2026-10-05",
+      "source_url": "https://bigbuild.vic.gov.au/use-metro-tunnel/stations/town-hall",
+      "publisher": "Victoria’s Big Build"
+    },
+    {
+      "id": "town-hall-precinct",
+      "plan_id": "town-hall-finishing",
+      "title": "Town Hall Station precinct and entrances",
+      "image_url": "https://bigbuild.vic.gov.au/__data/assets/image/0011/978113/MT-TownHall-Location.png",
+      "caption": "Official station location map, including the Federation Square entrance. Entrance opening notes belong to the published map; consult the current works notice for access today.",
+      "alt_text": "Official Town Hall Station precinct map showing entrances and surrounding streets.",
+      "source_id": "town-hall-location",
+      "verified_on": "2026-10-05",
+      "source_url": "https://bigbuild.vic.gov.au/use-metro-tunnel/stations/town-hall",
+      "publisher": "Victoria’s Big Build"
+    },
+    {
+      "id": "transport-future-network",
+      "plan_id": "transport",
+      "title": "Transport Strategy 2030 network concept",
+      "image_url": "data/plan-maps/transport-strategy-map-42.png",
+      "caption": "Figure 28, printed page 81 of the strategy endorsed in 2019. This is the strategy’s historical future-network concept, not today’s operating network or a current project commitment.",
+      "alt_text": "Official 2019 Transport Strategy future rail network schematic and legend.",
+      "source_id": "transport-strategy-document",
+      "verified_on": "2026-10-05",
+      "source_url": "https://participate.melbourne.vic.gov.au/download_file/6417/1344",
+      "publisher": "City of Melbourne"
+    }
+  ]
+}

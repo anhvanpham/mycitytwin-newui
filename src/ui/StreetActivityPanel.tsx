@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import { eventWarningArea, hourOnDate, nearbyEvents, recommendations, visibleSensors, weatherSuitable, type ActivityDoc, type ActivityWeather } from '../data/streetActivity';
+import { RoadDisruptionsPanel } from './RoadDisruptionsPanel';
+import { hourOnDate, visibleSensors, weatherSuitable, type ActivityDoc, type ActivityWeather } from '../data/streetActivity';
 
 const clock = (t: string) => `${t.slice(11, 16)}`;
 const dateLabel = (t: string) => new Intl.DateTimeFormat('en-AU', { timeZone: 'Australia/Melbourne', weekday: 'short', day: 'numeric', month: 'short' }).format(new Date(t));
@@ -62,7 +63,6 @@ export function StreetActivityPanel({ doc, error, retry, sensorId, index, onTime
     const timer = window.setInterval(() => setNow(Date.now()), 60000);
     return () => window.clearInterval(timer);
   }, []);
-  const [preference, setPreference] = useState<'quiet' | 'busy'>('quiet');
   const sensors = doc ? visibleSensors(doc) : [];
   const sensor = sensors.find(s => s.id === sensorId) ?? sensors[0];
   const i = doc ? Math.min(Math.max(0, index), doc.times.length - 1) : 0;
@@ -71,11 +71,6 @@ export function StreetActivityPanel({ doc, error, retry, sensorId, index, onTime
   const expired = doc ? Date.parse(doc.times.at(-1)!) + 3600000 <= now : false;
   const maximum = Math.max(1, ...sensors.flatMap(s => s.counts.filter((c): c is number => c !== null)));
   const days = doc ? [...new Set(doc.times.map(t => t.slice(0, 10)))] : [];
-  const suggestions = doc && sensor && !expired ? recommendations(doc, sensor, preference, now) : [];
-  const events = doc && sensor ? nearbyEvents(doc, sensor, i) : [];
-  const sportCalendar = doc ? doc.events.filter(e => e.provider && Date.parse(e.knownAt) <= Date.parse(doc.exportedAt) && Date.parse(e.end) >= Date.parse(doc.times[0])).slice(0, 5) : [];
-  const aflSources = doc?.sportsCoverage?.sources.filter(s => s.provider === 'mcg' || s.provider === 'marvel') ?? [];
-  const aflInForecast = doc ? doc.events.filter(e => e.categories?.some(c => c === 'AFL' || c === 'AFLW') && Date.parse(e.start) < Date.parse(doc.times.at(-1)!) + 3600000 && Date.parse(e.end) + 7200000 > Date.parse(doc.times[0])).length : 0;
   const dayIndices = doc && time ? doc.times.flatMap((t, n) => t.slice(0, 10) === time.slice(0, 10) ? [n] : []) : [];
   const firstHour = doc && dayIndices.length ? Number(doc.times[dayIndices[0]].slice(11, 13)) : 0;
   const lastHour = doc && dayIndices.length ? Number(doc.times[dayIndices.at(-1)!].slice(11, 13)) : 0;
@@ -106,31 +101,10 @@ export function StreetActivityPanel({ doc, error, retry, sensorId, index, onTime
           <span>Sensor location</span>
           <output className="activity-sensor-name" aria-label="Selected sensor location" aria-live="polite">{sensor.name}</output>
         </div>
-        <h2>Suggested times</h2>
-        <label className="activity-field">I prefer
-          <select value={preference} onChange={e => setPreference(e.target.value as 'quiet' | 'busy')}>
-            <option value="quiet">Quieter streets</option><option value="busy">Livelier streets</option>
-          </select>
-        </label>
-        <details className="activity-weather-limits"><summary>Outdoor weather limits</summary><p className="activity-caption">08:00–21:00 · 12–30°C · rain ≤0.5 mm/h · wind ≤30 km/h · BOM rain chance ≤60% where available.</p></details>
-        {suggestions.length ? <ul className="activity-suggestions">{suggestions.map(n => <li key={n}>
-          <button type="button" onClick={() => onTime(n)}><strong>{stamp(doc.times[n])}</strong><span>{Math.round(sensor.counts[n]!).toLocaleString()} movements/h · {doc.weather[n].temperature.toFixed(1)}°C</span>{nearbyEvents(doc, sensor, n).length > 0 && <span className="activity-event-flag">Nearby event warning</span>}</button>
-        </li>)}</ul> : <p role="status">{expired ? 'This forecast has expired. Fresh data is needed for recommendations.' : 'No future hours meet these preferences and weather limits.'}</p>}
-        <details className="activity-events"><summary>Nearby events · {events.length} at this hour</summary>
-          {events.length ? <div className="activity-event-warning" role="note" aria-label="Nearby event warning">
-            <strong>Streets may be busier around these events</strong>
-            {events.map(e => <p key={e.id}><a href={e.sourceUrl} target="_blank" rel="noreferrer">{e.name}</a><br/>{e.venue} · {stamp(e.start)}{e.timing === 'start' ? ' · finish time unavailable' : `–${clock(e.end)}`}<br/>{eventWarningArea(e, sensor)}{e.timing === 'start' && ' · warning around the published start'}</p>)}
-          </div> : <p>No supplied event overlaps this hour near this sensor.</p>}
-          <p>Comedy, music, festivals and sporting events; coverage is incomplete. Warnings cover nearby venues and listed CBD access points, with a two-hour buffer. Start-only listings have no estimated finish. Events do not change predicted counts or recommendations.</p>
-          {doc.sportsCoverage && <div className="activity-sports-calendar">
-            <strong>Sporting calendar</strong>
-            <p>{aflSources.some(s => s.status === 'unavailable') ? 'AFL venue coverage partly unavailable.' : `AFL venue calendars checked · ${aflInForecast} listed matches in these forecast dates.`}</p>
-            {sportCalendar.map(e => <p key={e.id}><a href={e.sourceUrl} target="_blank" rel="noreferrer">{e.name}</a><br/>{e.venue} · {e.timing === 'date' ? `${dateLabel(e.start)}–${dateLabel(new Date(Date.parse(e.end) - 86400000).toISOString())} ${new Date(e.start).getFullYear()} · dates only` : stamp(e.start)}<br/>{Date.parse(e.start) > Date.parse(doc.times.at(-1)!) ? 'Outside forecast dates' : e.timing === 'date' ? 'Session times unavailable; check the official schedule.' : 'See the official schedule for event details.'}</p>)}
-          </div>}
-        </details>
+        <RoadDisruptionsPanel sensor={sensor} selectedTime={time} now={now}/>
         <div className="activity-legend"><span className="activity-gradient"/><span>0 → {Math.round(maximum).toLocaleString()} movements/h</span></div>
         <details className="activity-sources"><summary>Data & forecast information</summary>
-        <p className="activity-caption">{sensors.length} forecast sensors on this CBD map{doc.coverage ? ` · ${doc.coverage.insideCBDCount} inside the CBD out of ${doc.coverage.reportingCount} reporting sensors` : ` · ${doc.sensors.length} in this forecast`}. Unsensed streets are not estimated. Soft halos mark sensor forecasts; grey halos indicate unavailable forecasts. Quiet/busy compares each location with its own history.</p>
+        <p className="activity-caption">{sensors.length} forecast sensors on this CBD map{doc.coverage ? ` · ${doc.coverage.insideCBDCount} in this forecast extract out of ${doc.coverage.reportingCount} reporting sensors` : ` · ${doc.sensors.length} in this forecast`}. Unsensed streets are not estimated. Soft halos mark sensor forecasts; grey halos indicate unavailable forecasts. Quiet/busy compares each location with its own history.</p>
         {doc.coverage && doc.coverage.partial.length > 0 && <p className="activity-caption">{doc.coverage.completeForecastCount} sensors have complete hourly forecasts; {doc.coverage.partial.length} have gaps shown as unavailable.</p>}
           <p>Snapshot exported {fetchedLabel(doc.exportedAt)}. Last observed hour here: {fetchedLabel(sensor.lastObserved)}. {expired && 'Forecast expired.'}</p>
           <p>Counts use observed prior-week patterns. Recent complete input is unavailable for the RNN/Transformer; this layer uses the seasonal fallback.</p>

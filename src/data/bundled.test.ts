@@ -48,7 +48,8 @@ describe('bundled', () => {
      * of them.
      */
     const absolute = [
-      /fetch\(\s*['"`]\//, // fetch('/data/roads.json')
+      // This root endpoint is a Worker service, not a file in a frozen release.
+      /fetch\(\s*['"`]\/(?!road-disruptions-api['"`])/, // fetch('/data/roads.json')
       /['"`]\/(?:data|assets|icons|favicon)/, // new URL, <img src>, loaders
       /url\(\s*['"]?\//, // CSS url(/…)
     ];

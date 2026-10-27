@@ -25,11 +25,23 @@
  *   sunlight screen uses, so going back finds everything where it was left.
  */
 
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { SEASONS, matchingSeason, sameDayInMonth, type SimulationDate } from '../scene/solar';
 import { MapKey, SourcesLink } from './Sources';
 import { TimeBar } from './screens';
 import '../styles/compare.css';
+
+function SolarDifferenceHint({difference, loss}: {difference: string; loss?: string}) {
+ const [anchor, setAnchor] = useState<{left:number;bottom:number}|null>(null);
+ const trigger = useRef<HTMLButtonElement>(null);
+ const show = () => {const rect=trigger.current?.getBoundingClientRect();if(rect)setAnchor({left:Math.max(12,Math.min(window.innerWidth-332,rect.left)),bottom:Math.max(12,window.innerHeight-rect.top+8)});};
+ return <span className="compare__loss"><button ref={trigger} type="button" aria-describedby={anchor ? 'solar-loss-tooltip' : undefined} onPointerEnter={show} onFocus={show} onClick={show} onKeyDown={e=>{if(e.key==='Escape')setAnchor(null);}}>Solar difference ⓘ</button>
+  {anchor && createPortal(<div id="solar-loss-tooltip" role="tooltip" className="solar-difference-tooltip" style={{left:anchor.left,bottom:anchor.bottom}}>
+   <button aria-label="Close solar difference" onClick={()=>setAnchor(null)}>×</button><p>{difference}</p>{loss && <p className="compare__loss-detail">{loss}</p>}
+  </div>,document.body)}
+ </span>;
+}
 
 /** Where a window sits on the screen, in CSS pixels from the app's corner. */
 export interface FrameRect {
@@ -223,7 +235,7 @@ export function ComparePage({
       </div>
 
       {solarDifference && <div className="compare__solar-difference">
-        <span className="compare__loss"><button type="button" aria-describedby="solar-loss-tooltip">Solar difference ⓘ</button><span id="solar-loss-tooltip" role="tooltip"><span>{solarDifference}</span>{solarLoss && <span className="compare__loss-detail">{solarLoss}</span>}</span></span>
+        <SolarDifferenceHint difference={solarDifference} loss={solarLoss}/>
       </div>}
 
       <div className="compare__bar">

@@ -3,20 +3,19 @@ import { projectLonLat } from '../data/project';
 import { inRing, type EN } from '../data/streetGeometry';
 import { LOCAL_ORIGIN_WGS84, enuToWorld } from './frame';
 import { mercatorFromLonLat, sceneToLonLat, type ImagePlacement } from './basemap';
+import { HODDLE_GRID_RING } from '../data/hoddleGrid';
 
-// Approximate Hoddle Grid preview: Spencer, Flinders, Spring and La Trobe.
-// Corners follow the mapped street junctions; this is not an administrative boundary.
-const corners: EN[] = [[144.95143,-37.81317],[144.95507,-37.82108],[144.97490,-37.81528],[144.97108,-37.80771]];
+// One shared Hoddle Grid outline for the landing page, city scenes and timeline.
 const origin=projectLonLat(LOCAL_ORIGIN_WGS84.lon,LOCAL_ORIGIN_WGS84.lat);
-const centre:EN=corners.map(([lon,lat])=>projectLonLat(lon,lat)).reduce<EN>((a,p)=>[a[0]+(p[0]-origin[0])/4,a[1]+(p[1]-origin[1])/4],[0,0]);
-// Small margin includes the boundary streets themselves.
-export const CBD_RING:EN[]=corners.map(([lon,lat])=>{
-  const p=projectLonLat(lon,lat);const e=p[0]-origin[0],n=p[1]-origin[1];
-  const length=Math.hypot(e-centre[0],n-centre[1]);
-  return [e+(e-centre[0])*35/length,n+(n-centre[1])*35/length];
+export const CBD_RING:EN[]=HODDLE_GRID_RING.slice(0,-1).map(([lon,lat])=>{
+  const [e,n]=projectLonLat(lon,lat);return [e-origin[0],n-origin[1]];
 });
+export const CBD_EXTENT={
+  minE:Math.min(...CBD_RING.map(p=>p[0])), maxE:Math.max(...CBD_RING.map(p=>p[0])),
+  minN:Math.min(...CBD_RING.map(p=>p[1])), maxN:Math.max(...CBD_RING.map(p=>p[1])),
+};
 export const insideCBD=(p:EN)=>inRing(p,CBD_RING);
-export const CBD_FADE_IN_M=85;
+export const CBD_FADE_IN_M=0;
 export const CBD_FADE_OUT_M=155;
 export const CBD_PLANES=CBD_RING.map((p,i)=>{
   const q=CBD_RING[(i+1)%CBD_RING.length],dx=q[0]-p[0],dy=q[1]-p[1];

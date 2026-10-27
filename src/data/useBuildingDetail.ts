@@ -71,13 +71,15 @@ const asText = (value: string | null | undefined): string | null =>
 export function useBuildingDetail(buildingId: string | null) {
   const [detail, setDetail] = useState<BuildingDetail | null>(null);
   const [settled, setSettled] = useState(false);
+  const isFringe = buildingId?.startsWith('council-structure:') ?? false;
 
   useEffect(() => {
     // Clear immediately, so a previous building's facts never sit under a
     // new building's address while the request is in flight.
     setDetail(null);
     setSettled(false);
-    if (!buildingId) return;
+    // Council fringe geometry has no matching census-detail row in the core API.
+    if (!buildingId || isFringe) return;
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 8000);
@@ -109,7 +111,7 @@ export function useBuildingDetail(buildingId: string | null) {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [buildingId]);
+  }, [buildingId, isFringe]);
 
-  return { detail, settled };
+  return { detail: isFringe ? null : detail, settled: isFringe || settled };
 }
